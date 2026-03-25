@@ -1,0 +1,6 @@
+<%= turbo_stream.replace "lesson_status_#{@lesson.id}",
+      partial: "lessons/status",
+      locals: { lesson: @lesson, user: current_user } %>
+<%= turbo_stream.replace "sidebar-lessons-tree" do %>
+  <%= render "shared/sidebar_lessons_tree", user: current_user.reload, current_lesson_id: @lesson.id, active_lesson: @lesson %>
+<% end %>

@@ -1,0 +1,79 @@
+<% completed = user.lesson_completions.pluck(:lesson_id).to_set %>
+<% lessons_by_year = user.visible_lessons_relation.to_a.group_by(&:year_group_key) %>
+<% highlight = current_lesson_id.presence %>
+<% year_keys = user.learner_year_keys %>
+
+<div id="sidebar-lessons-tree" class="min-w-0 space-y-0.5 pr-0.5">
+  <% if year_keys.empty? %>
+    <p class="px-1 text-[11px] text-[var(--color-text-muted)]">Finish setup to see lessons for your chosen years.</p>
+  <% else %>
+    <% Curriculum::YearGroups.phases_for_years(year_keys).each do |phase| %>
+      <%= tag.details(
+            class: "mb-1 rounded-md",
+            open: user.phase_expanded?(phase[:key]),
+            data: { sidebar_nav_phase: true, phase_key: phase[:key] }
+          ) do %>
+        <%= tag.summary(class: "flex cursor-pointer list-none items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[11px] font-semibold marker:content-none text-[var(--color-text)] hover:bg-white/5 sm:text-xs [&::-webkit-details-marker]:hidden") do %>
+          <span><%= phase[:label] %></span>
+          <span class="shrink-0 text-[10px] opacity-60" aria-hidden="true">▸</span>
+        <% end %>
+
+        <div class="ml-0.5 space-y-1 border-l border-[var(--color-border)]/50 py-1 pl-1.5">
+          <% phase[:years].each do |y| %>
+            <% next unless year_keys.include?(y[:key]) %>
+            <% year_lessons = lessons_by_year[y[:key]] || [] %>
+            <%= tag.details(
+                  class: "rounded-md",
+                  open: user.year_expanded?(y[:key]),
+                  data: { sidebar_nav_year: true, year_key: y[:key] }
+                ) do %>
+              <%= tag.summary(class: "flex cursor-pointer list-none items-center justify-between gap-2 rounded-md px-1.5 py-1 text-[11px] font-semibold marker:content-none text-[var(--color-text-muted)] hover:bg-white/5 sm:text-xs [&::-webkit-details-marker]:hidden") do %>
+                <span><%= y[:label] %></span>
+                <span class="shrink-0 text-[10px] opacity-60" aria-hidden="true">▸</span>
+              <% end %>
+
+              <div class="ml-0.5 space-y-0.5 border-l border-[var(--color-border)]/35 py-0.5 pl-1.5">
+                <% grouped = year_lessons.group_by(&:subject).sort %>
+                <% oak_blocks, rest_blocks = grouped.partition { |(s, _)| s == Lesson::OAK_SUBJECT_NAME } %>
+
+                <% if oak_blocks.any? %>
+                  <p class="mb-0.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-accent)]">Oak Academy</p>
+                  <% oak_blocks.each do |subject, lessons_for_subject| %>
+                    <%= render "shared/sidebar_subject_accordion",
+                        year_key: y[:key],
+                        subject: subject,
+                        lessons_for_subject: lessons_for_subject,
+                        user: user,
+                        completed: completed,
+                        highlight: highlight,
+                        active_lesson: local_assigns[:active_lesson] %>
+                  <% end %>
+                <% end %>
+
+                <% if oak_blocks.any? && rest_blocks.any? %>
+                  <div class="my-1.5 border-t border-[var(--color-border)] pt-1.5" role="separator" aria-hidden="true"></div>
+                  <p class="mb-0.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Subjects</p>
+                <% end %>
+
+                <% rest_blocks.each do |subject, lessons_for_subject| %>
+                  <%= render "shared/sidebar_subject_accordion",
+                      year_key: y[:key],
+                      subject: subject,
+                      lessons_for_subject: lessons_for_subject,
+                      user: user,
+                      completed: completed,
+                      highlight: highlight,
+                      active_lesson: local_assigns[:active_lesson] %>
+                <% end %>
+
+                <% if grouped.empty? %>
+                  <p class="px-1 text-[10px] text-[var(--color-text-muted)]">No rows for this year. Run bin/rails db:seed.</p>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

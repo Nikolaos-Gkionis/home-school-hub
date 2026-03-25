@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" class="h-dvh overflow-hidden">
+  <head>
+    <title><%= content_for(:title) || "HomeSchool Hub" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Orbitron:wght@500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body class="<%= ThemeManager.body_class_for("cosmic_voyager") %> min-h-dvh bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
+    <div class="flex min-h-dvh items-center justify-center p-4">
+      <div class="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-xl">
+        <div class="font-display text-2xl font-bold tracking-tight text-[var(--color-accent)]">HomeSchool Hub</div>
+        <%= yield %>
+      </div>
+    </div>
+  </body>
+</html>

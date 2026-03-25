@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@layer base {
+  .theme-cosmic-voyager {
+    --color-bg: #0f0c29;
+    --color-surface: #1a1744;
+    --color-accent: #a78bfa;
+    --color-text: #e2e8f0;
+    --color-text-muted: #94a3b8;
+    --color-border: rgba(167, 139, 250, 0.25);
+    --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .theme-forest-ranger {
+    --color-bg: #1c2e1e;
+    --color-surface: #24382a;
+    --color-accent: #86efac;
+    --color-text: #ecfdf5;
+    --color-text-muted: #a7f3d0;
+    --color-border: rgba(134, 239, 172, 0.25);
+    --font-display: "Fraunces", ui-serif, Georgia, serif;
+  }
+
+  .theme-cyberpunk-scholar {
+    --color-bg: #0d0221;
+    --color-surface: #1a0b2e;
+    --color-accent: #f472b6;
+    --color-text: #fae8ff;
+    --color-text-muted: #e9d5ff;
+    --color-border: rgba(244, 114, 182, 0.3);
+    --font-display: "Orbitron", ui-sans-serif, system-ui, sans-serif;
+  }
+}

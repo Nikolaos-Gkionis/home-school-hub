@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" class="h-dvh overflow-hidden">
+  <head>
+    <title><%= content_for(:title) || "HomeSchool Hub" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="HomeSchool Hub">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Orbitron:wght@500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="<%= ThemeManager.body_class_for(current_user&.current_theme || "cosmic_voyager") %> h-dvh max-h-dvh overflow-hidden bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
+    <% if notice.present? %>
+      <div class="fixed right-4 top-4 z-50 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm shadow-lg" role="status"><%= notice %></div>
+    <% end %>
+    <% if alert.present? %>
+      <div class="fixed right-4 top-4 z-50 rounded-lg border border-red-400/40 bg-red-950/90 px-4 py-2 text-sm text-red-100 shadow-lg" role="alert"><%= alert %></div>
+    <% end %>
+
+    <div class="flex h-full min-h-0 w-full">
+      <nav class="flex h-full min-h-0 w-56 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:w-60 sm:p-3.5" aria-label="Primary">
+        <div class="shrink-0 font-display text-base font-bold tracking-tight text-[var(--color-accent)] sm:text-lg">HomeSchool Hub</div>
+
+        <% if user_signed_in? %>
+          <div class="mt-4 flex min-h-0 flex-1 flex-col gap-1 text-sm">
+            <%= link_to "Dashboard", root_path, class: "shrink-0 rounded-md px-2 py-1.5 hover:bg-white/5 #{"border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" if request.path == root_path || request.path == "/dashboard"}" %>
+
+            <% if current_user.learners.any? %>
+              <div class="shrink-0 space-y-1 border-b border-[var(--color-border)] pb-2">
+                <div class="px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Active learner</div>
+                <div class="flex flex-col gap-0.5">
+                  <% current_user.learners.order(:position).each do |lr| %>
+                    <% active = current_user.active_learner&.id == lr.id %>
+                    <%= button_to lr.display_name,
+                        activate_learner_path(lr),
+                        method: :patch,
+                        form: { class: "w-full" },
+                        class: "w-full truncate rounded-md px-2 py-1.5 text-left text-[11px] #{active ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:bg-white/5"}" %>
+                  <% end %>
+                </div>
+                <%= link_to "Add a year", new_learner_path, class: "block px-2 pt-1 text-[10px] text-[var(--color-accent)] hover:underline" %>
+              </div>
+            <% end %>
+
+            <% nav_highlight = @lesson&.id %>
+            <div
+              class="flex min-h-0 flex-1 flex-col gap-1"
+              data-controller="sidebar-nav"
+              data-sidebar-nav-save-url-value="<%= sidebar_preferences_path(format: :json) %>"
+            >
+              <div class="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Lessons</div>
+              <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+                <%= render "shared/sidebar_lessons_tree", user: current_user, current_lesson_id: nav_highlight, active_lesson: @lesson %>
+              </div>
+
+              <details class="shrink-0 border-t border-[var(--color-border)] pt-2">
+                <summary class="cursor-pointer select-none text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)] marker:content-none [&::-webkit-details-marker]:hidden">
+                  Subjects
+                </summary>
+                <% all_subjects = Lesson.distinct_subjects.sort %>
+                <% if all_subjects.any? %>
+                  <%= form_with url: sidebar_preferences_path, method: :patch, class: "mt-2 space-y-2", data: { turbo: true } do %>
+                    <% selected = current_user.shows_all_subjects? ? all_subjects : (current_user.effective_preferred_subjects || []) %>
+                    <div class="max-h-24 space-y-1 overflow-y-auto text-[11px]">
+                      <% all_subjects.each do |subj| %>
+                        <label class="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-white/5">
+                          <%= check_box_tag "preferred_subjects[]", subj, selected.include?(subj),
+                              class: "rounded border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]/40" %>
+                          <span class="truncate"><%= subj.titleize %></span>
+                        </label>
+                      <% end %>
+                    </div>
+                    <%= submit_tag "Save subjects", class: "w-full cursor-pointer rounded-md border border-[var(--color-border)] py-1 text-[11px] font-medium text-[var(--color-text)] hover:bg-white/5" %>
+                  <% end %>
+                <% else %>
+                  <p class="mt-1 text-[10px] text-[var(--color-text-muted)]">Run bin/rails db:seed for subjects.</p>
+                <% end %>
+              </details>
+            </div>
+
+            <div class="mt-2 shrink-0 border-t border-[var(--color-border)] pt-3 text-[var(--color-text-muted)]">
+              <div class="mb-2 flex items-center gap-1.5 text-xs sm:text-sm">
+                <span aria-hidden="true">🔥</span>
+                <span><%= current_user.weekly_streak %> wk streak</span>
+              </div>
+
+              <%= form_with model: current_user, url: theme_path, method: :patch, class: "space-y-1.5", data: { turbo: true } do |f| %>
+                <%= f.label :current_theme, "Theme", class: "block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]" %>
+                <%= f.select :current_theme,
+                    ThemeManager::PRESETS.keys.map { |k| [ThemeManager::DISPLAY_NAMES[k], k] },
+                    {},
+                    class: "w-full rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs text-[var(--color-text)]" %>
+                <%= f.submit "Apply", class: "w-full cursor-pointer rounded-md bg-[var(--color-accent)] px-2 py-1 text-[11px] font-semibold text-[var(--color-bg)]" %>
+              <% end %>
+
+              <%= button_to "Sign out", destroy_user_session_path, method: :delete,
+                  class: "mt-2 w-full rounded-md border border-[var(--color-border)] px-2 py-1 text-[11px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+            </div>
+          </div>
+        <% else %>
+          <div class="mt-6 flex flex-col gap-2 text-sm">
+            <%= link_to "Sign in", new_user_session_path, class: "rounded-md px-2 py-2 text-center font-medium text-[var(--color-accent)] ring-1 ring-[var(--color-border)] hover:bg-white/5" %>
+            <%= link_to "Sign up", new_user_registration_path, class: "rounded-md bg-[var(--color-accent)] px-2 py-2 text-center font-semibold text-[var(--color-bg)] hover:brightness-110" %>
+          </div>
+        <% end %>
+      </nav>
+
+      <main id="main-content" class="flex min-h-0 min-w-0 flex-1 flex-col px-4 py-3 sm:px-5 sm:py-4 <%= controller_name == "dashboard" ? "overflow-hidden" : "overflow-y-auto overscroll-y-contain" %>">
+        <div class="min-h-0 flex-1 <%= controller_name == "dashboard" ? "flex flex-col" : "" %>">
+          <%= yield %>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
