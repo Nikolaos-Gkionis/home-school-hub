@@ -30,4 +30,15 @@
     --color-border: rgba(244, 114, 182, 0.3);
     --font-display: "Orbitron", ui-sans-serif, system-ui, sans-serif;
   }
+
+  /* Warm dunes, sun-bleached sand, compass-gold accents */
+  .theme-desert-explorer {
+    --color-bg: #2a2318;
+    --color-surface: #3d3426;
+    --color-accent: #f0b429;
+    --color-text: #fff8e7;
+    --color-text-muted: #c9a66b;
+    --color-border: rgba(240, 180, 41, 0.28);
+    --font-display: "Marcellus", ui-serif, Georgia, serif;
+  }
 }
