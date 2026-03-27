@@ -7,6 +7,6 @@ class ThemesController < ApplicationController
     if ThemeManager::PRESETS.key?(params.dig(:user, :current_theme))
       current_user.update!(current_theme: params[:user][:current_theme])
     end
-    redirect_back fallback_location: root_path
+    redirect_back fallback_location: dashboard_path
   end
 end

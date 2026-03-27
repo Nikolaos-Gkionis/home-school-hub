@@ -1,0 +1,6 @@
+<%# locals: lesson:, user: %>
+<% if lesson.oak_hub? && lesson.summary_json.is_a?(Hash) && lesson.summary_json["lessonTitle"].present? %>
+  <%= render "dashboard/oak_lesson", lesson: lesson, user: user %>
+<% else %>
+  <%= render "dashboard/lesson_fallback", lesson: lesson %>
+<% end %>

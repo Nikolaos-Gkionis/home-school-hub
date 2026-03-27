@@ -2,6 +2,7 @@
 
 class LearnersController < ApplicationController
   before_action :authenticate_user!
+  before_action :ensure_parent!
 
   def new
     @phases = Curriculum::YearGroups::PHASES
@@ -20,12 +21,18 @@ class LearnersController < ApplicationController
     end
 
     current_user.learners.create!(year_group_key: yk)
-    redirect_to root_path, notice: "Added #{Curriculum::YearGroups.label_for_year(yk)}."
+    redirect_to dashboard_path, notice: "Added #{Curriculum::YearGroups.label_for_year(yk)}."
   end
 
   def activate
     learner = current_user.learners.find(params[:id])
     current_user.update!(active_learner: learner)
-    redirect_back fallback_location: root_path
+    redirect_back fallback_location: dashboard_path
+  end
+
+  private
+
+  def ensure_parent!
+    redirect_to dashboard_path, alert: "Only parent accounts can manage school years." unless current_user.parent?
   end
 end

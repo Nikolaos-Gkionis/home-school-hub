@@ -1,21 +1,52 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  ROLE_PARENT = "parent"
+  ROLE_LEARNER = "learner"
+
+  attr_accessor :pending_invite_token
+
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
   belongs_to :last_active_lesson, class_name: "Lesson", optional: true
   belongs_to :last_completed_lesson, class_name: "Lesson", optional: true
   belongs_to :active_learner, class_name: "Learner", optional: true
+  belongs_to :parent, class_name: "User", optional: true
 
   has_many :learners, dependent: :destroy
+  has_many :children, class_name: "User", foreign_key: :parent_id, dependent: :nullify, inverse_of: :parent
+  has_many :invitations, foreign_key: :parent_id, dependent: :destroy, inverse_of: :parent
   has_many :lesson_completions, dependent: :destroy
   has_many :completed_lessons, through: :lesson_completions, source: :lesson
+  has_many :lesson_section_views, dependent: :destroy
+  has_many :lesson_quiz_responses, dependent: :destroy
   has_many :user_badges, dependent: :destroy
   has_many :badges, through: :user_badges
+  has_many :lesson_time_logs, dependent: :destroy
 
   validates :current_theme, inclusion: { in: ThemeManager::PRESETS.keys }
+  validates :role, inclusion: { in: [ ROLE_PARENT, ROLE_LEARNER ] }
   validate :active_learner_belongs_to_user, if: :active_learner_foreign_key_set?
+  validate :role_parent_child_consistency
+
+  after_commit :consume_pending_invite, on: :create
+
+  def parent?
+    role == ROLE_PARENT
+  end
+
+  def learner?
+    role == ROLE_LEARNER
+  end
+
+  def family_can_view?(other)
+    return true if other.id == id
+    return true if parent? && other.parent_id == id
+    return true if learner? && other.id == parent_id
+
+    false
+  end
 
   def completed?(lesson)
     lesson_completions.exists?(lesson: lesson)
@@ -29,9 +60,16 @@ class User < ApplicationRecord
     learners.distinct.pluck(:year_group_key).compact
   end
 
-  def needs_onboarding?
-    learners.none?
+  def needs_setup?
+    return false if learner?
+
+    return true if learners.none?
+    return true if setup_completed_at.blank?
+
+    false
   end
+
+  alias needs_onboarding? needs_setup?
 
   def visible_lessons_relation
     rel = Lesson.ordered
@@ -43,6 +81,15 @@ class User < ApplicationRecord
   end
 
   def effective_preferred_subjects
+    lr = active_learner
+    if lr&.preferred_subjects.present?
+      arr = Array(lr.preferred_subjects).map(&:to_s).uniq
+      return nil if arr.empty?
+
+      scope_subjects = Lesson.where(year_group_key: lr.year_group_key).distinct.pluck(:subject)
+      return (arr & scope_subjects).presence
+    end
+
     return nil if preferred_subjects.nil?
 
     arr = Array(preferred_subjects).map(&:to_s).uniq
@@ -53,7 +100,10 @@ class User < ApplicationRecord
   end
 
   def shows_all_subjects?
-    preferred_subjects.nil?
+    lr = active_learner
+    return preferred_subjects.nil? if lr.nil? || lr.preferred_subjects.nil?
+
+    false
   end
 
   def sidebar_expanded_hash
@@ -112,6 +162,23 @@ class User < ApplicationRecord
   end
 
   private
+
+  def consume_pending_invite
+    token = pending_invite_token
+    return if token.blank?
+
+    self.pending_invite_token = nil
+    Invitations::AcceptInvite.call(self, token)
+  end
+
+  def role_parent_child_consistency
+    if role == ROLE_PARENT && parent_id.present?
+      errors.add(:parent_id, "must be blank for a parent account")
+    end
+    if role == ROLE_LEARNER && parent_id.blank?
+      errors.add(:parent_id, "must be set for a learner account")
+    end
+  end
 
   def active_learner_foreign_key_set?
     self.class.has_attribute?(:active_learner_id) && read_attribute(:active_learner_id).present?

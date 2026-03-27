@@ -6,6 +6,7 @@ class DashboardController < ApplicationController
   def show
     @lessons = current_user.visible_lessons_relation
     @lesson = find_lesson
+    hydrate_oak_lesson! if @lesson&.oak_hub?
     persist_lesson_context! if @lesson
   end
 
@@ -29,6 +30,14 @@ class DashboardController < ApplicationController
     current_user.first_visible_hub_lesson_in(rel)
   end
 
+  def hydrate_oak_lesson!
+    return unless Oak::ApiClient.configured?
+    return if @lesson.summary_json.is_a?(Hash) && @lesson.summary_json["lessonTitle"].present?
+
+    Oak::LessonHydrator.call(@lesson)
+    @lesson.reload
+  end
+
   def persist_lesson_context!
     h = current_user.sidebar_expanded_hash
     expand = params[:lesson_id].present? || (h["subjects"].empty? && h["units"].empty?)
@@ -38,10 +47,10 @@ class DashboardController < ApplicationController
       nav_subj = Lesson.compose_nav_subject_key(@lesson.year_group_key, @lesson.subject)
       nav_unit = Lesson.compose_nav_unit_key(@lesson.year_group_key, @lesson.subject, @lesson.unit)
       attrs[:sidebar_expanded] = {
-        "phases" => (h["phases"] + [pk.to_s]).compact.uniq,
-        "years" => (h["years"] + [@lesson.year_group_key.to_s]).compact.uniq,
-        "subjects" => (h["subjects"] + [nav_subj]).uniq,
-        "units" => (h["units"] + [nav_unit]).uniq
+        "phases" => (h["phases"] + [ pk.to_s ]).compact.uniq,
+        "years" => (h["years"] + [ @lesson.year_group_key.to_s ]).compact.uniq,
+        "subjects" => (h["subjects"] + [ nav_subj ]).uniq,
+        "units" => (h["units"] + [ nav_unit ]).uniq
       }
     end
     current_user.update!(attrs)

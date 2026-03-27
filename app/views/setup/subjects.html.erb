@@ -1,0 +1,35 @@
+<% content_for :title, "Step 2 — Subjects — HomeSchool Hub" %>
+
+<div class="mx-auto max-w-2xl space-y-6 py-2">
+  <div>
+    <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">Step 2 of 2</p>
+    <h1 class="font-display text-xl font-bold text-[var(--color-text)] sm:text-2xl">Choose subjects per year</h1>
+    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
+      Tick the subjects you want for each year. Leave all ticked for everything in that year. You can change this later in the sidebar.
+    </p>
+  </div>
+
+  <%= form_with url: setup_subjects_path, method: :post, class: "space-y-6", data: { turbo: true } do %>
+    <% @learners.each do |lr| %>
+      <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
+        <p class="mb-3 font-display text-sm font-semibold text-[var(--color-text)]">
+          <%= lr.display_name %>
+          <span class="font-normal text-[var(--color-text-muted)]">(<%= Curriculum::YearGroups.label_for_year(lr.year_group_key) %>)</span>
+        </p>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <% @subject_options.each do |subj| %>
+            <% checked = lr.preferred_subjects.nil? || Array(lr.preferred_subjects).include?(subj) %>
+            <label class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-xs ring-1 ring-[var(--color-border)]/40 hover:bg-white/5">
+              <%= check_box_tag "preferred_subjects[#{lr.id}][]", subj, checked,
+                  class: "rounded border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-accent)]" %>
+              <span><%= subj %></span>
+            </label>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%= submit_tag "Finish setup",
+        class: "w-full cursor-pointer rounded-xl bg-[var(--color-accent)] px-4 py-3 text-sm font-semibold text-[var(--color-bg)] shadow-md hover:brightness-110" %>
+  <% end %>
+</div>

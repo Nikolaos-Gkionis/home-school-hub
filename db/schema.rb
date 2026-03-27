@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_25_160504) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_27_100000) do
   create_table "badges", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -20,10 +20,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_160504) do
     t.index ["key"], name: "index_badges_on_key", unique: true
   end
 
+  create_table "invitations", force: :cascade do |t|
+    t.datetime "accepted_at"
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "expires_at", null: false
+    t.integer "parent_id", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.string "year_group_key", null: false
+    t.index ["parent_id", "email"], name: "index_invitations_pending_unique", unique: true, where: "accepted_at IS NULL"
+    t.index ["parent_id"], name: "index_invitations_on_parent_id"
+    t.index ["token"], name: "index_invitations_on_token", unique: true
+  end
+
   create_table "learners", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "display_label"
     t.integer "position", default: 0, null: false
+    t.json "preferred_subjects"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.string "year_group_key", null: false
@@ -42,16 +57,63 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_160504) do
     t.index ["user_id"], name: "index_lesson_completions_on_user_id"
   end
 
+  create_table "lesson_quiz_responses", force: :cascade do |t|
+    t.json "answer_indices", default: [], null: false
+    t.boolean "correct", null: false
+    t.datetime "created_at", null: false
+    t.integer "lesson_id", null: false
+    t.integer "question_index", null: false
+    t.string "quiz_type", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["lesson_id"], name: "index_lesson_quiz_responses_on_lesson_id"
+    t.index ["user_id", "lesson_id", "quiz_type", "question_index"], name: "idx_lesson_quiz_responses_unique", unique: true
+    t.index ["user_id"], name: "index_lesson_quiz_responses_on_user_id"
+  end
+
+  create_table "lesson_section_views", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "first_seen_at", null: false
+    t.datetime "last_seen_at", null: false
+    t.integer "lesson_id", null: false
+    t.string "section_key", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["lesson_id"], name: "index_lesson_section_views_on_lesson_id"
+    t.index ["user_id", "lesson_id", "section_key"], name: "idx_lesson_section_views_unique", unique: true
+    t.index ["user_id"], name: "index_lesson_section_views_on_user_id"
+  end
+
+  create_table "lesson_time_logs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "lesson_id", null: false
+    t.date "logged_on", null: false
+    t.integer "seconds", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["lesson_id"], name: "index_lesson_time_logs_on_lesson_id"
+    t.index ["user_id", "lesson_id", "logged_on"], name: "index_lesson_time_logs_daily_unique", unique: true
+    t.index ["user_id"], name: "index_lesson_time_logs_on_user_id"
+  end
+
   create_table "lessons", force: :cascade do |t|
+    t.json "assets_json", default: {}, null: false
+    t.string "content_mode", default: "legacy_iframe", null: false
     t.datetime "created_at", null: false
     t.string "external_url", null: false
+    t.string "oak_key_stage_slug"
+    t.string "oak_lesson_slug"
+    t.string "oak_subject_slug"
     t.integer "position", default: 0, null: false
+    t.json "quizzes_json", default: {}, null: false
     t.string "subject", null: false
+    t.json "summary_json", default: {}, null: false
     t.string "title", null: false
     t.string "unit", null: false
     t.datetime "updated_at", null: false
     t.string "year_group_key", default: "year_7", null: false
     t.index ["subject", "unit", "position"], name: "index_lessons_on_subject_and_unit_and_position"
+    t.index ["year_group_key", "oak_lesson_slug"], name: "index_lessons_on_year_group_key_and_oak_lesson_slug", unique: true, where: "oak_lesson_slug IS NOT NULL"
     t.index ["year_group_key", "subject", "unit", "position"], name: "index_lessons_on_year_subject_unit_position"
   end
 
@@ -76,25 +138,38 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_160504) do
     t.string "encrypted_password", default: "", null: false
     t.integer "last_active_lesson_id"
     t.integer "last_completed_lesson_id"
+    t.integer "parent_id"
     t.json "preferred_subjects"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
+    t.string "role", default: "parent", null: false
+    t.datetime "setup_completed_at"
     t.json "sidebar_expanded", default: {"phases" => [], "years" => [], "subjects" => [], "units" => []}, null: false
     t.datetime "updated_at", null: false
     t.index ["active_learner_id"], name: "index_users_on_active_learner_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["last_active_lesson_id"], name: "index_users_on_last_active_lesson_id"
     t.index ["last_completed_lesson_id"], name: "index_users_on_last_completed_lesson_id"
+    t.index ["parent_id"], name: "index_users_on_parent_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["role"], name: "index_users_on_role"
   end
 
+  add_foreign_key "invitations", "users", column: "parent_id"
   add_foreign_key "learners", "users"
   add_foreign_key "lesson_completions", "lessons"
   add_foreign_key "lesson_completions", "users"
+  add_foreign_key "lesson_quiz_responses", "lessons"
+  add_foreign_key "lesson_quiz_responses", "users"
+  add_foreign_key "lesson_section_views", "lessons"
+  add_foreign_key "lesson_section_views", "users"
+  add_foreign_key "lesson_time_logs", "lessons"
+  add_foreign_key "lesson_time_logs", "users"
   add_foreign_key "user_badges", "badges"
   add_foreign_key "user_badges", "users"
   add_foreign_key "users", "learners", column: "active_learner_id"
   add_foreign_key "users", "lessons", column: "last_active_lesson_id"
   add_foreign_key "users", "lessons", column: "last_completed_lesson_id"
+  add_foreign_key "users", "users", column: "parent_id"
 end

@@ -5,6 +5,13 @@ namespace :curriculum do
   task seed: :environment do
     OakCurriculumSeed.call
     Curriculum::YearBrowseSeeder.ensure_all!
+    Oak::Importer.call if Oak::ApiClient.configured?
+  end
+
+  desc "Sync published Oak lessons from the Open API (requires OAK_API_TOKEN)"
+  task oak_sync: :environment do
+    result = Oak::Importer.call
+    puts result.inspect
   end
 
   desc "Clear lessons and re-seed from YAML"
@@ -12,5 +19,6 @@ namespace :curriculum do
     Lesson.destroy_all
     OakCurriculumSeed.call
     Curriculum::YearBrowseSeeder.ensure_all!
+    Oak::Importer.call if Oak::ApiClient.configured?
   end
 end

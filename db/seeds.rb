@@ -12,3 +12,4 @@ end
 
 OakCurriculumSeed.call
 Curriculum::YearBrowseSeeder.ensure_all!
+Oak::Importer.call if Oak::ApiClient.configured?

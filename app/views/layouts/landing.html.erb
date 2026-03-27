@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" class="min-h-full">
+  <head>
+    <title><%= content_for(:title) || "HomeSchool Hub" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body class="<%= ThemeManager.body_class_for("cosmic_voyager") %> min-h-full bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
+    <% if notice.present? %>
+      <div class="fixed right-4 top-4 z-50 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm shadow-lg" role="status"><%= notice %></div>
+    <% end %>
+    <% if alert.present? %>
+      <div class="fixed right-4 top-4 z-50 rounded-lg border border-red-400/40 bg-red-950/90 px-4 py-2 text-sm text-red-100 shadow-lg" role="alert"><%= alert %></div>
+    <% end %>
+
+    <div class="flex min-h-full flex-col">
+      <main class="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6">
+        <%= yield %>
+      </main>
+      <%= render "shared/ogl_footer" %>
+    </div>
+  </body>
+</html>

@@ -41,7 +41,7 @@
           <% lessons.sort_by(&:position).each do |lesson| %>
             <% active = highlight.present? && highlight.to_i == lesson.id %>
             <%= link_to lesson.title.truncate(24),
-                root_path(lesson_id: lesson.id),
+                dashboard_path(lesson_id: lesson.id),
                 class: "block truncate rounded px-1.5 py-1 text-[11px] hover:bg-white/5 sm:text-xs #{active ? "bg-white/10 font-semibold text-[var(--color-accent)] ring-1 ring-inset ring-[var(--color-accent)]/50" : "text-[var(--color-text-muted)]"}",
                 **(active ? { aria: { current: "page" } } : {}) %>
           <% end %>

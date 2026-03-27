@@ -8,6 +8,6 @@ class CreateLearners < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    add_index :learners, [:user_id, :year_group_key]
+    add_index :learners, [ :user_id, :year_group_key ]
   end
 end

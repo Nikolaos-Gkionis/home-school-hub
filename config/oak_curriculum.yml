@@ -1,0 +1,28 @@
+# Oak Curriculum API sync — subjects aligned with the hub plan (secondary-focused).
+# Request an API key: https://open-api.thenational.academy/docs
+# Run: OAK_API_TOKEN=... bin/rails curriculum:oak_sync
+#
+# Subject slugs must match GET /subjects (Oak). If a slug 404s, adjust it here.
+
+year_groups:
+  - year_7
+
+subjects:
+  - slug: art
+    display_name: "Art and design"
+  - slug: geography
+    display_name: "Geography"
+  - slug: history
+    display_name: "History"
+  - slug: maths
+    display_name: "Mathematics"
+  - slug: english
+    display_name: "English"
+  - slug: citizenship
+    display_name: "Citizenship"
+  - slug: science
+    display_name: "Science"
+  - slug: german
+    display_name: "German"
+  - slug: religious-education
+    display_name: "Religious education"

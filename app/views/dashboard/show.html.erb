@@ -1,9 +1,19 @@
 <% content_for :title, "Dashboard — HomeSchool Hub" %>
 
 <% if @lesson.blank? %>
-  <p class="text-sm text-[var(--color-text-muted)]">No lessons yet. Run <code class="rounded bg-black/20 px-1 py-0.5 text-xs">bin/rails db:seed</code> and reload.</p>
+  <div class="oak-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/50 p-6 shadow-sm">
+    <h1 class="font-display text-lg font-semibold text-[var(--color-text)]">No lessons in your scope yet</h1>
+    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
+      Add your Oak API token and run <code class="rounded bg-black/20 px-1 text-xs">bin/rails curriculum:oak_sync</code>, or widen subject filters in the sidebar.
+    </p>
+  </div>
 <% else %>
-  <div class="flex h-full min-h-0 w-full max-w-6xl flex-col gap-2 sm:gap-3">
+  <div
+    class="flex h-full min-h-0 w-full max-w-6xl flex-col gap-2 sm:gap-3"
+    data-controller="lesson-timer"
+    data-lesson-timer-url-value="<%= lesson_time_log_path(lesson_id: @lesson.id) %>"
+    data-lesson-timer-interval-value="45"
+  >
     <header class="flex flex-none flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <div class="min-w-0">
         <h1 class="font-display truncate text-base font-semibold tracking-tight text-[var(--color-text)] sm:text-lg">
@@ -15,25 +25,17 @@
       </div>
 
       <div class="flex flex-none flex-wrap items-center gap-2">
-        <%= link_to @lesson.external_url,
+        <%= link_to "Open on Oak (new tab)",
+              @lesson.oak_pupil_lesson_url,
               target: "_blank",
               rel: "noopener noreferrer",
-              class: "inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-accent)]/50 hover:bg-white/5 sm:px-3.5 sm:text-sm" do %>
-          <span>Open in tab</span>
-        <% end %>
+              class: "inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-accent)]/50 hover:bg-white/5 sm:px-3.5 sm:text-sm" %>
         <%= render "lessons/status", lesson: @lesson, user: current_user %>
       </div>
     </header>
 
-    <div class="relative min-h-0 w-full flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/35 p-1 sm:rounded-2xl sm:p-1.5">
-      <iframe
-        src="<%= @lesson.external_url %>"
-        title="<%= @lesson.title %>"
-        class="absolute inset-0 h-full w-full rounded-md border-0 bg-black/20 sm:rounded-lg"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox allow-downloads"
-        loading="lazy"
-        referrerpolicy="strict-origin-when-cross-origin"
-      ></iframe>
+    <div class="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/35 p-2 sm:rounded-2xl sm:p-3">
+      <%= render "dashboard/lesson_content", lesson: @lesson, user: current_user %>
     </div>
   </div>
 <% end %>

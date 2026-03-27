@@ -1,0 +1,36 @@
+<% content_for :title, "Invite a learner — HomeSchool Hub" %>
+
+<div class="mx-auto max-w-md space-y-6 py-2">
+  <div>
+    <h1 class="font-display text-xl font-bold text-[var(--color-text)]">Invite a learner</h1>
+    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
+      We’ll email a link so they can create their own account. Their role will be <strong>learner</strong>, separate from your parent account.
+    </p>
+  </div>
+
+  <%= form_with model: @invitation, url: invitations_path, method: :post, class: "space-y-4" do |f| %>
+    <% if @invitation.errors.any? %>
+      <ul class="list-inside list-disc text-sm text-red-300">
+        <% @invitation.errors.full_messages.each do |m| %>
+          <li><%= m %></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <div>
+      <%= f.label :email, class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
+      <%= f.email_field :email, required: true, class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :year_group_key, "School year", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
+      <%= f.select :year_group_key,
+          Curriculum::YearGroups.all_year_keys.map { |k| [ Curriculum::YearGroups.label_for_year(k), k ] },
+          {},
+          class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+    </div>
+
+    <%= f.submit "Send invitation",
+        class: "w-full cursor-pointer rounded-xl bg-[var(--color-accent)] px-4 py-3 text-sm font-semibold text-[var(--color-bg)]" %>
+  <% end %>
+</div>

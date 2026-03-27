@@ -1,4 +1,5 @@
 # Oak National Academy — Year 7 (England). bin/rails db:seed
+# For full per-lesson hub content, set OAK_API_TOKEN and run: bin/rails curriculum:oak_sync
 lessons:
   - title: "Browse years & subjects (Oak)"
     external_url: "https://www.thenational.academy/pupils"
@@ -11,51 +12,3 @@ lessons:
     subject: "Oak National Academy"
     unit: "Account"
     position: 2
-
-  - title: "Year 7 — all units"
-    external_url: "https://www.thenational.academy/pupils/programmes/art-secondary-year-7/units"
-    subject: "Art and design"
-    unit: "Programme"
-    position: 1
-
-  - title: "Year 7 — all units"
-    external_url: "https://www.thenational.academy/pupils/programmes/french-secondary-year-7/units"
-    subject: "French"
-    unit: "Programme"
-    position: 1
-
-  - title: "Year 7 — all units"
-    external_url: "https://www.thenational.academy/pupils/programmes/mathematics-secondary-year-7/units"
-    subject: "Mathematics"
-    unit: "Programme"
-    position: 1
-
-  - title: "Year 7 — all units"
-    external_url: "https://www.thenational.academy/pupils/programmes/english-secondary-year-7/units"
-    subject: "English"
-    unit: "Programme"
-    position: 1
-
-  - title: "Year 7 — all units"
-    external_url: "https://www.thenational.academy/pupils/programmes/science-secondary-year-7/units"
-    subject: "Science"
-    unit: "Programme"
-    position: 1
-
-  - title: "Year 7 — all units"
-    external_url: "https://www.thenational.academy/pupils/programmes/computing-secondary-year-7/units"
-    subject: "Computing"
-    unit: "Programme"
-    position: 1
-
-  - title: "Year 7 — all units"
-    external_url: "https://www.thenational.academy/pupils/programmes/history-secondary-year-7/units"
-    subject: "History"
-    unit: "Programme"
-    position: 1
-
-  - title: "Year 7 — all units"
-    external_url: "https://www.thenational.academy/pupils/programmes/geography-secondary-year-7/units"
-    subject: "Geography"
-    unit: "Programme"
-    position: 1

@@ -12,11 +12,11 @@ class SidebarPreferencesController < ApplicationController
     if params.key?(:preferred_subjects)
       update_preferred_subjects_from_form!
       current_user.resync_hub_after_visible_scope_change!
-      redirect_to root_path, notice: "Subjects updated."
+      redirect_to dashboard_path, notice: "Subjects updated."
       return
     end
 
-    redirect_back fallback_location: root_path, notice: "Subjects updated."
+    redirect_back fallback_location: dashboard_path, notice: "Subjects updated."
   end
 
   private

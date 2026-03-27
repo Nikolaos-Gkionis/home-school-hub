@@ -33,7 +33,14 @@
 
         <% if user_signed_in? %>
           <div class="mt-4 flex min-h-0 flex-1 flex-col gap-1 text-sm">
-            <%= link_to "Dashboard", root_path, class: "shrink-0 rounded-md px-2 py-1.5 hover:bg-white/5 #{"border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" if request.path == root_path || request.path == "/dashboard"}" %>
+            <% dash = request.path == "/dashboard" %>
+            <% ins = request.path == "/insights" %>
+            <%= link_to "Dashboard", dashboard_path, class: "shrink-0 rounded-md px-2 py-1.5 hover:bg-white/5 #{"border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" if dash}" %>
+            <%= link_to "Insights", insights_path, class: "shrink-0 rounded-md px-2 py-1.5 hover:bg-white/5 #{"border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" if ins}" %>
+            <% if current_user.parent? %>
+              <%= link_to "Invite learner", new_invitation_path, class: "shrink-0 rounded-md px-2 py-1.5 text-[11px] hover:bg-white/5" %>
+            <% end %>
+            <%= link_to "How it works", root_path, class: "shrink-0 rounded-md px-2 py-1.5 text-[11px] text-[var(--color-text-muted)] hover:bg-white/5" %>
 
             <% if current_user.learners.any? %>
               <div class="shrink-0 space-y-1 border-b border-[var(--color-border)] pb-2">
@@ -48,7 +55,9 @@
                         class: "w-full truncate rounded-md px-2 py-1.5 text-left text-[11px] #{active ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:bg-white/5"}" %>
                   <% end %>
                 </div>
-                <%= link_to "Add a year", new_learner_path, class: "block px-2 pt-1 text-[10px] text-[var(--color-accent)] hover:underline" %>
+                <% if current_user.parent? %>
+                  <%= link_to "Add a year", new_learner_path, class: "block px-2 pt-1 text-[10px] text-[var(--color-accent)] hover:underline" %>
+                <% end %>
               </div>
             <% end %>
 
@@ -115,10 +124,12 @@
         <% end %>
       </nav>
 
-      <main id="main-content" class="flex min-h-0 min-w-0 flex-1 flex-col px-4 py-3 sm:px-5 sm:py-4 <%= controller_name == "dashboard" ? "overflow-hidden" : "overflow-y-auto overscroll-y-contain" %>">
-        <div class="min-h-0 flex-1 <%= controller_name == "dashboard" ? "flex flex-col" : "" %>">
+      <% hub_main = controller_name == "dashboard" %>
+      <main id="main-content" class="flex min-h-0 min-w-0 flex-1 flex-col px-4 py-3 sm:px-5 sm:py-4 <%= hub_main ? "overflow-hidden" : "overflow-y-auto overscroll-y-contain" %>">
+        <div class="min-h-0 flex-1 <%= hub_main ? "flex flex-col" : "" %>">
           <%= yield %>
         </div>
+        <%= render "shared/ogl_footer" %>
       </main>
     </div>
   </body>

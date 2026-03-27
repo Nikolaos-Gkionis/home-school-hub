@@ -19,7 +19,7 @@ module Gamification
       (1...dates.size).each do |i|
         if (dates[i] - dates[i - 1]).to_i <= 7
           streak += 1
-          max_streak = [max_streak, streak].max
+          max_streak = [ max_streak, streak ].max
         else
           streak = 1
         end

@@ -1,0 +1,161 @@
+<%# locals: lesson:, user: %>
+<% s = lesson.summary_data %>
+<% quizzes = lesson.quizzes_json.is_a?(Hash) ? lesson.quizzes_json : {} %>
+
+<div class="oak-hub flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-0.5 sm:pr-1">
+  <%= render "dashboard/oak_lesson_progress", lesson: lesson, user: user %>
+
+  <section
+    class="oak-unit-card rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-3 shadow-sm ring-1 ring-[var(--color-accent)]/10 sm:p-4"
+    data-controller="section-view"
+    data-section-view-url-value="<%= lesson_section_view_path(lesson_id: lesson.id, section_key: "overview") %>"
+  >
+    <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Overview</h2>
+    <p class="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+      <%= s["pupilLessonOutcome"].presence || "Work through each section below, then mark the lesson complete when you are finished." %>
+    </p>
+  </section>
+
+  <% if s["lessonKeywords"].present? %>
+    <section
+      class="oak-unit-card rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-3 shadow-sm ring-1 ring-[var(--color-accent)]/10 sm:p-4"
+      data-controller="section-view"
+      data-section-view-url-value="<%= lesson_section_view_path(lesson_id: lesson.id, section_key: "keywords") %>"
+    >
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Keywords</h2>
+      <dl class="mt-2 space-y-2 text-sm">
+        <% Array(s["lessonKeywords"]).each do |kw| %>
+          <div>
+            <dt class="font-medium text-[var(--color-text)]"><%= kw["keyword"] %></dt>
+            <dd class="text-[var(--color-text-muted)]"><%= kw["description"] %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </section>
+  <% end %>
+
+  <% if lesson.assets_list.any? { |a| a["type"] == "video" } %>
+    <section
+      class="rounded-xl border border-[var(--color-border)] bg-black/30 p-2 sm:p-3"
+      data-controller="section-view"
+      data-section-view-url-value="<%= lesson_section_view_path(lesson_id: lesson.id, section_key: "video") %>"
+    >
+      <h2 class="px-1 font-display text-sm font-semibold text-[var(--color-text)]">Video</h2>
+      <p class="px-1 pb-2 text-xs text-[var(--color-text-muted)]">Streamed via Oak (your API key on the server).</p>
+      <video
+        controls
+        playsinline
+        class="aspect-video w-full rounded-lg bg-black"
+        src="<%= lesson_oak_asset_path(lesson_id: lesson.id, type: "video") %>"
+      >
+      </video>
+    </section>
+  <% end %>
+
+  <% if s["keyLearningPoints"].present? %>
+    <section
+      class="oak-unit-card rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-3 shadow-sm ring-1 ring-[var(--color-accent)]/10 sm:p-4"
+      data-controller="section-view"
+      data-section-view-url-value="<%= lesson_section_view_path(lesson_id: lesson.id, section_key: "outcome") %>"
+    >
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Key learning points</h2>
+      <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-[var(--color-text-muted)]">
+        <% Array(s["keyLearningPoints"]).each do |row| %>
+          <li><%= row["keyLearningPoint"] %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <% if s["misconceptionsAndCommonMistakes"].present? %>
+    <section
+      class="oak-unit-card rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-3 shadow-sm ring-1 ring-[var(--color-accent)]/10 sm:p-4"
+      data-controller="section-view"
+      data-section-view-url-value="<%= lesson_section_view_path(lesson_id: lesson.id, section_key: "misconceptions") %>"
+    >
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Misconceptions</h2>
+      <ul class="mt-2 space-y-3 text-sm">
+        <% Array(s["misconceptionsAndCommonMistakes"]).each do |row| %>
+          <li class="text-[var(--color-text-muted)]">
+            <span class="font-medium text-[var(--color-text)]"><%= row["misconception"] %></span>
+            <% if row["response"].present? %>
+              <span class="block pt-1"><%= row["response"] %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <% if s["teacherTips"].present? %>
+    <section
+      class="oak-unit-card rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-3 shadow-sm ring-1 ring-[var(--color-accent)]/10 sm:p-4"
+      data-controller="section-view"
+      data-section-view-url-value="<%= lesson_section_view_path(lesson_id: lesson.id, section_key: "teacher_tips") %>"
+    >
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Teacher tips</h2>
+      <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-[var(--color-text-muted)]">
+        <% Array(s["teacherTips"]).each do |row| %>
+          <% tip = row.is_a?(Hash) ? (row["teacherTip"] || row["items"]) : row %>
+          <% if tip.is_a?(String) %>
+            <li><%= tip %></li>
+          <% end %>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <% [["starter", "Starter quiz", "starter_quiz", "starterQuiz"], ["exit", "Exit quiz", "exit_quiz", "exitQuiz"]].each do |qt, title, section_key, json_key| %>
+    <% questions = Array(quizzes[json_key]).select { |q| q["questionType"].to_s == "multiple-choice" } %>
+    <% next if questions.blank? %>
+
+    <section
+      class="oak-unit-card rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-3 shadow-sm ring-1 ring-[var(--color-accent)]/10 sm:p-4"
+      data-controller="section-view"
+      data-section-view-url-value="<%= lesson_section_view_path(lesson_id: lesson.id, section_key: section_key) %>"
+    >
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]"><%= title %></h2>
+      <div class="mt-3 space-y-5">
+        <% questions.each_with_index do |question, qidx| %>
+          <% answers = Array(question["answers"]) %>
+          <% shuffled = answers.each_with_index.to_a.shuffle %>
+          <% multi = answers.count { |a| a["distractor"] == false } > 1 %>
+          <div class="border-t border-[var(--color-border)]/50 pt-4 first:border-t-0 first:pt-0">
+            <p class="text-sm font-medium text-[var(--color-text)]"><%= question["question"] %></p>
+            <%= form_with url: lesson_quiz_responses_path(lesson_id: lesson.id), method: :post, local: true, data: { turbo: true } do %>
+              <%= hidden_field_tag :quiz_type, qt %>
+              <%= hidden_field_tag :question_index, qidx %>
+              <div class="mt-2 space-y-2">
+                <% shuffled.each do |ans, orig_idx| %>
+                  <% if multi %>
+                    <label class="flex cursor-pointer items-start gap-2 text-sm text-[var(--color-text-muted)]">
+                      <%= check_box_tag "answer_indices[]", orig_idx, false, class: "mt-1 rounded border-[var(--color-border)]" %>
+                      <span><%= ans["content"] %></span>
+                    </label>
+                  <% else %>
+                    <label class="flex cursor-pointer items-start gap-2 text-sm text-[var(--color-text-muted)]">
+                      <%= radio_button_tag "answer_indices", orig_idx, false, class: "mt-1" %>
+                      <span><%= ans["content"] %></span>
+                    </label>
+                  <% end %>
+                <% end %>
+              </div>
+              <div class="mt-3">
+                <%= submit_tag "Check answer",
+                      class: "rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)] hover:opacity-90" %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <footer class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/25 px-3 py-3 text-xs leading-relaxed text-[var(--color-text-muted)]">
+    <p>
+      A <%= lesson.subject %> lesson by Oak National Academy licensed under
+      <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="text-[var(--color-accent)] underline hover:opacity-90" target="_blank" rel="noopener noreferrer">Open Government Licence (OGL)</a>.
+      This app is not affiliated with or endorsed by Oak National Academy.
+    </p>
+  </footer>
+</div>
