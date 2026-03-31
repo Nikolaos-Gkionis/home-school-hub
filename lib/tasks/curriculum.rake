@@ -12,6 +12,9 @@ namespace :curriculum do
   task oak_sync: :environment do
     result = Oak::Importer.call
     puts result.inspect
+    if result.is_a?(Hash) && result[:hydrated].to_i.positive?
+      puts "Post-import hydration: #{result[:hydrated]} lesson(s) fetched summary/assets/quiz/transcript."
+    end
   end
 
   desc "Clear lessons and re-seed from YAML"

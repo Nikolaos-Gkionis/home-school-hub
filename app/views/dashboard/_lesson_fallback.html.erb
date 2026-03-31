@@ -3,8 +3,8 @@
   <div class="rounded-xl bg-[var(--color-accent)]/10 px-4 py-3 text-sm text-[var(--color-text)]">
     <p class="font-semibold">Lesson content is not loaded in the hub yet</p>
     <p class="mt-2 text-[var(--color-text-muted)]">
-      We don’t embed Oak’s full site in an iframe. For the full on-hub experience, set <code class="rounded bg-black/25 px-1 text-xs">OAK_API_TOKEN</code> and run
-      <code class="rounded bg-black/25 px-1 text-xs">bin/rails curriculum:oak_sync</code> so lessons include API data (OGL).
+      This link isn’t a single Oak lesson slug we can sync. For full lesson content in the hub, set <code class="rounded bg-black/25 px-1 text-xs">OAK_API_TOKEN</code> and run
+      <code class="rounded bg-black/25 px-1 text-xs">bin/rails curriculum:oak_sync</code> (see <%= link_to "Oak Open API", "https://open-api.thenational.academy/docs/about-oaks-api/api-overview", class: "text-[var(--color-accent)] underline", target: "_blank", rel: "noopener noreferrer" %>).
     </p>
   </div>
   <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/50 p-4">

@@ -1,6 +1,11 @@
 <%# locals: lesson:, user: %>
-<% if lesson.oak_hub? && lesson.summary_json.is_a?(Hash) && lesson.summary_json["lessonTitle"].present? %>
-  <%= render "dashboard/oak_lesson", lesson: lesson, user: user %>
+<% if lesson.oak_hub? %>
+  <% has_cached = lesson.summary_json.is_a?(Hash) && lesson.summary_json["lessonTitle"].present? %>
+  <% if Oak::ApiClient.configured? || has_cached %>
+    <%= render "dashboard/oak_lesson", lesson: lesson, user: user %>
+  <% else %>
+    <%= render "dashboard/oak_lesson_api_required", lesson: lesson %>
+  <% end %>
 <% else %>
   <%= render "dashboard/lesson_fallback", lesson: lesson %>
 <% end %>

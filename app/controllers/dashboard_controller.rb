@@ -6,7 +6,7 @@ class DashboardController < ApplicationController
   def show
     @lessons = current_user.visible_lessons_relation
     @lesson = find_lesson
-    hydrate_oak_lesson! if @lesson&.oak_hub?
+    hydrate_oak_lesson! if @lesson
     persist_lesson_context! if @lesson
   end
 
@@ -31,11 +31,16 @@ class DashboardController < ApplicationController
   end
 
   def hydrate_oak_lesson!
+    return unless @lesson.oak_hub?
     return unless Oak::ApiClient.configured?
-    return if @lesson.summary_json.is_a?(Hash) && @lesson.summary_json["lessonTitle"].present?
 
-    Oak::LessonHydrator.call(@lesson)
+    needs_fill = !(@lesson.summary_json.is_a?(Hash) && @lesson.summary_json["lessonTitle"].present?)
+    stale = Oak::LessonHydrator.stale?(@lesson)
+    return unless needs_fill || stale
+
+    result = Oak::LessonHydrator.call(@lesson)
     @lesson.reload
+    flash.now[:alert] = result.user_message if result.failure? && result.user_message.present?
   end
 
   def persist_lesson_context!

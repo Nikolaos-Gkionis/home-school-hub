@@ -20,7 +20,7 @@ module Oak
     def call
       unless ApiClient.configured?
         Rails.logger.info("[Oak::Importer] Skipped: set OAK_API_TOKEN (see README).")
-        return { created: 0, updated: 0, skipped: true }
+        return { created: 0, updated: 0, skipped: true, hydrated: 0 }
       end
 
       cfg = load_config
@@ -42,10 +42,16 @@ module Oak
         end
       end
 
-      { created:, updated:, skipped: false }
+      hydrated = 0
+      if ENV["OAK_SKIP_POST_IMPORT_HYDRATE"] != "1"
+        r = PostImportHydrator.call
+        hydrated = r[:hydrated].to_i
+      end
+
+      { created:, updated:, skipped: false, hydrated: }
     rescue ApiClient::Unauthorized => e
       Rails.logger.error("[Oak::Importer] #{e.message}")
-      { created: 0, updated: 0, error: e.message }
+      { created: 0, updated: 0, hydrated: 0, error: e.message }
     end
 
     private
@@ -100,7 +106,8 @@ module Oak
             external_url: "https://www.thenational.academy/pupils/lessons/#{lesson_slug}",
             summary_json: {},
             assets_json: {},
-            quizzes_json: {}
+            quizzes_json: {},
+            transcript_json: {}
           )
           lesson.save!
           per_subj += 1

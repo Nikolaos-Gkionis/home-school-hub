@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_27_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_31_120000) do
   create_table "badges", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -104,11 +104,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_100000) do
     t.string "oak_key_stage_slug"
     t.string "oak_lesson_slug"
     t.string "oak_subject_slug"
+    t.datetime "oak_synced_at"
     t.integer "position", default: 0, null: false
     t.json "quizzes_json", default: {}, null: false
     t.string "subject", null: false
     t.json "summary_json", default: {}, null: false
     t.string "title", null: false
+    t.json "transcript_json", default: {}, null: false
     t.string "unit", null: false
     t.datetime "updated_at", null: false
     t.string "year_group_key", default: "year_7", null: false

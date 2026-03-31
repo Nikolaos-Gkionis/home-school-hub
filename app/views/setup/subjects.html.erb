@@ -1,21 +1,14 @@
 <% content_for :title, "Step 2 — Subjects — HomeSchool Hub" %>
 
 <div class="mx-auto max-w-2xl space-y-6 py-2">
-  <div>
-    <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">Step 2 of 2</p>
-    <h1 class="font-display text-xl font-bold text-[var(--color-text)] sm:text-2xl">Choose subjects per year</h1>
-    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
-      Tick the subjects you want for each year. Leave all ticked for everything in that year. You can change this later in the sidebar.
-    </p>
-  </div>
+  <%= render "shared/hub_page_header",
+      kicker: "Step 2 of 2",
+      title: "Choose subjects per year",
+      description: "Tick the subjects you want for each year. Leave all ticked for everything in that year. You can change this later in the sidebar." %>
 
   <%= form_with url: setup_subjects_path, method: :post, class: "space-y-6", data: { turbo: true } do %>
     <% @learners.each do |lr| %>
-      <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
-        <p class="mb-3 font-display text-sm font-semibold text-[var(--color-text)]">
-          <%= lr.display_name %>
-          <span class="font-normal text-[var(--color-text-muted)]">(<%= Curriculum::YearGroups.label_for_year(lr.year_group_key) %>)</span>
-        </p>
+      <%= render layout: "shared/hub_card", locals: { title: "#{lr.display_name} (#{Curriculum::YearGroups.label_for_year(lr.year_group_key)})" } do %>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <% @subject_options.each do |subj| %>
             <% checked = lr.preferred_subjects.nil? || Array(lr.preferred_subjects).include?(subj) %>
@@ -26,7 +19,7 @@
             </label>
           <% end %>
         </div>
-      </div>
+      <% end %>
     <% end %>
 
     <%= submit_tag "Finish setup",

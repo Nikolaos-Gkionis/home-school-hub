@@ -1,0 +1,10 @@
+<%# locals: title:, kicker: nil, description: nil %>
+<div class="hub-page-header space-y-2">
+  <% if local_assigns[:kicker].present? %>
+    <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]"><%= kicker %></p>
+  <% end %>
+  <h1 class="font-display text-xl font-bold text-[var(--color-text)] sm:text-2xl"><%= title %></h1>
+  <% if local_assigns[:description].present? %>
+    <p class="text-sm leading-relaxed text-[var(--color-text-muted)]"><%= description %></p>
+  <% end %>
+</div>

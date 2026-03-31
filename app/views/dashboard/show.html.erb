@@ -19,8 +19,10 @@
         <h1 class="font-display truncate text-base font-semibold tracking-tight text-[var(--color-text)] sm:text-lg">
           <%= @lesson.title %>
         </h1>
-        <p class="mt-0.5 truncate text-xs text-[var(--color-text-muted)] sm:text-sm">
-          <%= @lesson.subject %> · <%= @lesson.unit %>
+        <% meta = @lesson.summary_data %>
+        <% line = [ meta["subjectTitle"].presence || @lesson.subject, meta["keyStageTitle"], @lesson.unit ].compact.join(" · ") %>
+        <p class="mt-0.5 truncate text-xs text-[var(--color-text-muted)] sm:text-sm" title="<%= line %>">
+          <%= line %>
         </p>
       </div>
 

@@ -10,9 +10,10 @@ class Lesson < ApplicationRecord
   CONTENT_MODE_LEGACY = "legacy_iframe"
   CONTENT_MODE_OAK_HUB = "oak_hub"
 
-  # Tracked in LessonSectionView for Oak hub lessons (order matches dashboard sections).
+  # Tracked in LessonSectionView for Oak hub lessons (render order in dashboard).
   HUB_SECTION_KEYS = %w[
-    overview keywords video misconceptions outcome teacher_tips starter_quiz exit_quiz
+    overview keywords video downloads misconceptions outcome teacher_tips
+    starter_quiz exit_quiz content_guidance supervision transcript
   ].freeze
 
   YEAR_ORDER = %w[
@@ -75,9 +76,65 @@ class Lesson < ApplicationRecord
     Array(h["assets"])
   end
 
+  def assets_attributions
+    h = assets_json
+    return [] unless h.is_a?(Hash)
+
+    Array(h["attribution"]).map(&:to_s).reject(&:blank?)
+  end
+
+  def downloadable_asset_rows
+    assets_list.reject { |a| a["type"].to_s == "video" }
+  end
+
+  def transcript_excerpt
+    t = transcript_json
+    return "" unless t.is_a?(Hash)
+
+    t["transcript"].to_s
+  end
+
+  def hub_section_visible?(key)
+    s = summary_data
+    q = quizzes_json.is_a?(Hash) ? quizzes_json : {}
+    case key
+    when "overview"
+      true
+    when "keywords"
+      s["lessonKeywords"].present?
+    when "video"
+      assets_list.any? { |a| a["type"].to_s == "video" }
+    when "downloads"
+      downloadable_asset_rows.any?
+    when "misconceptions"
+      s["misconceptionsAndCommonMistakes"].present?
+    when "outcome"
+      s["keyLearningPoints"].present?
+    when "teacher_tips"
+      s["teacherTips"].present?
+    when "starter_quiz"
+      Array(q["starterQuiz"]).any? { |qu| qu["questionType"].to_s == "multiple-choice" }
+    when "exit_quiz"
+      Array(q["exitQuiz"]).any? { |qu| qu["questionType"].to_s == "multiple-choice" }
+    when "content_guidance"
+      s["contentGuidance"].present?
+    when "supervision"
+      s["supervisionLevel"].present?
+    when "transcript"
+      transcript_excerpt.present?
+    else
+      false
+    end
+  end
+
+  def hub_section_keys_for_lesson
+    HUB_SECTION_KEYS.select { |k| hub_section_visible?(k) }
+  end
+
   def hub_section_progress_for(user)
-    seen = lesson_section_views.where(user: user).distinct.count(:section_key)
-    { seen:, total: HUB_SECTION_KEYS.size }
+    keys = hub_section_keys_for_lesson
+    seen = lesson_section_views.where(user: user, section_key: keys).distinct.count(:section_key)
+    { seen:, total: [ keys.size, 1 ].max }
   end
 
   def quiz_mc_total_count

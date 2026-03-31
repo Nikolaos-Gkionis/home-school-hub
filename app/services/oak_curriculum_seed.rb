@@ -4,6 +4,7 @@ require "yaml"
 
 class OakCurriculumSeed
   PATH = Rails.root.join("config/curriculum/oak_year7.yml")
+  PUPIL_LESSON_SLUG_PATTERN = %r{thenational\.academy/pupils/lessons/([^/?#]+)}i
 
   def self.call
     new.call
@@ -31,7 +32,16 @@ class OakCurriculumSeed
         external_url: url,
         position: attrs["position"].to_i
       )
+      if (slug = extract_pupil_lesson_slug(url))
+        lesson.oak_lesson_slug = slug
+        lesson.content_mode = Lesson::CONTENT_MODE_OAK_HUB
+        lesson.external_url = "https://www.thenational.academy/pupils/lessons/#{slug}"
+      end
       lesson.save!
     end
+  end
+
+  def extract_pupil_lesson_slug(url)
+    PUPIL_LESSON_SLUG_PATTERN.match(url.to_s)&.captures&.first
   end
 end

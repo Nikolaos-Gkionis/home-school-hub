@@ -1,10 +1,13 @@
 <% content_for :title, "Invite a learner — HomeSchool Hub" %>
 
 <div class="mx-auto max-w-md space-y-6 py-2">
-  <div>
-    <h1 class="font-display text-xl font-bold text-[var(--color-text)]">Invite a learner</h1>
-    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
-      We’ll email a link so they can create their own account. Their role will be <strong>learner</strong>, separate from your parent account.
+  <div class="space-y-2">
+    <%= render "shared/hub_page_header",
+        kicker: "Family",
+        title: "Invite a learner",
+        description: "We’ll email a link so they can create their own account." %>
+    <p class="text-sm text-[var(--color-text-muted)]">
+      Their role will be <strong class="text-[var(--color-text)]">learner</strong>, separate from your parent account.
     </p>
   </div>
 

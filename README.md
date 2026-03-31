@@ -15,10 +15,16 @@ Open http://localhost:3000 — the landing page explains how the hub uses Oak’
 
 ## Curriculum
 
-- Starter links: `config/curriculum/oak_year7.yml`
-- **Oak Open API** (free key from [Oak’s API docs](https://open-api.thenational.academy/docs)): set `OAK_API_TOKEN` in your environment (or set `OAK_API_AUTH_HEADER` to the full `Authorization` value if Oak gives a non-Bearer format). Subjects and years are listed in `config/oak_curriculum.yml`.
-- Import lessons: `bin/rails curriculum:oak_sync` (or `curriculum:seed` / `curriculum:resync`, which call the importer when a token is set).
-- Optional: `OAK_IMPORT_LIMIT=5` caps lessons per subject while testing the sync.
+- Starter rows: `config/curriculum/oak_year7.yml` (optional links; rows whose URLs match `/pupils/lessons/{slug}` are upgraded to `oak_hub` on seed).
+- **Oak Open API** ([overview](https://open-api.thenational.academy/docs/about-oaks-api/api-overview), [terms](https://open-api.thenational.academy/docs/about-oaks-api/terms-and-conditions)): set `OAK_API_TOKEN` (or `OAK_API_AUTH_HEADER` for a full non-Bearer `Authorization` value). Subjects and years for sync live in `config/oak_curriculum.yml`.
+- Import + hydrate: `bin/rails curriculum:oak_sync` pulls lesson rows, then **post-import hydration** fetches summary, assets, quiz, and transcript for up to `OAK_POST_IMPORT_HYDRATE_MAX` lessons (default **80**) unless you set `OAK_SKIP_POST_IMPORT_HYDRATE=1`. While viewing a lesson, stale data older than **7 days** is refreshed when the token is set.
+- Optional tuning: `OAK_IMPORT_LIMIT=5` caps lessons per subject during sync; `OAK_POST_IMPORT_HYDRATE_MAX=0` skips the hydration pass; `OAK_POST_IMPORT_HYDRATE_SLEEP` controls delay between hydrate calls (seconds).
+
+## Tests
+
+```bash
+bin/rails test
+```
 
 ## Deploy
 
