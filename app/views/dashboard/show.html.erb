@@ -9,7 +9,7 @@
   </div>
 <% else %>
   <div
-    class="flex h-full min-h-0 w-full max-w-6xl flex-col gap-2 sm:gap-3"
+    class="flex h-full min-h-0 w-full max-w-none flex-col gap-2 sm:gap-3"
     data-controller="lesson-timer"
     data-lesson-timer-url-value="<%= lesson_time_log_path(lesson_id: @lesson.id) %>"
     data-lesson-timer-interval-value="45"

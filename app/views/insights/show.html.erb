@@ -1,12 +1,12 @@
 <% content_for :title, "Insights — HomeSchool Hub" %>
 
-<div class="mx-auto max-w-4xl space-y-6 pb-8">
+<div class="mx-auto w-full max-w-none space-y-6 pb-8">
   <header class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
     <div class="min-w-0 flex-1 space-y-2">
       <%= render "shared/hub_page_header",
           kicker: "Family",
           title: "Insights",
-          description: "Progress, quiz success, and time on lessons — all tracked in this hub using your learners’ activity." %>
+          description: "Progress is stored on each learner’s account when they use the hub while signed in (completions, quizzes, lesson time, and sections viewed). Parents can filter by child; the choice is remembered for this browser session." %>
     </div>
     <% if current_user.parent? && @children.any? %>
       <%= form_with url: insights_path, method: :get, class: "flex items-center gap-2", data: { turbo: true } do %>
@@ -14,7 +14,7 @@
         <%= select_tag :child_id,
             options_for_select(
               [ [ "All learners", "" ] ] + @children.map { |c| [ c.email, c.id ] },
-              params[:child_id]
+              @insights_filter_id
             ),
             class: "rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5 text-xs",
             onchange: "this.form.requestSubmit()" %>
@@ -23,58 +23,109 @@
   </header>
 
   <% m = @metrics %>
-  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
     <% [
       [ "Learners in view", m[:learner_count] ],
       [ "Lessons completed", m[:lessons_completed] ],
-      [ "Quiz success", "#{(m[:quiz_success_ratio].to_f * 100).round(1)}%" ],
-      [ "Time (minutes)", m[:time_minutes] ]
-    ].each do |label, val| %>
+      [ "Sections viewed", m[:sections_explored] ],
+      [ "Quiz success", "#{(m[:quiz_success_ratio].to_f * 100).round(1)}%", m[:quiz_attempts].to_i > 0 ? "#{m[:quiz_attempts]} attempts" : nil ],
+      [ "Time (minutes)", m[:time_minutes] ],
+    ].each do |entry| %>
+      <% label, val = entry[0], entry[1] %>
+      <% hint = entry[2] %>
       <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
         <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]"><%= label %></p>
         <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= val %></p>
+        <% if hint.present? %>
+          <p class="mt-1 text-[10px] text-[var(--color-text-muted)]"><%= hint %></p>
+        <% end %>
       </div>
     <% end %>
   </div>
 
-  <div class="grid gap-6 lg:grid-cols-2">
+  <% week_sorted = m[:completions_by_week].sort_by { |k, _| k }.last(12) %>
+  <% subject_sorted = m[:completions_by_subject].sort_by { |_, c| -c }.first(10) %>
+  <%= tag.div(
+        class: "space-y-6",
+        data: {
+          controller: "insights-charts",
+          insights_charts_week_labels_value: week_sorted.map(&:first),
+          insights_charts_week_counts_value: week_sorted.map(&:last),
+          insights_charts_subject_labels_value: subject_sorted.map(&:first),
+          insights_charts_subject_counts_value: subject_sorted.map(&:last),
+          insights_charts_learner_rows_value: m[:per_learner].presence || []
+        }
+      ) do %>
+
+  <% if m[:per_learner].present? %>
     <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
-      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Completions by week</h2>
-      <div class="mt-4 flex h-40 items-end gap-1">
-        <% max = [ m[:completions_by_week].values.max.to_i, 1 ].max %>
-        <% m[:completions_by_week].sort_by { |k, _| k }.last(12).each do |week, count| %>
-          <div class="flex flex-1 flex-col items-center justify-end gap-1">
-            <div
-              class="w-full max-w-[24px] rounded-t-md bg-[var(--color-accent)]/80"
-              style="height: <%= (count.to_f / max * 100).round(1) %>%"
-              title="<%= week %>: <%= count %>"
-            ></div>
-            <span class="max-w-full truncate text-[9px] text-[var(--color-text-muted)]"><%= week.to_s.last(5) %></span>
-          </div>
-        <% end %>
-        <% if m[:completions_by_week].empty? %>
-          <p class="text-sm text-[var(--color-text-muted)]">No data yet — complete a lesson to see bars here.</p>
-        <% end %>
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Learner comparison</h2>
+      <p class="mt-1 text-xs text-[var(--color-text-muted)]">Grouped bars: lessons completed, sections viewed, and quiz attempts per child account.</p>
+      <div class="relative mt-4 h-64 w-full min-h-[16rem] max-h-[28rem] sm:h-72">
+        <canvas data-insights-charts-target="learnerCanvas" class="max-h-full"></canvas>
       </div>
     </div>
 
     <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">By learner</h2>
+      <p class="mt-1 text-xs text-[var(--color-text-muted)]">Each row is data for that child’s account only.</p>
+      <div class="mt-3 overflow-x-auto">
+        <table class="w-full min-w-[36rem] text-left text-xs sm:text-sm">
+          <thead>
+            <tr class="border-b border-[var(--color-border)] text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+              <th class="py-2 pr-3">Learner</th>
+              <th class="py-2 pr-3 text-right">Lessons done</th>
+              <th class="py-2 pr-3 text-right">Sections</th>
+              <th class="py-2 pr-3 text-right">Quiz attempts</th>
+              <th class="py-2 pr-3 text-right">Quiz correct</th>
+              <th class="py-2 pr-3 text-right">Time (min)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% m[:per_learner].each do |row| %>
+              <tr class="border-b border-[var(--color-border)]/40 last:border-0">
+                <td class="py-2 pr-3 text-[var(--color-text)]"><%= row[:label] %></td>
+                <td class="py-2 pr-3 text-right tabular-nums text-[var(--color-text)]"><%= row[:lessons_completed] %></td>
+                <td class="py-2 pr-3 text-right tabular-nums text-[var(--color-text)]"><%= row[:sections_explored] %></td>
+                <td class="py-2 pr-3 text-right tabular-nums text-[var(--color-text)]"><%= row[:quiz_attempts] %></td>
+                <td class="py-2 pr-3 text-right tabular-nums text-[var(--color-accent)]"><%= row[:quiz_correct] %></td>
+                <td class="py-2 pr-3 text-right tabular-nums text-[var(--color-text)]"><%= row[:time_minutes] %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Completions by week</h2>
+      <p class="mt-1 text-xs text-[var(--color-text-muted)]">Last 12 weeks · hover a bar for the full date range.</p>
+      <% if week_sorted.any? %>
+        <div class="relative mt-4 h-52 w-full min-h-[13rem] sm:h-56">
+          <canvas data-insights-charts-target="weekCanvas"></canvas>
+        </div>
+      <% else %>
+        <p class="mt-4 text-sm text-[var(--color-text-muted)]">No data yet — complete a lesson to see the chart.</p>
+      <% end %>
+    </div>
+
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
       <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">By subject</h2>
-      <ul class="mt-3 space-y-2 text-sm">
-        <% m[:completions_by_subject].sort_by { |_, c| -c }.first(10).each do |subj, count| %>
-          <li class="flex justify-between gap-2 border-b border-[var(--color-border)]/40 pb-2">
-            <span class="truncate text-[var(--color-text)]"><%= subj %></span>
-            <span class="shrink-0 font-medium text-[var(--color-accent)]"><%= count %></span>
-          </li>
-        <% end %>
-        <% if m[:completions_by_subject].empty? %>
-          <li class="text-[var(--color-text-muted)]">No completions yet.</li>
-        <% end %>
-      </ul>
+      <p class="mt-1 text-xs text-[var(--color-text-muted)]">Top subjects by lesson completions (up to 10).</p>
+      <% if subject_sorted.any? %>
+        <div class="relative mt-4 h-52 w-full min-h-[13rem] sm:h-56">
+          <canvas data-insights-charts-target="subjectCanvas"></canvas>
+        </div>
+      <% else %>
+        <p class="mt-4 text-sm text-[var(--color-text-muted)]">No completions yet.</p>
+      <% end %>
     </div>
   </div>
+  <% end %>
 
   <p class="text-xs text-[var(--color-text-muted)]">
-    Quiz counts include multiple-choice attempts saved from lesson quizzes. Time accrues while a lesson is open (timer in the lesson panel).
+    Quiz counts are multiple-choice checks from lesson quizzes. Time accrues while a lesson is open (timer on the lesson page). Section views are recorded when each lesson block loads. Nothing here is stored only in a session — it is tied to the signed-in user in the database.
   </p>
 </div>

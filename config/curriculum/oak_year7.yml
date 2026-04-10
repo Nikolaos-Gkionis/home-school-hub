@@ -1,14 +1,4 @@
-# Oak National Academy — Year 7 (England). bin/rails db:seed
-# For full per-lesson hub content, set OAK_API_TOKEN and run: bin/rails curriculum:oak_sync
-lessons:
-  - title: "Browse years & subjects (Oak)"
-    external_url: "https://www.thenational.academy/pupils"
-    subject: "Oak National Academy"
-    unit: "Getting started"
-    position: 1
-
-  - title: "Sign in (library, downloads, some media)"
-    external_url: "https://www.thenational.academy/sign-in"
-    subject: "Oak National Academy"
-    unit: "Account"
-    position: 2
+# Optional per-lesson seed rows — only include URLs of the form
+# https://www.thenational.academy/pupils/lessons/{slug}
+# (site-wide browse/sign-in links are not supported as hub lessons).
+lessons: []

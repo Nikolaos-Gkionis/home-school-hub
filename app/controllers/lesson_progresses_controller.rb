@@ -50,7 +50,10 @@ class LessonProgressesController < ApplicationController
     lr.assign_attributes(answer_indices: indices, correct: correct)
     lr.save!
 
-    redirect_to dashboard_path(lesson_id: lesson.id)
+    respond_to do |format|
+      format.json { render json: { correct: correct } }
+      format.html { redirect_to dashboard_path(lesson_id: lesson.id) }
+    end
   end
 
   private

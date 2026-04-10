@@ -25,6 +25,7 @@ class Lesson < ApplicationRecord
   has_many :completing_users, through: :lesson_completions, source: :user
   has_many :lesson_section_views, dependent: :destroy
   has_many :lesson_quiz_responses, dependent: :destroy
+  has_many :lesson_time_logs, dependent: :destroy
 
   validates :title, :external_url, :subject, :unit, :year_group_key, presence: true
   validates :content_mode, inclusion: { in: [ CONTENT_MODE_LEGACY, CONTENT_MODE_OAK_HUB ] }
@@ -32,7 +33,7 @@ class Lesson < ApplicationRecord
   scope :ordered, -> {
     conn = connection
     cases = YEAR_ORDER.map.with_index { |yk, i| "WHEN #{conn.quote(yk)} THEN #{i}" }.join(" ")
-    order(Arel.sql("CASE #{table_name}.year_group_key #{cases} ELSE 99 END, #{table_name}.subject, #{table_name}.unit, #{table_name}.position, #{table_name}.id"))
+    order(Arel.sql("CASE #{table_name}.year_group_key #{cases} ELSE 99 END, #{table_name}.subject, COALESCE(#{table_name}.unit_position, 9999), #{table_name}.unit, #{table_name}.position, #{table_name}.id"))
   }
 
   def self.compose_unit_key(subject, unit)

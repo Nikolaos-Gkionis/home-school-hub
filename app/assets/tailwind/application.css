@@ -1,5 +1,148 @@
 @import "tailwindcss";
 
+@layer components {
+  /* Sidebar: `<details>` chevrons rotate when open (summary points right → down). */
+  .sidebar-details-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--color-text-muted);
+    transition: transform 0.2s ease, color 0.15s ease;
+  }
+
+  @media (min-width: 640px) {
+    .sidebar-details-chevron {
+      font-size: 1.05rem;
+    }
+  }
+
+  details[open] > summary .sidebar-details-chevron {
+    transform: rotate(90deg);
+    color: var(--color-accent);
+  }
+
+  /* Toggle: one « icon; flip so » when sidebar is collapsed (expand). */
+  nav.app-sidebar .sidebar-toggle-chevron {
+    transition: transform 0.2s ease;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-toggle-chevron {
+    transform: scaleX(-1);
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-brand-text {
+    display: none;
+  }
+
+  /* Expanded: show labels; collapsed: icon-only columns */
+  nav.app-sidebar[data-collapsed="true"] .sidebar-brand-row {
+    justify-content: center;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-top-links .sidebar-nav-link {
+    justify-content: center;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-top-links .sidebar-nav-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-section-label-text,
+  nav.app-sidebar[data-collapsed="true"] .sidebar-lessons-heading-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-lessons-heading {
+    justify-content: center;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-lessons-scroll {
+    display: none;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-active-learner-block .sidebar-nav-link {
+    justify-content: center;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-active-learner-block .sidebar-section-heading {
+    justify-content: center;
+  }
+
+  /* Subjects row: icon only; don’t open drawer while collapsed */
+  nav.app-sidebar[data-collapsed="true"] .sidebar-subjects-panel > summary {
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-subjects-panel .sidebar-details-chevron {
+    display: none;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-subjects-summary-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-subjects-panel > :not(summary) {
+    display: none !important;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-streak-text {
+    display: none;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-theme-form {
+    display: none;
+  }
+
+  .sidebar-theme-collapsed-only {
+    display: none;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-theme-collapsed-only {
+    display: flex;
+    justify-content: center;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-streak-row {
+    justify-content: center;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] .sidebar-footer-block .sidebar-nav-link {
+    justify-content: center;
+  }
+
+  nav.app-sidebar[data-collapsed="true"] {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
 @layer base {
   .theme-cosmic-voyager {
     --color-bg: #0f0c29;

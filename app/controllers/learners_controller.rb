@@ -30,6 +30,19 @@ class LearnersController < ApplicationController
     redirect_back fallback_location: dashboard_path
   end
 
+  def destroy
+    learner = current_user.learners.find(params[:id])
+    label = learner.display_name
+    was_active = current_user.active_learner_id == learner.id
+    learner.destroy!
+    if was_active
+      nxt = current_user.learners.order(:position).first
+      current_user.update!(active_learner: nxt)
+    end
+    current_user.resync_hub_after_visible_scope_change!
+    redirect_to dashboard_path, notice: "Removed #{label} from your school years."
+  end
+
   private
 
   def ensure_parent!

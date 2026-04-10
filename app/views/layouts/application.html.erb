@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-dvh overflow-hidden">
+<html lang="en" class="h-dvh w-full overflow-hidden">
   <head>
     <title><%= content_for(:title) || "HomeSchool Hub" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Marcellus&family=Orbitron:wght@500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
@@ -19,7 +20,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="<%= ThemeManager.body_class_for(current_user&.current_theme || "cosmic_voyager") %> h-dvh max-h-dvh overflow-hidden bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
+  <body class="<%= ThemeManager.body_class_for(current_user&.current_theme || "cosmic_voyager") %> box-border h-dvh min-h-0 w-full max-w-none overflow-hidden bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
     <% if notice.present? %>
       <div class="fixed right-4 top-4 z-50 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm shadow-lg" role="status"><%= notice %></div>
     <% end %>
@@ -27,84 +28,176 @@
       <div class="fixed right-4 top-4 z-50 rounded-lg border border-red-400/40 bg-red-950/90 px-4 py-2 text-sm text-red-100 shadow-lg" role="alert"><%= alert %></div>
     <% end %>
 
-    <div class="flex h-full min-h-0 w-full">
-      <nav class="flex h-full min-h-0 w-56 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:w-60 sm:p-3.5" aria-label="Primary">
-        <div class="shrink-0 font-display text-base font-bold tracking-tight text-[var(--color-accent)] sm:text-lg">HomeSchool Hub</div>
+    <% if user_signed_in? %>
+      <div
+        class="flex h-dvh min-h-0 w-full min-w-0 flex-1 overflow-hidden"
+        data-controller="sidebar-layout"
+      >
+        <nav
+          class="app-sidebar flex h-dvh min-h-0 w-1/5 min-w-[14rem] max-w-[26rem] shrink-0 flex-col overflow-hidden border-r border-[var(--color-border)] bg-[var(--color-surface)] p-3 transition-[width,min-width,max-width,padding,gap] duration-200 ease-out sm:p-3.5 data-[collapsed=true]:w-14 data-[collapsed=true]:min-w-14 data-[collapsed=true]:max-w-14 data-[collapsed=true]:px-2 data-[collapsed=true]:py-2.5"
+          aria-label="Primary"
+          data-sidebar-layout-target="panel"
+          data-collapsed="false"
+        >
+          <div class="sidebar-brand-row flex shrink-0 items-center gap-2">
+            <div class="sidebar-brand-text min-w-0 flex-1 font-display text-base font-bold tracking-tight text-[var(--color-accent)] sm:text-lg">
+              HomeSchool Hub
+            </div>
+            <button
+              type="button"
+              class="sidebar-toggle flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--color-text-muted)] hover:bg-white/10 hover:text-[var(--color-accent)]"
+              data-action="click->sidebar-layout#toggle"
+              aria-expanded="true"
+              aria-controls="main-content"
+              title="Collapse sidebar"
+            >
+              <i
+                class="sidebar-toggle-chevron fa-solid fa-angles-left text-base sm:text-lg"
+                aria-hidden="true"
+              ></i>
+            </button>
+          </div>
 
-        <% if user_signed_in? %>
-          <div class="mt-4 flex min-h-0 flex-1 flex-col gap-1 text-sm">
+          <div class="sidebar-top-links mt-4 flex shrink-0 flex-col gap-1 text-sm">
             <% dash = request.path == "/dashboard" %>
             <% ins = request.path == "/insights" %>
-            <%= link_to "Dashboard", dashboard_path, class: "shrink-0 rounded-md px-2 py-1.5 hover:bg-white/5 #{"border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" if dash}" %>
-            <%= link_to "Insights", insights_path, class: "shrink-0 rounded-md px-2 py-1.5 hover:bg-white/5 #{"border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" if ins}" %>
-            <% if current_user.parent? %>
-              <%= link_to "Invite learner", new_invitation_path, class: "shrink-0 rounded-md px-2 py-1.5 text-[11px] hover:bg-white/5" %>
+            <%= link_to dashboard_path, class: "sidebar-nav-link flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/5 #{dash ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" : ""}" do %>
+              <i class="fa-solid fa-house fa-fw shrink-0 text-[var(--color-accent)] opacity-90" aria-hidden="true"></i>
+              <span class="sidebar-nav-label truncate">Dashboard</span>
             <% end %>
-            <%= link_to "How it works", root_path, class: "shrink-0 rounded-md px-2 py-1.5 text-[11px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+            <%= link_to insights_path, class: "sidebar-nav-link flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/5 #{ins ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" : ""}" do %>
+              <i class="fa-solid fa-chart-line fa-fw shrink-0 text-[var(--color-accent)] opacity-90" aria-hidden="true"></i>
+              <span class="sidebar-nav-label truncate">Insights</span>
+            <% end %>
+            <% if current_user.parent? %>
+              <%= link_to new_invitation_path, class: "sidebar-nav-link flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] hover:bg-white/5" do %>
+                <i class="fa-solid fa-user-plus fa-fw shrink-0 text-[var(--color-text-muted)]" aria-hidden="true"></i>
+                <span class="sidebar-nav-label truncate">Invite learner</span>
+              <% end %>
+            <% end %>
+            <%= link_to root_path, class: "sidebar-nav-link flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-[var(--color-text-muted)] hover:bg-white/5" do %>
+              <i class="fa-regular fa-circle-question fa-fw shrink-0" aria-hidden="true"></i>
+              <span class="sidebar-nav-label truncate">How it works</span>
+            <% end %>
+          </div>
 
+          <div class="sidebar-expandable mt-3 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
             <% if current_user.learners.any? %>
-              <div class="shrink-0 space-y-1 border-b border-[var(--color-border)] pb-2">
-                <div class="px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Active learner</div>
+              <div class="sidebar-active-learner-block shrink-0 space-y-1 border-b border-[var(--color-border)] pb-2">
+                <div class="sidebar-section-heading flex items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                  <i class="fa-solid fa-user-graduate text-[9px]" aria-hidden="true"></i>
+                  <span class="sidebar-section-label-text">Active learner</span>
+                </div>
                 <div class="flex flex-col gap-0.5">
                   <% current_user.learners.order(:position).each do |lr| %>
                     <% active = current_user.active_learner&.id == lr.id %>
-                    <%= button_to lr.display_name,
-                        activate_learner_path(lr),
+                    <%= button_to activate_learner_path(lr),
                         method: :patch,
                         form: { class: "w-full" },
-                        class: "w-full truncate rounded-md px-2 py-1.5 text-left text-[11px] #{active ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:bg-white/5"}" %>
+                        class: "sidebar-nav-link flex w-full items-center gap-2 truncate rounded-md px-2 py-1.5 text-left text-[11px] #{active ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:bg-white/5"}" do %>
+                      <i class="fa-solid fa-graduation-cap fa-fw shrink-0 text-[10px]" aria-hidden="true"></i>
+                      <span class="sidebar-nav-label truncate"><%= lr.display_name %></span>
+                    <% end %>
                   <% end %>
                 </div>
                 <% if current_user.parent? %>
-                  <%= link_to "Add a year", new_learner_path, class: "block px-2 pt-1 text-[10px] text-[var(--color-accent)] hover:underline" %>
+                  <%= link_to new_learner_path, class: "sidebar-nav-link flex items-center gap-2 px-2 pt-1 text-[10px] text-[var(--color-accent)] hover:underline" do %>
+                    <i class="fa-solid fa-plus fa-fw shrink-0 text-[9px]" aria-hidden="true"></i>
+                    <span class="sidebar-nav-label">Add a year</span>
+                  <% end %>
                 <% end %>
               </div>
             <% end %>
 
             <% nav_highlight = @lesson&.id %>
             <div
-              class="flex min-h-0 flex-1 flex-col gap-1"
+              class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden"
               data-controller="sidebar-nav"
               data-sidebar-nav-save-url-value="<%= sidebar_preferences_path(format: :json) %>"
             >
-              <div class="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Lessons</div>
-              <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+              <div class="sidebar-lessons-heading flex shrink-0 items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                <i class="fa-solid fa-book-open text-[9px]" aria-hidden="true"></i>
+                <span class="sidebar-lessons-heading-text">Lessons</span>
+              </div>
+              <div class="sidebar-lessons-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-0.5 [-webkit-overflow-scrolling:touch]">
                 <%= render "shared/sidebar_lessons_tree", user: current_user, current_lesson_id: nav_highlight, active_lesson: @lesson %>
               </div>
 
-              <details class="shrink-0 border-t border-[var(--color-border)] pt-2">
-                <summary class="cursor-pointer select-none text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)] marker:content-none [&::-webkit-details-marker]:hidden">
-                  Subjects
+              <details class="sidebar-subjects-panel shrink-0 border-t border-[var(--color-border)] pt-2">
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)] marker:content-none select-none [&::-webkit-details-marker]:hidden">
+                  <span class="flex min-w-0 items-center gap-1.5">
+                    <i class="fa-solid fa-sliders shrink-0 text-[9px]" aria-hidden="true"></i>
+                    <span class="sidebar-subjects-summary-text min-w-0 truncate">Subjects &amp; school years</span>
+                  </span>
+                  <i class="fa-solid fa-chevron-right sidebar-details-chevron" aria-hidden="true"></i>
                 </summary>
-                <% all_subjects = Lesson.distinct_subjects.sort %>
-                <% if all_subjects.any? %>
-                  <%= form_with url: sidebar_preferences_path, method: :patch, class: "mt-2 space-y-2", data: { turbo: true } do %>
-                    <% selected = current_user.shows_all_subjects? ? all_subjects : (current_user.effective_preferred_subjects || []) %>
-                    <div class="max-h-24 space-y-1 overflow-y-auto text-[11px]">
-                      <% all_subjects.each do |subj| %>
-                        <label class="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-white/5">
-                          <%= check_box_tag "preferred_subjects[]", subj, selected.include?(subj),
-                              class: "rounded border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]/40" %>
-                          <span class="truncate"><%= subj.titleize %></span>
-                        </label>
+                <div class="mt-2 space-y-3 text-[11px]">
+                  <% if current_user.parent? && current_user.learners.any? %>
+                    <div>
+                      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">School years in hub</p>
+                      <ul class="mt-1.5 space-y-1">
+                        <% current_user.learners.order(:position).each do |lr| %>
+                          <li class="flex items-center justify-between gap-2 rounded-md px-1 py-0.5 hover:bg-white/5">
+                            <span class="min-w-0 truncate text-[var(--color-text)]"><%= lr.display_name %></span>
+                            <%= button_to learner_path(lr),
+                                method: :delete,
+                                form: {
+                                  class: "inline shrink-0",
+                                  data: {
+                                    turbo_confirm: "Remove #{lr.display_name} from your hub? Lessons for this year will disappear until you add the year again."
+                                  }
+                                },
+                                class: "cursor-pointer rounded border border-[var(--color-border)]/80 bg-transparent px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)] hover:border-amber-400/50 hover:text-amber-200" do %>
+                              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                              <span class="sr-only">Remove</span>
+                            <% end %>
+                          </li>
+                        <% end %>
+                      </ul>
+                      <%= link_to new_learner_path, class: "mt-1.5 block text-[10px] text-[var(--color-accent)] hover:underline" do %>
+                        <i class="fa-solid fa-calendar-plus mr-1 text-[9px]" aria-hidden="true"></i>
+                        Add another school year
                       <% end %>
                     </div>
-                    <%= submit_tag "Save subjects", class: "w-full cursor-pointer rounded-md border border-[var(--color-border)] py-1 text-[11px] font-medium text-[var(--color-text)] hover:bg-white/5" %>
                   <% end %>
-                <% else %>
-                  <p class="mt-1 text-[10px] text-[var(--color-text-muted)]">Run bin/rails db:seed for subjects.</p>
-                <% end %>
+
+                  <% all_subjects = Lesson.distinct_subjects.sort %>
+                  <% if all_subjects.any? %>
+                    <div>
+                      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Subjects to show</p>
+                      <p class="mt-0.5 text-[10px] text-[var(--color-text-muted)]">Tick more to widen the tree; untick to hide. Save when done.</p>
+                      <%= form_with url: sidebar_preferences_path, method: :patch, class: "mt-2 space-y-2", data: { turbo: true } do %>
+                        <% selected = current_user.shows_all_subjects? ? all_subjects : (current_user.effective_preferred_subjects || []) %>
+                        <div class="max-h-40 space-y-1 overflow-y-auto pr-0.5 text-[11px] sm:max-h-52">
+                          <% all_subjects.each do |subj| %>
+                            <label class="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-white/5">
+                              <%= check_box_tag "preferred_subjects[]", subj, selected.include?(subj),
+                                  class: "rounded border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]/40" %>
+                              <span class="truncate"><%= subj.titleize %></span>
+                            </label>
+                          <% end %>
+                        </div>
+                        <%= submit_tag "Save subjects", class: "w-full cursor-pointer rounded-md border border-[var(--color-border)] py-1 text-[11px] font-medium text-[var(--color-text)] hover:bg-white/5" %>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <p class="text-[10px] text-[var(--color-text-muted)]">Run bin/rails db:seed for subjects.</p>
+                  <% end %>
+                </div>
               </details>
             </div>
 
-            <div class="mt-2 shrink-0 border-t border-[var(--color-border)] pt-3 text-[var(--color-text-muted)]">
-              <div class="mb-2 flex items-center gap-1.5 text-xs sm:text-sm">
-                <span aria-hidden="true">🔥</span>
-                <span><%= current_user.weekly_streak %> wk streak</span>
+            <div class="sidebar-footer-block mt-2 shrink-0 border-t border-[var(--color-border)] pt-3 text-[var(--color-text-muted)]">
+              <div class="sidebar-streak-row mb-2 flex items-center gap-1.5 text-xs sm:text-sm">
+                <i class="fa-solid fa-fire shrink-0 text-orange-400" aria-hidden="true"></i>
+                <span class="sidebar-streak-text"><%= current_user.weekly_streak %> wk streak</span>
               </div>
 
-              <%= form_with model: current_user, url: theme_path, method: :patch, class: "space-y-1.5", data: { turbo: true } do |f| %>
-                <%= f.label :current_theme, "Theme", class: "block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]" %>
+              <%= form_with model: current_user, url: theme_path, method: :patch, class: "sidebar-theme-form space-y-1.5", data: { turbo: true } do |f| %>
+                <%= f.label :current_theme, class: "flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]" do %>
+                  <i class="fa-solid fa-palette text-[9px]" aria-hidden="true"></i>
+                  Theme
+                <% end %>
                 <%= f.select :current_theme,
                     ThemeManager::PRESETS.keys.map { |k| [ThemeManager::DISPLAY_NAMES[k], k] },
                     {},
@@ -112,25 +205,57 @@
                 <%= f.submit "Apply", class: "w-full cursor-pointer rounded-md bg-[var(--color-accent)] px-2 py-1 text-[11px] font-semibold text-[var(--color-bg)]" %>
               <% end %>
 
-              <%= button_to "Sign out", destroy_user_session_path, method: :delete,
-                  class: "mt-2 w-full rounded-md border border-[var(--color-border)] px-2 py-1 text-[11px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+              <div
+                class="sidebar-theme-collapsed-only mt-1 text-[var(--color-text-muted)]"
+                title="Expand the sidebar to change theme"
+              >
+                <i class="fa-solid fa-palette text-sm" aria-hidden="true"></i>
+              </div>
+
+              <%= button_to destroy_user_session_path,
+                  method: :delete,
+                  form: { class: "w-full" },
+                  class: "sidebar-nav-link mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-[var(--color-border)] px-2 py-1 text-[11px] text-[var(--color-text-muted)] hover:bg-white/5" do %>
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                <span class="sidebar-nav-label">Sign out</span>
+              <% end %>
             </div>
           </div>
-        <% else %>
-          <div class="mt-6 flex flex-col gap-2 text-sm">
-            <%= link_to "Sign in", new_user_session_path, class: "rounded-md px-2 py-2 text-center font-medium text-[var(--color-accent)] ring-1 ring-[var(--color-border)] hover:bg-white/5" %>
-            <%= link_to "Sign up", new_user_registration_path, class: "rounded-md bg-[var(--color-accent)] px-2 py-2 text-center font-semibold text-[var(--color-bg)] hover:brightness-110" %>
-          </div>
-        <% end %>
-      </nav>
+        </nav>
 
-      <% hub_main = controller_name == "dashboard" %>
-      <main id="main-content" class="flex min-h-0 min-w-0 flex-1 flex-col px-4 py-3 sm:px-5 sm:py-4 <%= hub_main ? "overflow-hidden" : "overflow-y-auto overscroll-y-contain" %>">
-        <div class="min-h-0 flex-1 <%= hub_main ? "flex flex-col" : "" %>">
-          <%= yield %>
-        </div>
-        <%= render "shared/ogl_footer" %>
-      </main>
-    </div>
+        <% hub_main = controller_name == "dashboard" %>
+        <main id="main-content" class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-4 py-3 sm:px-5 sm:py-4 <%= hub_main ? "" : "overflow-y-auto overscroll-y-contain" %>">
+          <div class="min-h-0 min-w-0 flex-1 <%= hub_main ? "flex flex-col overflow-hidden" : "" %>">
+            <%= yield %>
+          </div>
+          <%= render "shared/ogl_footer" %>
+        </main>
+      </div>
+    <% else %>
+      <div class="flex h-dvh min-h-0 w-full min-w-0 overflow-hidden">
+        <nav class="flex h-dvh w-1/5 min-w-[14rem] max-w-[26rem] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:p-3.5" aria-label="Primary">
+          <div class="shrink-0 font-display text-base font-bold tracking-tight text-[var(--color-accent)] sm:text-lg">
+            <i class="fa-solid fa-graduation-cap mr-1.5 text-[var(--color-accent)]" aria-hidden="true"></i>
+            HomeSchool Hub
+          </div>
+          <div class="mt-6 flex flex-col gap-2 text-sm">
+            <%= link_to new_user_session_path, class: "flex items-center justify-center gap-2 rounded-md px-2 py-2 text-center font-medium text-[var(--color-accent)] ring-1 ring-[var(--color-border)] hover:bg-white/5" do %>
+              <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+              Sign in
+            <% end %>
+            <%= link_to new_user_registration_path, class: "flex items-center justify-center gap-2 rounded-md bg-[var(--color-accent)] px-2 py-2 text-center font-semibold text-[var(--color-bg)] hover:brightness-110" do %>
+              <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+              Sign up
+            <% end %>
+          </div>
+        </nav>
+        <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain px-4 py-3 sm:px-5 sm:py-4">
+          <div class="min-h-0 flex-1">
+            <%= yield %>
+          </div>
+          <%= render "shared/ogl_footer" %>
+        </main>
+      </div>
+    <% end %>
   </body>
 </html>

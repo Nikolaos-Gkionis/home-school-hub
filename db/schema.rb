@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_31_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_31_120100) do
   create_table "badges", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -112,11 +112,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_31_120000) do
     t.string "title", null: false
     t.json "transcript_json", default: {}, null: false
     t.string "unit", null: false
+    t.integer "unit_position"
     t.datetime "updated_at", null: false
     t.string "year_group_key", default: "year_7", null: false
     t.index ["subject", "unit", "position"], name: "index_lessons_on_subject_and_unit_and_position"
     t.index ["year_group_key", "oak_lesson_slug"], name: "index_lessons_on_year_group_key_and_oak_lesson_slug", unique: true, where: "oak_lesson_slug IS NOT NULL"
     t.index ["year_group_key", "subject", "unit", "position"], name: "index_lessons_on_year_subject_unit_position"
+    t.index ["year_group_key", "subject", "unit_position"], name: "index_lessons_on_year_subject_unit_position_order"
   end
 
   create_table "user_badges", force: :cascade do |t|

@@ -14,7 +14,7 @@ Rails.application.routes.draw do
   get "setup/subjects", to: "setup#subjects", as: :setup_subjects
   post "setup/subjects", to: "setup#save_subjects"
 
-  resources :learners, only: [ :new, :create ] do
+  resources :learners, only: [ :new, :create, :destroy ] do
     member do
       patch :activate
     end

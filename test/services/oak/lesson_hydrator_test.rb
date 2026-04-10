@@ -78,5 +78,42 @@ module Oak
       lesson.reload
       assert_equal({}, lesson.transcript_json)
     end
+
+    test "still saves summary when another endpoint fails" do
+      lesson = Lesson.create!(
+        year_group_key: "year_7",
+        subject: "Science",
+        unit: "Forces",
+        title: "Gravity",
+        external_url: "https://www.thenational.academy/pupils/lessons/partial-lesson",
+        oak_lesson_slug: "partial-lesson",
+        content_mode: Lesson::CONTENT_MODE_OAK_HUB,
+        summary_json: {},
+        assets_json: { "assets" => [ { "type" => "video" } ] },
+        quizzes_json: {},
+        transcript_json: {}
+      )
+
+      fetcher = lambda do |path|
+        case path
+        when "/lessons/partial-lesson/summary"
+          { "lessonTitle" => "Recovered title", "pupilLessonOutcome" => "Learn stuff." }
+        when "/lessons/partial-lesson/assets", "/lessons/partial-lesson/quiz"
+          raise ApiClient::BadResponse.new("server error", http_code: 500)
+        when "/lessons/partial-lesson/transcript"
+          { "transcript" => "Hi." }
+        else
+          {}
+        end
+      end
+
+      result = LessonHydrator.new(lesson, fetcher: fetcher).call
+      assert result.ok?
+      lesson.reload
+      assert_equal "Recovered title", lesson.summary_json["lessonTitle"]
+      assert_equal "Hi.", lesson.transcript_json["transcript"]
+      assert lesson.assets_json.is_a?(Hash) # kept previous assets when fetch failed
+      assert lesson.assets_json["assets"].present?
+    end
   end
 end

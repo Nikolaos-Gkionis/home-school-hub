@@ -134,15 +134,13 @@ class User < ApplicationRecord
   end
 
   def first_visible_hub_lesson_in(relation)
-    rel = relation
-    return nil if rel.blank?
+    return nil if relation.blank?
 
     yk = active_learner&.year_group_key
-    scoped = yk.present? ? rel.where(year_group_key: yk) : rel
-    scoped.find_by(subject: Lesson::OAK_SUBJECT_NAME, unit: Lesson::OAK_BROWSE_UNIT) ||
-      rel.find_by(subject: Lesson::OAK_SUBJECT_NAME, unit: Lesson::OAK_BROWSE_UNIT) ||
+    scoped = yk.present? ? relation.where(year_group_key: yk) : relation
+    scoped.where.not(subject: Lesson::OAK_SUBJECT_NAME).first ||
       scoped.first ||
-      rel.first
+      relation.first
   end
 
   def resync_hub_after_visible_scope_change!
