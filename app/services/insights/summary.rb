@@ -46,7 +46,7 @@ module Insights
         sections_explored: sections_explored,
         completions_by_week: by_week,
         completions_by_subject: by_subject,
-        per_learner: per_learner,
+        per_learner: per_learner
       }
     end
 
@@ -69,7 +69,7 @@ module Insights
         quiz_correct: qc,
         quiz_success_ratio: qn.positive? ? (qc.to_f / qn) : 0.0,
         time_minutes: (time_logs.sum(:seconds) / 60.0).round(1),
-        sections_explored: sections.count,
+        sections_explored: sections.count
       }
     end
 

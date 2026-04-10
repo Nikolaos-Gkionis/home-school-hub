@@ -31,9 +31,15 @@ class Lesson < ApplicationRecord
   validates :content_mode, inclusion: { in: [ CONTENT_MODE_LEGACY, CONTENT_MODE_OAK_HUB ] }
 
   scope :ordered, -> {
-    conn = connection
-    cases = YEAR_ORDER.map.with_index { |yk, i| "WHEN #{conn.quote(yk)} THEN #{i}" }.join(" ")
-    order(Arel.sql("CASE #{table_name}.year_group_key #{cases} ELSE 99 END, #{table_name}.subject, COALESCE(#{table_name}.unit_position, 9999), #{table_name}.unit, #{table_name}.position, #{table_name}.id"))
+    t = arel_table
+    year_rank = Arel::Nodes::Case.new(t[:year_group_key])
+    YEAR_ORDER.each_with_index { |yk, i| year_rank.when(t[:year_group_key].eq(yk)).then(i) }
+    year_rank.else(99)
+    unit_order = Arel::Nodes::NamedFunction.new(
+      "COALESCE",
+      [ t[:unit_position], Arel::Nodes.build_quoted(9999) ]
+    )
+    order(year_rank, t[:subject], unit_order, t[:unit], t[:position], t[:id])
   }
 
   def self.compose_unit_key(subject, unit)

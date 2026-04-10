@@ -2,6 +2,8 @@ source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.1.3"
+# GHSA-53p3-c7vp-4mcc (XSS via Trix); Rails pins ~> 2.1.15 — allow patched releases.
+gem "action_text-trix", ">= 2.1.18"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use sqlite3 as the database for Active Record
