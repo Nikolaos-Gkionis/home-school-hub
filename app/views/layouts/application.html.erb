@@ -21,12 +21,8 @@
   </head>
 
   <body class="<%= ThemeManager.body_class_for(current_user&.current_theme || "cosmic_voyager") %> box-border h-dvh min-h-0 w-full max-w-none overflow-hidden bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
-    <% if notice.present? %>
-      <div class="fixed right-4 top-4 z-50 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm shadow-lg" role="status"><%= notice %></div>
-    <% end %>
-    <% if alert.present? %>
-      <div class="fixed right-4 top-4 z-50 rounded-lg border border-red-400/40 bg-red-950/90 px-4 py-2 text-sm text-red-100 shadow-lg" role="alert"><%= alert %></div>
-    <% end %>
+    <%= render "shared/flash_modal" %>
+    <%= render "shared/confirm_dialog" %>
 
     <% if user_signed_in? %>
       <div
@@ -161,14 +157,14 @@
                     </div>
                   <% end %>
 
-                  <% all_subjects = Lesson.distinct_subjects.sort %>
+                  <% all_subjects = OakCurriculum.hub_subject_filter_options %>
                   <% if all_subjects.any? %>
                     <div>
                       <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Subjects to show</p>
                       <p class="mt-0.5 text-[10px] text-[var(--color-text-muted)]">Tick more to widen the tree; untick to hide. Save when done.</p>
                       <%= form_with url: sidebar_preferences_path, method: :patch, class: "mt-2 space-y-2", data: { turbo: true } do %>
                         <% selected = current_user.shows_all_subjects? ? all_subjects : (current_user.effective_preferred_subjects || []) %>
-                        <div class="max-h-40 space-y-1 overflow-y-auto pr-0.5 text-[11px] sm:max-h-52">
+                        <div class="sidebar-subjects-scroll space-y-1 text-[11px]">
                           <% all_subjects.each do |subj| %>
                             <label class="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-white/5">
                               <%= check_box_tag "preferred_subjects[]", subj, selected.include?(subj),
@@ -204,13 +200,6 @@
                     class: "w-full rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs text-[var(--color-text)]" %>
                 <%= f.submit "Apply", class: "w-full cursor-pointer rounded-md bg-[var(--color-accent)] px-2 py-1 text-[11px] font-semibold text-[var(--color-bg)]" %>
               <% end %>
-
-              <div
-                class="sidebar-theme-collapsed-only mt-1 text-[var(--color-text-muted)]"
-                title="Expand the sidebar to change theme"
-              >
-                <i class="fa-solid fa-palette text-sm" aria-hidden="true"></i>
-              </div>
 
               <%= button_to destroy_user_session_path,
                   method: :delete,

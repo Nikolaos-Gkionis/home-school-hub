@@ -50,7 +50,7 @@ class SidebarPreferencesController < ApplicationController
   end
 
   def update_preferred_subjects_from_form!
-    all = Lesson.distinct_subjects.sort
+    all = OakCurriculum.hub_subject_filter_options
     chosen = Array(params[:preferred_subjects]).map(&:to_s).uniq.sort
     if chosen.empty?
       current_user.update!(preferred_subjects: nil)

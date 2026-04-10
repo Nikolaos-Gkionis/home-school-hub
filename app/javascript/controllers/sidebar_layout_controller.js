@@ -24,7 +24,7 @@ export default class extends Controller {
       btn.setAttribute("aria-expanded", this.collapsed ? "false" : "true")
       btn.setAttribute(
         "title",
-        this.collapsed ? "Expand sidebar (icons only — open for full navigation)" : "Collapse sidebar"
+        this.collapsed ? "Expand sidebar" : "Collapse sidebar"
       )
     }
   }

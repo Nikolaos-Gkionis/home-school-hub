@@ -64,6 +64,6 @@ class SetupController < ApplicationController
   end
 
   def subject_options
-    @subject_options ||= OakCurriculum.display_names.presence || Lesson.distinct.order(:subject).pluck(:subject)
+    @subject_options ||= OakCurriculum.hub_subject_filter_options
   end
 end

@@ -10,6 +10,14 @@ year_groups:
 subjects:
   - slug: art
     display_name: "Art and design"
+  - slug: biology
+    display_name: "Biology"
+  - slug: chemistry
+    display_name: "Chemistry"
+  - slug: physics
+    display_name: "Physics"
+  - slug: science
+    display_name: "Science"
   - slug: geography
     display_name: "Geography"
   - slug: history
@@ -20,9 +28,23 @@ subjects:
     display_name: "English"
   - slug: citizenship
     display_name: "Citizenship"
-  - slug: science
-    display_name: "Science"
+  - slug: computing
+    display_name: "Computing"
+  - slug: design-technology
+    display_name: "Design and technology"
+  - slug: drama
+    display_name: "Drama"
+  - slug: music
+    display_name: "Music"
+  - slug: physical-education
+    display_name: "Physical education"
   - slug: german
     display_name: "German"
+  - slug: french
+    display_name: "French"
+  - slug: spanish
+    display_name: "Spanish"
   - slug: religious-education
     display_name: "Religious education"
+  - slug: rshe-pshe
+    display_name: "RSHE (PSHE)"

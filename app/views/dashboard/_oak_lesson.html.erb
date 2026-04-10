@@ -205,14 +205,6 @@
         </button>
       </div>
     </div>
-
-    <footer class="border-t border-[var(--color-border)]/60 px-4 py-3 text-xs leading-relaxed text-[var(--color-text-muted)] sm:px-6">
-      <p>
-        A <%= lesson.subject %> lesson by Oak National Academy licensed under
-        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="text-[var(--color-accent)] underline hover:opacity-90" target="_blank" rel="noopener noreferrer">Open Government Licence (OGL)</a>.
-        This app is not affiliated with or endorsed by Oak National Academy. Use of the Oak API is subject to <%= link_to "Oak’s API terms", "https://open-api.thenational.academy/docs/about-oaks-api/terms-and-conditions", class: "text-[var(--color-accent)] underline hover:opacity-90", target: "_blank", rel: "noopener noreferrer" %>.
-      </p>
-    </footer>
   </div>
 
   <%# --- Step: Introduction (reading & resources) --- %>
@@ -392,12 +384,6 @@
         </details>
       </section>
     <% end %>
-
-    <p class="text-[10px] text-[var(--color-text-muted)]">
-      Oak content ©
-      <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="text-[var(--color-accent)] underline" target="_blank" rel="noopener noreferrer">OGL</a>.
-      <%= link_to "API terms", "https://open-api.thenational.academy/docs/about-oaks-api/terms-and-conditions", class: "text-[var(--color-accent)] underline", target: "_blank", rel: "noopener noreferrer" %>.
-    </p>
   </div>
 
   <% if starter_block %>
@@ -408,10 +394,6 @@
       >
         <%= render "dashboard/oak_quiz_flow", lesson: lesson, qb: starter_block %>
       </section>
-      <p class="text-[10px] text-[var(--color-text-muted)]">
-        Oak content ©
-        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="text-[var(--color-accent)] underline" target="_blank" rel="noopener noreferrer">OGL</a>.
-      </p>
     </div>
   <% end %>
 
@@ -450,10 +432,6 @@
           </div>
         <% end %>
       </section>
-      <p class="text-[10px] text-[var(--color-text-muted)]">
-        Oak content ©
-        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="text-[var(--color-accent)] underline" target="_blank" rel="noopener noreferrer">OGL</a>.
-      </p>
     </div>
   <% end %>
 
@@ -465,10 +443,6 @@
       >
         <%= render "dashboard/oak_quiz_flow", lesson: lesson, qb: exit_block %>
       </section>
-      <p class="text-[10px] text-[var(--color-text-muted)]">
-        Oak content ©
-        <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" class="text-[var(--color-accent)] underline" target="_blank" rel="noopener noreferrer">OGL</a>.
-      </p>
     </div>
   <% end %>
 </div>
