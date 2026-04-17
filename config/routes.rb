@@ -34,7 +34,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :invitations, only: [ :new, :create ] do
+  resources :invitations, only: [ :new, :create, :edit, :update, :destroy ] do
     post :resend, on: :member
   end
   get "invitations/accept/:token", to: "invitations#accept", as: :accept_invitation

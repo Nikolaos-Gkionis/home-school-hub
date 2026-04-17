@@ -23,6 +23,31 @@ class InvitationsController < ApplicationController
     end
   end
 
+  def edit
+    @invitation = current_user.invitations.find(params[:id])
+  end
+
+  def update
+    @invitation = current_user.invitations.find(params[:id])
+    if @invitation.accepted_at.present?
+      redirect_to parent_family_path, alert: "Accepted invites cannot be edited."
+      return
+    end
+
+    if @invitation.update(invitation_params)
+      redirect_to parent_family_path, notice: "Invite updated for #{@invitation.email}."
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    invitation = current_user.invitations.find(params[:id])
+    email = invitation.email
+    invitation.destroy!
+    redirect_back fallback_location: parent_family_path, notice: "Deleted invite for #{email}."
+  end
+
   def resend
     invitation = current_user.invitations.find(params[:id])
     if invitation.accepted_at.present?

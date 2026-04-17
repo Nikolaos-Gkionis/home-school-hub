@@ -34,9 +34,18 @@
             <span><strong><%= invite.child_name %></strong> - <%= invite.email %></span>
             <% status = invite.accepted_at.present? ? "Accepted" : "Pending" %>
             <span class="text-xs text-[var(--color-text-muted)]"><%= status %> · sent <%= invite.created_at.to_date %></span>
-            <% if invite.accepted_at.blank? && !invite.expired? %>
-              <%= button_to "Resend", resend_invitation_path(invite), method: :post, class: "ml-3 rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
-            <% end %>
+            <div class="ml-3 flex items-center gap-2">
+              <% if invite.accepted_at.blank? %>
+                <%= link_to "Edit", edit_invitation_path(invite), class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+              <% end %>
+              <% if invite.accepted_at.blank? && !invite.expired? %>
+                <%= button_to "Resend", resend_invitation_path(invite), method: :post, class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+              <% end %>
+              <%= button_to "Delete", invitation_path(invite),
+                  method: :delete,
+                  form: { data: { turbo_confirm: "Delete invite for #{invite.email}?" } },
+                  class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+            </div>
           </li>
         <% end %>
       </ul>

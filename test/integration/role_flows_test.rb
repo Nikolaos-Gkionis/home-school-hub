@@ -109,6 +109,33 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
     assert_not_nil invite.accepted_at
   end
 
+  def test_parent_can_edit_and_delete_pending_invite
+    parent = create_parent(email: "parent8@example.com")
+    invite = parent.invitations.create!(
+      child_name: "Original Name",
+      email: "invite-edit@example.com",
+      year_group_key: Curriculum::YearGroups.all_year_keys.first
+    )
+
+    sign_in_as(parent)
+    patch invitation_path(invite), params: {
+      invitation: {
+        child_name: "Edited Name",
+        email: "invite-edited@example.com",
+        year_group_key: invite.year_group_key
+      }
+    }
+    assert_redirected_to parent_family_path
+
+    invite.reload
+    assert_equal "Edited Name", invite.child_name
+    assert_equal "invite-edited@example.com", invite.email
+
+    delete invitation_path(invite)
+    assert_redirected_to parent_family_path
+    assert_nil Invitation.find_by(id: invite.id)
+  end
+
   private
 
   def create_parent(email:)
