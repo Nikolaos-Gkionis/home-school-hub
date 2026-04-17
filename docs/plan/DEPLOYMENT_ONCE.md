@@ -20,11 +20,75 @@ Maps [ONCE](https://once.com) expectations to HSH actions: Docker, **port 80**, 
 
 ---
 
+## Recommended deployment profile (Phase 1: one child)
+
+For initial usage (single-family / low concurrency), use:
+
+- Database: **SQLite**
+- Persistence: **Docker named volume mounted at `/rails/storage`**
+- Active Storage: write to persistent disk-backed storage under `/rails/storage`
+- Health check: `GET /up`
+- Container port: `80`
+
+Rationale:
+
+- Lowest operational complexity
+- Fast setup and easy recovery
+- No external DB service required
+- Works well for low write contention and low concurrency
+
+---
+
+## Canonical storage paths (Phase 1)
+
+Use one canonical path strategy to avoid split data:
+
+- Keep `config/database.yml` using `storage/...` paths (already configured)
+- Mount persistent volume to container path: **`/rails/storage`**
+- Ensure Active Storage production service also points into `/rails/storage` (not `/tmp/storage`)
+
+Do not mix `/storage/...` and `/rails/storage/...` in Phase 1.
+
+---
+
+## ONCE / container runtime checklist
+
+1. Image exposes port 80 and app listens successfully  
+2. Persistent volume mounted to `/rails/storage`  
+3. `/up` returns success from inside deployment network  
+4. `SECRET_KEY_BASE` configured  
+5. `db:prepare` runs at boot (or equivalent migration step)  
+6. Backup + restore test completed for SQLite files in volume
+
+---
+
 ## DNS / SSL
 
 - Point DNS A/AAAA to VPS.
 - Terminate TLS at reverse proxy or ONCE edge if offered; if **Cloudflare**, use **Full (strict)** with valid origin cert.
 - Ensure health checks hit **`/up`** over the same scheme/port ONCE uses internally (often HTTP inside Docker network).
+
+### Namecheap + Netlify split (keep blog intact)
+
+Goal:
+
+- Keep `ng-dsgn.com` and `www.ng-dsgn.com` on Netlify unchanged
+- Route only `homeschoolhub.ng-dsgn.com` to the ONCE/VPS app
+
+In Namecheap DNS, keep existing Netlify records for host `@` and `www` as-is. Add:
+
+- **A** record: host `homeschoolhub` → `<YOUR_VPS_IPV4>` (TTL automatic)
+- Optional **AAAA** record: host `homeschoolhub` → `<YOUR_VPS_IPV6>`
+
+Result:
+
+- Blog remains on Netlify at `ng-dsgn.com` and `www.ng-dsgn.com`
+- App serves from `homeschoolhub.ng-dsgn.com`
+
+TLS notes:
+
+- Issue/enable TLS cert for `homeschoolhub.ng-dsgn.com` in ONCE/proxy flow.
+- Verify `https://homeschoolhub.ng-dsgn.com/up` after deploy.
 
 ---
 
