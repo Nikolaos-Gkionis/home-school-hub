@@ -33,7 +33,7 @@
   >
     <div class="grid gap-6 p-4 sm:p-6 lg:grid-cols-2 lg:gap-8">
       <div class="min-w-0">
-        <%= link_to dashboard_path,
+        <%= link_to current_user.parent? ? parent_dashboard_path : child_dashboard_path,
               class: "mb-4 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-accent)] hover:underline" do %>
           <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
           Lessons

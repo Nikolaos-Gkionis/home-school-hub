@@ -6,8 +6,19 @@ Rails.application.routes.draw do
 
   root "pages#home"
 
-  get "dashboard", to: "dashboard#show"
-  get "insights", to: "insights#show"
+  get "dashboard", to: "legacy_redirects#dashboard"
+  get "insights", to: "legacy_redirects#insights"
+
+  namespace :parent do
+    get "dashboard", to: "dashboards#show"
+    get "family", to: "families#show"
+    get "children/:id", to: "families#child", as: :child
+  end
+
+  namespace :child do
+    get "dashboard", to: "dashboards#show"
+    get "profile", to: "profiles#show"
+  end
 
   get "setup/years", to: "setup#years", as: :setup_years
   post "setup/years", to: "setup#save_years"

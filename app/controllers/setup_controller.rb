@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 class SetupController < ApplicationController
+  include RoleAccess
+
   before_action :authenticate_user!
-  before_action :redirect_learners
+  before_action :require_parent!
   before_action :redirect_if_done, only: %i[years subjects]
 
   def years
@@ -50,17 +52,13 @@ class SetupController < ApplicationController
     end
 
     current_user.update!(setup_completed_at: Time.current)
-    redirect_to dashboard_path, notice: "Your curriculum is set. You can change subjects anytime from the sidebar."
+    redirect_to parent_dashboard_path, notice: "Your curriculum is set. You can change subjects anytime from the sidebar."
   end
 
   private
 
-  def redirect_learners
-    redirect_to dashboard_path if current_user.learner?
-  end
-
   def redirect_if_done
-    redirect_to dashboard_path unless current_user.needs_setup?
+    redirect_to parent_dashboard_path unless current_user.needs_setup?
   end
 
   def subject_options

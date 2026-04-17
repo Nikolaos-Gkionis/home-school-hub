@@ -11,7 +11,7 @@ class InsightsController < ApplicationController
     @scope_user = resolve_scope_user(filter_id)
     if filter_id.present? && @scope_user.nil?
       session.delete(INSIGHTS_CHILD_SESSION_KEY)
-      redirect_to insights_path, alert: "Could not load metrics for that learner."
+      redirect_to parent_family_path, alert: "Could not load metrics for that learner."
       return
     end
 

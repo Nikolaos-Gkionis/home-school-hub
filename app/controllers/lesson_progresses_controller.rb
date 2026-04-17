@@ -52,7 +52,7 @@ class LessonProgressesController < ApplicationController
 
     respond_to do |format|
       format.json { render json: { correct: correct } }
-      format.html { redirect_to dashboard_path(lesson_id: lesson.id) }
+      format.html { redirect_to role_dashboard_path(lesson_id: lesson.id) }
     end
   end
 

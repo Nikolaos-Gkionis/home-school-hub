@@ -1,0 +1,29 @@
+<% content_for :title, "Child details — HomeSchool Hub" %>
+
+<div class="mx-auto w-full max-w-4xl space-y-6 pb-8">
+  <%= render "shared/hub_page_header",
+      kicker: "Parent",
+      title: @child.email,
+      description: "Progress for this child account only." %>
+
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Lessons completed</p>
+      <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= @metrics[:lessons_completed] %></p>
+    </div>
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Sections viewed</p>
+      <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= @metrics[:sections_explored] %></p>
+    </div>
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Quiz success</p>
+      <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= (@metrics[:quiz_success_ratio].to_f * 100).round(1) %>%</p>
+    </div>
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">
+      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Time (min)</p>
+      <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= @metrics[:time_minutes] %></p>
+    </div>
+  </div>
+
+  <%= link_to "Back to family", parent_family_path, class: "text-sm text-[var(--color-accent)] hover:underline" %>
+</div>

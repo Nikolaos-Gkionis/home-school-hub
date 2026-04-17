@@ -55,21 +55,10 @@
           </div>
 
           <div class="sidebar-top-links mt-4 flex shrink-0 flex-col gap-1 text-sm">
-            <% dash = request.path == "/dashboard" %>
-            <% ins = request.path == "/insights" %>
-            <%= link_to dashboard_path, class: "sidebar-nav-link flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/5 #{dash ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" : ""}" do %>
-              <i class="fa-solid fa-house fa-fw shrink-0 text-[var(--color-accent)] opacity-90" aria-hidden="true"></i>
-              <span class="sidebar-nav-label truncate">Dashboard</span>
-            <% end %>
-            <%= link_to insights_path, class: "sidebar-nav-link flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/5 #{ins ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium" : ""}" do %>
-              <i class="fa-solid fa-chart-line fa-fw shrink-0 text-[var(--color-accent)] opacity-90" aria-hidden="true"></i>
-              <span class="sidebar-nav-label truncate">Insights</span>
-            <% end %>
             <% if current_user.parent? %>
-              <%= link_to new_invitation_path, class: "sidebar-nav-link flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] hover:bg-white/5" do %>
-                <i class="fa-solid fa-user-plus fa-fw shrink-0 text-[var(--color-text-muted)]" aria-hidden="true"></i>
-                <span class="sidebar-nav-label truncate">Invite learner</span>
-              <% end %>
+              <%= render "layouts/nav/parent_nav" %>
+            <% else %>
+              <%= render "layouts/nav/child_nav" %>
             <% end %>
             <%= link_to root_path, class: "sidebar-nav-link flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-[var(--color-text-muted)] hover:bg-white/5" do %>
               <i class="fa-regular fa-circle-question fa-fw shrink-0" aria-hidden="true"></i>
@@ -78,7 +67,7 @@
           </div>
 
           <div class="sidebar-expandable mt-3 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
-            <% if current_user.learners.any? %>
+            <% if current_user.parent? && current_user.learners.any? %>
               <div class="sidebar-active-learner-block shrink-0 space-y-1 border-b border-[var(--color-border)] pb-2">
                 <div class="sidebar-section-heading flex items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                   <i class="fa-solid fa-user-graduate text-[9px]" aria-hidden="true"></i>
@@ -212,7 +201,7 @@
           </div>
         </nav>
 
-        <% hub_main = controller_name == "dashboard" %>
+        <% hub_main = controller_name.in?(%w[dashboard dashboards]) %>
         <main id="main-content" class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-4 py-3 sm:px-5 sm:py-4 <%= hub_main ? "" : "overflow-y-auto overscroll-y-contain" %>">
           <div class="min-h-0 min-w-0 flex-1 <%= hub_main ? "flex flex-col overflow-hidden" : "" %>">
             <%= yield %>

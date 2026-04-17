@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 class LearnersController < ApplicationController
+  include RoleAccess
+
   before_action :authenticate_user!
-  before_action :ensure_parent!
+  before_action :require_parent!
 
   def new
     @phases = Curriculum::YearGroups::PHASES
@@ -21,13 +23,13 @@ class LearnersController < ApplicationController
     end
 
     current_user.learners.create!(year_group_key: yk)
-    redirect_to dashboard_path, notice: "Added #{Curriculum::YearGroups.label_for_year(yk)}."
+    redirect_to parent_dashboard_path, notice: "Added #{Curriculum::YearGroups.label_for_year(yk)}."
   end
 
   def activate
     learner = current_user.learners.find(params[:id])
     current_user.update!(active_learner: learner)
-    redirect_back fallback_location: dashboard_path
+    redirect_back fallback_location: parent_dashboard_path
   end
 
   def destroy
@@ -40,12 +42,6 @@ class LearnersController < ApplicationController
       current_user.update!(active_learner: nxt)
     end
     current_user.resync_hub_after_visible_scope_change!
-    redirect_to dashboard_path, notice: "Removed #{label} from your school years."
-  end
-
-  private
-
-  def ensure_parent!
-    redirect_to dashboard_path, alert: "Only parent accounts can manage school years." unless current_user.parent?
+    redirect_to parent_dashboard_path, notice: "Removed #{label} from your school years."
   end
 end

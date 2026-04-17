@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 class InvitationsController < ApplicationController
+  include RoleAccess
+
   before_action :authenticate_user!, except: [ :accept ]
-  before_action :ensure_parent!, except: [ :accept ]
+  before_action :require_parent!, except: [ :accept ]
 
   def new
     @invitation = Invitation.new
@@ -26,10 +28,6 @@ class InvitationsController < ApplicationController
   end
 
   private
-
-  def ensure_parent!
-    redirect_to dashboard_path, alert: "Only parent accounts can send invitations." unless current_user.parent?
-  end
 
   def invitation_params
     params.require(:invitation).permit(:email, :year_group_key)
