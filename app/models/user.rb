@@ -61,11 +61,6 @@ class User < ApplicationRecord
   end
 
   def needs_setup?
-    return false if learner?
-
-    return true if learners.none?
-    return true if setup_completed_at.blank?
-
     false
   end
 

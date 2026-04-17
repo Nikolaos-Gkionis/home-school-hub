@@ -13,6 +13,9 @@ Rails.application.routes.draw do
     get "dashboard", to: "dashboards#show"
     get "family", to: "families#show"
     get "children/:id", to: "families#child", as: :child
+    get "children/:id/edit", to: "families#edit_child", as: :edit_child
+    patch "children/:id", to: "families#update_child", as: :update_child
+    delete "children/:id", to: "families#destroy_child", as: :remove_child
   end
 
   namespace :child do
@@ -31,7 +34,9 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :invitations, only: [ :new, :create ]
+  resources :invitations, only: [ :new, :create ] do
+    post :resend, on: :member
+  end
   get "invitations/accept/:token", to: "invitations#accept", as: :accept_invitation
 
   post "lessons/:lesson_id/time", to: "lesson_time_logs#create", as: :lesson_time_log

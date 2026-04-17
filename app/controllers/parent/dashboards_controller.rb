@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
 module Parent
-  class DashboardsController < DashboardController
+  class DashboardsController < ApplicationController
     include RoleAccess
 
+    before_action :authenticate_user!
     before_action :require_parent!
+
+    def show
+      @metrics = Insights::Summary.call(viewer: current_user, scope_user: nil)
+      @sent_invitations = current_user.invitations.order(created_at: :desc)
+    end
   end
 end

@@ -1,5 +1,5 @@
 <p>Hello,</p>
-<p>You've been invited to join <strong>HomeSchool Hub</strong> as a learner.</p>
+<p><strong><%= @invitation.child_name %></strong>, you've been invited to join <strong>HomeSchool Hub</strong> as a learner.</p>
 <p>
   <%= link_to "Create your account", accept_invitation_url(@invitation.token) %>
 </p>

@@ -1,0 +1,25 @@
+<% content_for :title, "Edit child — HomeSchool Hub" %>
+
+<div class="mx-auto w-full max-w-xl space-y-6 pb-8">
+  <%= render "shared/hub_page_header",
+      kicker: "Parent",
+      title: "Edit child details",
+      description: "Update the child name shown in the app and their login email." %>
+
+  <%= form_with url: parent_update_child_path(@child), method: :patch, scope: :child, class: "space-y-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm" do |f| %>
+    <div>
+      <%= f.label :child_name, "Child name", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
+      <%= f.text_field :child_name, value: @child_name, required: true, class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :email, "Login email", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
+      <%= f.email_field :email, value: @child.email, required: true, class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= f.submit "Save changes", class: "cursor-pointer rounded-md bg-[var(--color-accent)] px-3 py-2 text-xs font-semibold text-[var(--color-bg)]" %>
+      <%= link_to "Cancel", parent_family_path, class: "text-xs text-[var(--color-text-muted)] hover:underline" %>
+    </div>
+  <% end %>
+</div>

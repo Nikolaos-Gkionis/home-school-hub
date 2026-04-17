@@ -67,7 +67,7 @@
           </div>
 
           <div class="sidebar-expandable mt-3 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
-            <% if current_user.parent? && current_user.learners.any? %>
+            <% if current_user.learner? && current_user.learners.any? %>
               <div class="sidebar-active-learner-block shrink-0 space-y-1 border-b border-[var(--color-border)] pb-2">
                 <div class="sidebar-section-heading flex items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                   <i class="fa-solid fa-user-graduate text-[9px]" aria-hidden="true"></i>
@@ -85,92 +85,65 @@
                     <% end %>
                   <% end %>
                 </div>
-                <% if current_user.parent? %>
-                  <%= link_to new_learner_path, class: "sidebar-nav-link flex items-center gap-2 px-2 pt-1 text-[10px] text-[var(--color-accent)] hover:underline" do %>
-                    <i class="fa-solid fa-plus fa-fw shrink-0 text-[9px]" aria-hidden="true"></i>
-                    <span class="sidebar-nav-label">Add a year</span>
-                  <% end %>
-                <% end %>
               </div>
             <% end %>
 
             <% nav_highlight = @lesson&.id %>
-            <div
-              class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden"
-              data-controller="sidebar-nav"
-              data-sidebar-nav-save-url-value="<%= sidebar_preferences_path(format: :json) %>"
-            >
-              <div class="sidebar-lessons-heading flex shrink-0 items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                <i class="fa-solid fa-book-open text-[9px]" aria-hidden="true"></i>
-                <span class="sidebar-lessons-heading-text">Lessons</span>
-              </div>
-              <div class="sidebar-lessons-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-0.5 [-webkit-overflow-scrolling:touch]">
-                <%= render "shared/sidebar_lessons_tree", user: current_user, current_lesson_id: nav_highlight, active_lesson: @lesson %>
-              </div>
-
-              <details class="sidebar-subjects-panel shrink-0 border-t border-[var(--color-border)] pt-2">
-                <summary class="flex cursor-pointer list-none items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)] marker:content-none select-none [&::-webkit-details-marker]:hidden">
-                  <span class="flex min-w-0 items-center gap-1.5">
-                    <i class="fa-solid fa-sliders shrink-0 text-[9px]" aria-hidden="true"></i>
-                    <span class="sidebar-subjects-summary-text min-w-0 truncate">Subjects &amp; school years</span>
-                  </span>
-                  <i class="fa-solid fa-chevron-right sidebar-details-chevron" aria-hidden="true"></i>
-                </summary>
-                <div class="mt-2 space-y-3 text-[11px]">
-                  <% if current_user.parent? && current_user.learners.any? %>
-                    <div>
-                      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">School years in hub</p>
-                      <ul class="mt-1.5 space-y-1">
-                        <% current_user.learners.order(:position).each do |lr| %>
-                          <li class="flex items-center justify-between gap-2 rounded-md px-1 py-0.5 hover:bg-white/5">
-                            <span class="min-w-0 truncate text-[var(--color-text)]"><%= lr.display_name %></span>
-                            <%= button_to learner_path(lr),
-                                method: :delete,
-                                form: {
-                                  class: "inline shrink-0",
-                                  data: {
-                                    turbo_confirm: "Remove #{lr.display_name} from your hub? Lessons for this year will disappear until you add the year again."
-                                  }
-                                },
-                                class: "cursor-pointer rounded border border-[var(--color-border)]/80 bg-transparent px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)] hover:border-amber-400/50 hover:text-amber-200" do %>
-                              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                              <span class="sr-only">Remove</span>
-                            <% end %>
-                          </li>
-                        <% end %>
-                      </ul>
-                      <%= link_to new_learner_path, class: "mt-1.5 block text-[10px] text-[var(--color-accent)] hover:underline" do %>
-                        <i class="fa-solid fa-calendar-plus mr-1 text-[9px]" aria-hidden="true"></i>
-                        Add another school year
-                      <% end %>
-                    </div>
-                  <% end %>
-
-                  <% all_subjects = OakCurriculum.hub_subject_filter_options %>
-                  <% if all_subjects.any? %>
-                    <div>
-                      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Subjects to show</p>
-                      <p class="mt-0.5 text-[10px] text-[var(--color-text-muted)]">Tick more to widen the tree; untick to hide. Save when done.</p>
-                      <%= form_with url: sidebar_preferences_path, method: :patch, class: "mt-2 space-y-2", data: { turbo: true } do %>
-                        <% selected = current_user.shows_all_subjects? ? all_subjects : (current_user.effective_preferred_subjects || []) %>
-                        <div class="sidebar-subjects-scroll space-y-1 text-[11px]">
-                          <% all_subjects.each do |subj| %>
-                            <label class="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-white/5">
-                              <%= check_box_tag "preferred_subjects[]", subj, selected.include?(subj),
-                                  class: "rounded border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]/40" %>
-                              <span class="truncate"><%= subj.titleize %></span>
-                            </label>
-                          <% end %>
-                        </div>
-                        <%= submit_tag "Save subjects", class: "w-full cursor-pointer rounded-md border border-[var(--color-border)] py-1 text-[11px] font-medium text-[var(--color-text)] hover:bg-white/5" %>
-                      <% end %>
-                    </div>
-                  <% else %>
-                    <p class="text-[10px] text-[var(--color-text-muted)]">Run bin/rails db:seed for subjects.</p>
-                  <% end %>
+            <% if current_user.learner? %>
+              <div
+                class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden"
+                data-controller="sidebar-nav"
+                data-sidebar-nav-save-url-value="<%= sidebar_preferences_path(format: :json) %>"
+              >
+                <div class="sidebar-lessons-heading flex shrink-0 items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                  <i class="fa-solid fa-book-open text-[9px]" aria-hidden="true"></i>
+                  <span class="sidebar-lessons-heading-text">Lessons</span>
                 </div>
-              </details>
-            </div>
+                <div class="sidebar-lessons-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-0.5 [-webkit-overflow-scrolling:touch]">
+                  <%= render "shared/sidebar_lessons_tree", user: current_user, current_lesson_id: nav_highlight, active_lesson: @lesson %>
+                </div>
+
+                <details class="sidebar-subjects-panel shrink-0 border-t border-[var(--color-border)] pt-2">
+                  <summary class="flex cursor-pointer list-none items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)] marker:content-none select-none [&::-webkit-details-marker]:hidden">
+                    <span class="flex min-w-0 items-center gap-1.5">
+                      <i class="fa-solid fa-sliders shrink-0 text-[9px]" aria-hidden="true"></i>
+                      <span class="sidebar-subjects-summary-text min-w-0 truncate">Subjects</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right sidebar-details-chevron" aria-hidden="true"></i>
+                  </summary>
+                  <div class="mt-2 space-y-3 text-[11px]">
+                    <% all_subjects = OakCurriculum.hub_subject_filter_options %>
+                    <% if all_subjects.any? %>
+                      <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Subjects to show</p>
+                        <p class="mt-0.5 text-[10px] text-[var(--color-text-muted)]">Tick more to widen the tree; untick to hide. Save when done.</p>
+                        <%= form_with url: sidebar_preferences_path, method: :patch, class: "mt-2 space-y-2", data: { turbo: true } do %>
+                          <% selected = current_user.shows_all_subjects? ? all_subjects : (current_user.effective_preferred_subjects || []) %>
+                          <div class="sidebar-subjects-scroll space-y-1 text-[11px]">
+                            <% all_subjects.each do |subj| %>
+                              <label class="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-white/5">
+                                <%= check_box_tag "preferred_subjects[]", subj, selected.include?(subj),
+                                    class: "rounded border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]/40" %>
+                                <span class="truncate"><%= subj.titleize %></span>
+                              </label>
+                            <% end %>
+                          </div>
+                          <%= submit_tag "Save subjects", class: "w-full cursor-pointer rounded-md border border-[var(--color-border)] py-1 text-[11px] font-medium text-[var(--color-text)] hover:bg-white/5" %>
+                        <% end %>
+                      </div>
+                    <% else %>
+                      <p class="text-[10px] text-[var(--color-text-muted)]">Run bin/rails db:seed for subjects.</p>
+                    <% end %>
+                  </div>
+                </details>
+              </div>
+            <% else %>
+              <div class="flex min-h-0 flex-1 items-start">
+                <p class="rounded-md border border-[var(--color-border)]/70 bg-[var(--color-surface)]/40 px-2 py-1 text-[11px] text-[var(--color-text-muted)]">
+                  Parent mode shows family metrics and invite activity only.
+                </p>
+              </div>
+            <% end %>
 
             <div class="sidebar-footer-block mt-2 shrink-0 border-t border-[var(--color-border)] pt-3 text-[var(--color-text-muted)]">
               <div class="sidebar-streak-row mb-2 flex items-center gap-1.5 text-xs sm:text-sm">
@@ -206,7 +179,6 @@
           <div class="min-h-0 min-w-0 flex-1 <%= hub_main ? "flex flex-col overflow-hidden" : "" %>">
             <%= yield %>
           </div>
-          <%= render "shared/ogl_footer" %>
         </main>
       </div>
     <% else %>
@@ -231,7 +203,6 @@
           <div class="min-h-0 flex-1">
             <%= yield %>
           </div>
-          <%= render "shared/ogl_footer" %>
         </main>
       </div>
     <% end %>

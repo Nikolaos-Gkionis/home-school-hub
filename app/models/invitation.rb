@@ -3,6 +3,7 @@
 class Invitation < ApplicationRecord
   belongs_to :parent, class_name: "User"
 
+  validates :child_name, presence: true, length: { maximum: 100 }
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :year_group_key, presence: true, inclusion: { in: Curriculum::YearGroups.all_year_keys }
   validates :token, presence: true, uniqueness: true

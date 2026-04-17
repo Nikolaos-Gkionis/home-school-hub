@@ -1,0 +1,47 @@
+<% content_for :title, "Parent dashboard — HomeSchool Hub" %>
+
+<div class="mx-auto w-full max-w-6xl space-y-6 pb-8">
+  <%= render "shared/hub_page_header",
+      kicker: "Parent",
+      title: "Dashboard",
+      description: "Family progress across child accounts." %>
+
+  <% m = @metrics %>
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <% [
+      [ "Children in view", m[:learner_count] ],
+      [ "Lessons completed", m[:lessons_completed] ],
+      [ "Sections viewed", m[:sections_explored] ],
+      [ "Quiz success", "#{(m[:quiz_success_ratio].to_f * 100).round(1)}%" ],
+      [ "Time (minutes)", m[:time_minutes] ]
+    ].each do |label, value| %>
+      <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+        <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]"><%= label %></p>
+        <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= value %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
+    <div class="mb-3 flex items-center justify-between gap-2">
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Sent invites</h2>
+      <%= link_to "Invite child", new_invitation_path, class: "rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+    </div>
+    <% if @sent_invitations.any? %>
+      <ul class="space-y-2 text-sm">
+        <% @sent_invitations.each do |invite| %>
+          <li class="flex items-center justify-between rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
+            <span><strong><%= invite.child_name %></strong> - <%= invite.email %></span>
+            <% status = invite.accepted_at.present? ? "Accepted" : "Pending" %>
+            <span class="text-xs text-[var(--color-text-muted)]"><%= status %> · sent <%= invite.created_at.to_date %></span>
+            <% if invite.accepted_at.blank? && !invite.expired? %>
+              <%= button_to "Resend", resend_invitation_path(invite), method: :post, class: "ml-3 rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-sm text-[var(--color-text-muted)]">No invites sent yet.</p>
+    <% end %>
+  </section>
+</div>

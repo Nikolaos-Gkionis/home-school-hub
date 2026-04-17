@@ -3,41 +3,54 @@
 <div class="mx-auto w-full max-w-5xl space-y-6 pb-8">
   <%= render "shared/hub_page_header",
       kicker: "Parent",
-      title: "Family",
-      description: "Track invited children and active child accounts from one place." %>
+      title: "Sent invites",
+      description: "Track all invitations from your parent account." %>
 
   <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
     <div class="mb-3 flex items-center justify-between gap-3">
-      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Invited children</h2>
-      <%= link_to "Invite child", new_invitation_path, class: "rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Child accounts</h2>
     </div>
-    <% if @pending_invitations.any? %>
-      <ul class="space-y-2 text-sm">
-        <% @pending_invitations.each do |invite| %>
-          <li class="flex items-center justify-between rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
-            <span><%= invite.email %></span>
-            <span class="text-xs text-[var(--color-text-muted)]">Pending until <%= invite.expires_at.to_date %></span>
-          </li>
-        <% end %>
-      </ul>
-    <% else %>
-      <p class="text-sm text-[var(--color-text-muted)]">No pending invitations.</p>
-    <% end %>
-  </section>
-
-  <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
-    <h2 class="mb-3 font-display text-sm font-semibold text-[var(--color-text)]">Child accounts</h2>
     <% if @children.any? %>
       <ul class="space-y-2 text-sm">
         <% @children.each do |child| %>
           <li class="flex items-center justify-between rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
             <span><%= child.email %></span>
-            <%= link_to "View child", parent_child_path(child), class: "text-xs text-[var(--color-accent)] hover:underline" %>
+            <div class="flex items-center gap-2">
+              <%= link_to "Edit", parent_edit_child_path(child), class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+              <%= button_to "Remove",
+                  parent_remove_child_path(child),
+                  method: :delete,
+                  form: { data: { turbo_confirm: "Remove #{child.email} from your family?" } },
+                  class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+            </div>
           </li>
         <% end %>
       </ul>
     <% else %>
       <p class="text-sm text-[var(--color-text-muted)]">No child accounts linked yet.</p>
+    <% end %>
+  </section>
+
+  <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Invite history</h2>
+      <%= link_to "Invite child", new_invitation_path, class: "rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+    </div>
+    <% if @sent_invitations.any? %>
+      <ul class="space-y-2 text-sm">
+        <% @sent_invitations.each do |invite| %>
+          <li class="flex items-center justify-between rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
+            <span><strong><%= invite.child_name %></strong> - <%= invite.email %></span>
+            <% status = invite.accepted_at.present? ? "Accepted" : "Pending" %>
+            <span class="text-xs text-[var(--color-text-muted)]"><%= status %> · sent <%= invite.created_at.to_date %></span>
+            <% if invite.accepted_at.blank? && !invite.expired? %>
+              <%= button_to "Resend", resend_invitation_path(invite), method: :post, class: "ml-3 rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-sm text-[var(--color-text-muted)]">No invitations sent yet.</p>
     <% end %>
   </section>
 </div>

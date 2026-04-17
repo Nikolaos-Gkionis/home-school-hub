@@ -1,0 +1,12 @@
+<p>Hello <strong><%= @user.email %></strong>,</p>
+<p>Welcome to <strong>HomeSchool Hub</strong>.</p>
+<p>Quick start:</p>
+<ol>
+  <li>Sign in and open your parent dashboard.</li>
+  <li>Invite your child accounts from the Invite section.</li>
+  <li>Use Sent invites to resend or track accepted invites.</li>
+</ol>
+<p>
+  If you ever forget your password, use this reset link:
+  <%= link_to "Reset password", new_user_password_url %>.
+</p>

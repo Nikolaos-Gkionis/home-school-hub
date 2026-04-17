@@ -28,7 +28,7 @@ module Invitations
         @user.learners.destroy_all
         lr = @user.learners.create!(
           year_group_key: inv.year_group_key,
-          display_label: @user.email.split("@").first.tr(".", " ").titleize
+          display_label: inv.child_name.presence || @user.email.split("@").first.tr(".", " ").titleize
         )
         @user.update!(active_learner: lr)
       end

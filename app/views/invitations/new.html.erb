@@ -21,6 +21,11 @@
     <% end %>
 
     <div>
+      <%= f.label :child_name, "Child name", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
+      <%= f.text_field :child_name, required: true, class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+    </div>
+
+    <div>
       <%= f.label :email, class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
       <%= f.email_field :email, required: true, class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
     </div>

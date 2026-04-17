@@ -1,0 +1,15 @@
+<p>Hello <strong><%= @user.email %></strong>,</p>
+<p>Welcome to <strong>HomeSchool Hub</strong> as a child account.</p>
+<p>Quick start:</p>
+<ol>
+  <li>Sign in to your child dashboard and open your lessons.</li>
+  <li>Use your profile page to review account details.</li>
+  <li>Ask your parent to resend the invite if another child account needs setup.</li>
+</ol>
+<p>
+  If you ever need to reset your password, use this link:
+  <%= link_to "Reset password", new_user_password_url %>.
+</p>
+<% if @parent.present? %>
+  <p>This account is linked to parent: <strong><%= @parent.email %></strong>.</p>
+<% end %>

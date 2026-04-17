@@ -24,10 +24,11 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
     assert_redirected_to child_dashboard_path
   end
 
-  def test_parent_family_page_shows_children_and_pending_invites
+  def test_parent_family_page_shows_children_and_sent_invites
     parent = create_parent(email: "parent3@example.com")
     child = create_child(parent:, email: "child2@example.com")
     invite = parent.invitations.create!(
+      child_name: "Pending Child",
       email: "pending.child@example.com",
       year_group_key: Curriculum::YearGroups.all_year_keys.first
     )
@@ -50,9 +51,41 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
     assert_redirected_to child_dashboard_path
   end
 
+  def test_parent_can_remove_child_account
+    parent = create_parent(email: "parent6@example.com")
+    child = create_child(parent:, email: "child-remove@example.com")
+
+    sign_in_as(parent)
+    delete parent_remove_child_path(child)
+
+    assert_redirected_to parent_family_path
+    child.reload
+    assert_equal User::ROLE_PARENT, child.role
+    assert_nil child.parent_id
+  end
+
+  def test_parent_can_edit_child_name_and_email
+    parent = create_parent(email: "parent7@example.com")
+    child = create_child(parent:, email: "child-edit@example.com")
+
+    sign_in_as(parent)
+    patch parent_update_child_path(child), params: {
+      child: {
+        child_name: "Updated Child Name",
+        email: "updated-child@example.com"
+      }
+    }
+
+    assert_redirected_to parent_family_path
+    child.reload
+    assert_equal "updated-child@example.com", child.email
+    assert_equal "Updated Child Name", child.learners.order(:position).first.display_label
+  end
+
   def test_invited_child_sign_up_links_parent_and_redirects_to_child_dashboard
     parent = create_parent(email: "parent5@example.com")
     invite = parent.invitations.create!(
+      child_name: "New Child",
       email: "new.child@example.com",
       year_group_key: Curriculum::YearGroups.all_year_keys.first
     )

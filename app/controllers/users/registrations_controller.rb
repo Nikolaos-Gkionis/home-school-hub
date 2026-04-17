@@ -8,9 +8,10 @@ module Users
 
     def after_sign_up_path_for(resource)
       resource.reload
+      send_welcome_email(resource)
       return child_dashboard_path if resource.learner?
 
-      setup_years_path
+      parent_dashboard_path
     end
 
     private
@@ -25,6 +26,16 @@ module Users
 
     def registration_layout
       %w[new create].include?(action_name) ? "devise" : "application"
+    end
+
+    def send_welcome_email(resource)
+      if resource.learner?
+        UserMailer.with(user: resource).welcome_child.deliver_now
+      else
+        UserMailer.with(user: resource).welcome_parent.deliver_now
+      end
+    rescue Net::SMTPAuthenticationError
+      flash[:alert] = "Welcome email could not be sent because SMTP authentication failed."
     end
   end
 end
