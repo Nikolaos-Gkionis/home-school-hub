@@ -17,8 +17,8 @@ Expands [MASTER_LMS_PLAN.MD](../../MASTER_LMS_PLAN.MD) into executable tasks for
 - **Gemfile:** `gem "litestack"` (commented out in generated app until compatible; lock patch version after `bundle update`).
 - **Config:** Follow [litestack](https://github.com/oldmoe/litestack) README for Rails 8 — typically `config/database.yml` continues to use `adapter: sqlite3`; litestack may add queue/cache integration. Confirm current gem docs for `config/application.rb` requires and `config/environments/production.rb` Litesearch/Litequeue if used.
 - **Where DB files live:**  
-  - **Development:** `config/database.yml` → `database: storage/development.sqlite3` (keeps DB inside app tree for easy ONCE bind-mount of one `storage/` root).  
-  - **Production:** Same relative pattern but ensure `RAILS_STORAGE_PATH` or explicit `database:` path points under `/rails/storage` or `/storage/rails` as documented in DEPLOYMENT_ONCE.
+  - **Development:** `config/database.yml` → `database: storage/development.sqlite3` (keeps DB inside app tree for easy Kamal/Docker bind-mount of one `storage/` root).  
+  - **Production:** Same relative pattern; `config/deploy.yml` mounts a Docker volume at `/rails/storage` so `storage/production*.sqlite3` persist—see [`DEPLOYMENT_KAMAL.md`](DEPLOYMENT_KAMAL.md).
 
 ### Prerequisites checklist
 
@@ -89,7 +89,7 @@ add_index :lesson_completions, [:user_id, :lesson_id], unique: true
 4. `bin/rails generate devise User` (add `current_theme` in same migration or follow-up — see DESIGNER_PLAN).
 5. Run migrations.
 6. Add `before_action :authenticate_user!` to authenticated controllers (e.g. `DashboardController`).
-7. **Mailer / ONCE:** Production SMTP vars (`SMTP_ADDRESS`, etc.) will be injected by ONCE; keep `config/environments/production.rb` reading `ENV` for delivery options when enabling confirmable/recoverable.
+7. **Mailer / Kamal:** Production SMTP vars (`SMTP_ADDRESS`, etc.) are set in `config/deploy.yml` / `.kamal/secrets` and passed into the container; keep `config/environments/production.rb` reading `ENV` for delivery options when enabling confirmable/recoverable.
 
 ---
 

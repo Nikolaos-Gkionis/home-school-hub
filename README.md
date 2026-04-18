@@ -28,7 +28,7 @@ bin/rails test
 
 ## Deploy
 
-See `docs/plan/DEPLOYMENT_ONCE.md` for ONCE.com / Docker notes. Repo root must contain `Gemfile` and `Dockerfile` (flat layout).
+See [`docs/plan/DEPLOYMENT_KAMAL.md`](docs/plan/DEPLOYMENT_KAMAL.md) for Kamal deployment to a DigitalOcean droplet with a Namecheap subdomain (Docker, Let’s Encrypt, persistent `storage/` volume). Repo root must contain `Gemfile` and `Dockerfile` (flat layout).
 
 ## Stack
 
