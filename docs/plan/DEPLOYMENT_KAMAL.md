@@ -58,7 +58,7 @@ No need to expose the Rails container port directly; Kamal proxy publishes 80/44
 
 1. **Domain List** → your domain → **Manage** → **Advanced DNS**.
 2. Add an **A Record**:
-   - **Host:** subdomain label only (e.g. `homeschool` for `homeschool.task-days.com`).
+   - **Host:** subdomain label only (e.g. `homeschool` for `homeschool.peponi.to`).
    - **Value:** your droplet’s **public IPv4**.
    - **TTL:** Automatic, or 5–30 minutes while testing.
 
