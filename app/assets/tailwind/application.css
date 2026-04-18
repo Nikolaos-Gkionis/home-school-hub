@@ -98,13 +98,14 @@
     --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
   }
 
+  /* Light woodland: mint page, deep-green type and accents */
   .theme-forest-ranger {
-    --color-bg: #1c2e1e;
-    --color-surface: #24382a;
-    --color-accent: #86efac;
-    --color-text: #ecfdf5;
-    --color-text-muted: #a7f3d0;
-    --color-border: rgba(134, 239, 172, 0.25);
+    --color-bg: #f0fdf4;
+    --color-surface: #ecfdf5;
+    --color-accent: #15803d;
+    --color-text: #14532d;
+    --color-text-muted: #3f6212;
+    --color-border: rgba(21, 128, 61, 0.22);
     --font-display: "Fraunces", ui-serif, Georgia, serif;
   }
 
@@ -118,14 +119,14 @@
     --font-display: "Orbitron", ui-sans-serif, system-ui, sans-serif;
   }
 
-  /* Warm dunes, sun-bleached sand, compass-gold accents */
+  /* Light desert: warm paper, terracotta type, compass accents */
   .theme-desert-explorer {
-    --color-bg: #2a2318;
-    --color-surface: #3d3426;
-    --color-accent: #f0b429;
-    --color-text: #fff8e7;
-    --color-text-muted: #c9a66b;
-    --color-border: rgba(240, 180, 41, 0.28);
+    --color-bg: #fffbeb;
+    --color-surface: #fff7e6;
+    --color-accent: #c2410c;
+    --color-text: #431407;
+    --color-text-muted: #a16207;
+    --color-border: rgba(194, 65, 12, 0.2);
     --font-display: "Marcellus", ui-serif, Georgia, serif;
   }
 }

@@ -24,6 +24,10 @@ FileUtils.chdir APP_ROOT do
   system! "bin/rails db:prepare"
   system! "bin/rails db:reset" if ARGV.include?("--reset")
 
+  # Propshaft serves app/assets/builds/tailwind.css; it is gitignored and must be compiled from app/assets/tailwind/application.css.
+  puts "\n== Building Tailwind CSS =="
+  system! "bin/rails tailwindcss:build"
+
   puts "\n== Removing old logs and tempfiles =="
   system! "bin/rails log:clear tmp:clear"
 
