@@ -110,7 +110,7 @@ Create a GitHub **Personal Access Token** with `write:packages` (and `read:packa
 KAMAL_REGISTRY_PASSWORD=ghp_xxxxxxxx
 ```
 
-Set `image` to a registry-qualified name, e.g. `ghcr.io/your-user/home_school_hub`.
+Set `image` to **`your-user/home_school_hub`** (no `ghcr.io` prefix — Kamal combines it with `registry.server`).
 
 **DigitalOcean Container Registry**
 
