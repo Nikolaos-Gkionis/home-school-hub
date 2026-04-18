@@ -119,14 +119,14 @@
     --font-display: "Orbitron", ui-sans-serif, system-ui, sans-serif;
   }
 
-  /* Light desert: warm paper, terracotta type, compass accents */
+  /* Light desert: warm paper — accent dark enough for WCAG AA vs cream bg and button labels */
   .theme-desert-explorer {
     --color-bg: #fffbeb;
     --color-surface: #fff7e6;
-    --color-accent: #c2410c;
+    --color-accent: #78350f;
     --color-text: #431407;
-    --color-text-muted: #a16207;
-    --color-border: rgba(194, 65, 12, 0.2);
+    --color-text-muted: #92400e;
+    --color-border: rgba(120, 53, 15, 0.22);
     --font-display: "Marcellus", ui-serif, Georgia, serif;
   }
 }

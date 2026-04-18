@@ -16,11 +16,11 @@
     <%= render "shared/flash_modal" %>
     <%= render "shared/confirm_dialog" %>
 
-    <div class="flex min-h-dvh items-center justify-center p-4">
+    <main id="main-content" class="flex min-h-dvh items-center justify-center p-4">
       <div class="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-xl">
         <div class="font-display text-2xl font-bold tracking-tight text-[var(--color-accent)]">HomeSchool Hub</div>
         <%= yield %>
       </div>
-    </div>
+    </main>
   </body>
 </html>
