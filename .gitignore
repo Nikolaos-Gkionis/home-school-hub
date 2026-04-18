@@ -2,6 +2,7 @@
 
 /.bundle
 
+.kamal/secrets
 # Local secrets — never commit API tokens, passwords, or real keys
 # Matches .env, .env.local, .env.development.local, etc. (any directory)
 .env
