@@ -36,6 +36,9 @@ module Users
       end
     rescue Net::SMTPAuthenticationError
       flash[:alert] = "Welcome email could not be sent because SMTP authentication failed."
+    rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, SocketError => e
+      Rails.logger.warn("Welcome email could not reach SMTP: #{e.class} #{e.message}")
+      flash[:alert] = "Account created, but the welcome email could not be sent. Check SMTP settings on the server."
     end
   end
 end

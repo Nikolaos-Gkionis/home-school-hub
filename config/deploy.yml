@@ -38,10 +38,26 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    # Gmail: full account email + Google "App Password" (not your normal password). See .env.example.
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
     SOLID_QUEUE_IN_PUMA: true
+
+    # Public host (same as proxy.host) — used in mailer links and config.hosts.
+    MAILER_HOST: homeschool.peponi.to
+
+    # SMTP (Gmail: smtp.gmail.com:587 + App Password). Override domain if you use a workspace SMTP.
+    SMTP_ADDRESS: smtp.gmail.com
+    SMTP_PORT: "587"
+    SMTP_DOMAIN: gmail.com
+    SMTP_AUTHENTICATION: plain
+    SMTP_ENABLE_STARTTLS_AUTO: "true"
+
+    # "From" header; for Gmail use the same address as SMTP_USERNAME for best deliverability.
+    MAILER_FROM: "Home School Hub <change-me@gmail.com>"
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3

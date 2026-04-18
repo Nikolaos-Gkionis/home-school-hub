@@ -167,7 +167,10 @@ Add registry password and any other secret **references** (1Password, `ENV`, etc
 
   Then in `.kamal/secrets`: `OAK_API_TOKEN=...`
 
-- **SMTP / Devise:** when you enable mailers, add `SMTP_ADDRESS`, `SMTP_USERNAME`, etc. (as `clear` or `secret` as appropriate) and ensure `config/environments/production.rb` reads `ENV`.
+- **SMTP (Gmail or any provider):** [`config/deploy.yml`](../../config/deploy.yml) already lists `SMTP_ADDRESS`, `SMTP_PORT`, `MAILER_HOST`, `MAILER_FROM` under `env.clear`, and `SMTP_USERNAME` / `SMTP_PASSWORD` under `env.secret`. Set real values before deploy:
+  - Edit **`MAILER_HOST`** to match **`proxy.host`** (the public URL users open).
+  - Edit **`MAILER_FROM`** to a valid sender (for Gmail, use the same mailbox as **`SMTP_USERNAME`**).
+  - Export **`SMTP_USERNAME`** (full email) and **`SMTP_PASSWORD`** (Google **App Password**, not your normal password) before `bin/kamal deploy`, or assign them in [`.kamal/secrets`](../../.kamal/secrets) without committing. See [`.env.example`](../../.env.example).
 
 After changing secrets, redeploy so containers pick up new values.
 
