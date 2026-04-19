@@ -38,10 +38,9 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
-    # Gmail: full account email + Google "App Password" (not your normal password). See .env.example.
-    - SMTP_USERNAME
-    - SMTP_PASSWORD
-    # Must match authenticated mailbox for Gmail (e.g. "Home School Hub <you@gmail.com>"). Set in .kamal/secrets.
+    # Brevo: https://app.brevo.com → SMTP & API → API keys (transactional). Uses HTTPS so it works on DO.
+    - BREVO_API_KEY
+    # "From" for mailers — must be a verified sender/domain in Brevo (e.g. "Home School Hub <you@yourdomain.com>").
     - MAILER_FROM
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
@@ -51,12 +50,8 @@ env:
     # Public host (same as proxy.host) — used in mailer links and config.hosts.
     MAILER_HOST: homeschool.peponi.to
 
-    # SMTP (Gmail: smtp.gmail.com:587 + App Password). Override domain if you use a workspace SMTP.
-    SMTP_ADDRESS: smtp.gmail.com
-    SMTP_PORT: "587"
-    SMTP_DOMAIN: gmail.com
-    SMTP_AUTHENTICATION: plain
-    SMTP_ENABLE_STARTTLS_AUTO: "true"
+    # Optional: HTTP timeout for Brevo API (seconds).
+    BREVO_HTTP_TIMEOUT: "30"
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3

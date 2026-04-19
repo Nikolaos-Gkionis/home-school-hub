@@ -35,10 +35,10 @@ module Users
         UserMailer.with(user: resource).welcome_parent.deliver_now
       end
     rescue Net::SMTPAuthenticationError
-      flash[:alert] = "Welcome email could not be sent because SMTP authentication failed."
+      flash[:alert] = "Welcome email could not be sent (SMTP authentication failed)."
     rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, SocketError => e
-      Rails.logger.warn("Welcome email could not reach SMTP: #{e.class} #{e.message}")
-      flash[:alert] = "Account created, but the welcome email could not be sent. Check SMTP settings on the server."
+      Rails.logger.warn("Welcome email could not reach mail server: #{e.class} #{e.message}")
+      flash[:alert] = "Account created, but the welcome email could not be sent. Check Brevo or SMTP settings on the server."
     end
   end
 end

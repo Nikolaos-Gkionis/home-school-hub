@@ -167,12 +167,12 @@ Add registry password and any other secret **references** (1Password, `ENV`, etc
 
   Then in `.kamal/secrets`: `OAK_API_TOKEN=...`
 
-- **SMTP (Gmail or any provider):** [`config/deploy.yml`](../../config/deploy.yml) already lists `SMTP_ADDRESS`, `SMTP_PORT`, `MAILER_HOST`, `MAILER_FROM` under `env.clear`, and `SMTP_USERNAME` / `SMTP_PASSWORD` under `env.secret`. Set real values before deploy:
-  - Edit **`MAILER_HOST`** to match **`proxy.host`** (the public URL users open).
-  - Set **`MAILER_FROM`** in [`.kamal/secrets`](../../.kamal/secrets) (it is listed under `env.secret` in `deploy.yml`). For Gmail, use the **same address** as **`SMTP_USERNAME`** (e.g. `"Home School Hub <you@gmail.com>"`), not a random `no-reply@…` domain unless that address is a verified Gmail alias.
-  - Export **`SMTP_USERNAME`** (full email) and **`SMTP_PASSWORD`** (Google **App Password**, not your normal password) before `bin/kamal deploy`, or assign them in [`.kamal/secrets`](../../.kamal/secrets) without committing. See [`.env.example`](../../.env.example).
+- **Email (Brevo, recommended on DigitalOcean):** The app sends mail via **Brevo’s REST API over HTTPS (443)** so it works when [SMTP ports are blocked](https://docs.digitalocean.com/support/why-is-smtp-blocked). In [`config/deploy.yml`](../../config/deploy.yml), `env.secret` lists **`BREVO_API_KEY`** and **`MAILER_FROM`**. Add them to [`.kamal/secrets`](../../.kamal/secrets) (or export before `bin/kamal deploy`). In [Brevo](https://app.brevo.com), verify **Senders & IP** for the address used in **`MAILER_FROM`**. See [`.env.example`](../../.env.example).
+  - Edit **`MAILER_HOST`** in `deploy.yml` `env.clear` to match **`proxy.host`** (public URL for mailer links).
 
 After changing secrets, redeploy so containers pick up new values.
+
+**Optional SMTP:** If `BREVO_API_KEY` is unset and `SMTP_ADDRESS` is set, the app still supports classic SMTP (only useful when your host allows outbound **587**).
 
 ---
 

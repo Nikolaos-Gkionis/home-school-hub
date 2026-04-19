@@ -36,7 +36,14 @@ Rails.application.configure do
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
-  if ENV["SMTP_ADDRESS"].present?
+  if ENV["BREVO_API_KEY"].present?
+    config.action_mailer.delivery_method = :brevo
+    config.action_mailer.brevo_settings = {
+      api_key: ENV.fetch("BREVO_API_KEY"),
+      timeout: ENV.fetch("BREVO_HTTP_TIMEOUT", 30).to_i
+    }
+    config.action_mailer.raise_delivery_errors = true
+  elsif ENV["SMTP_ADDRESS"].present?
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {
       address: ENV.fetch("SMTP_ADDRESS"),
@@ -45,10 +52,12 @@ Rails.application.configure do
       user_name: ENV["SMTP_USERNAME"],
       password: ENV["SMTP_PASSWORD"],
       authentication: (ENV["SMTP_AUTHENTICATION"] || "plain").to_sym,
-      enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true"
+      enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true",
+      open_timeout: ENV.fetch("SMTP_OPEN_TIMEOUT", 30).to_i,
+      read_timeout: ENV.fetch("SMTP_READ_TIMEOUT", 60).to_i
     }.compact
   else
-    # Fallback keeps a local copy when SMTP is not configured yet.
+    # Fallback keeps a local copy when no transactional provider is configured yet.
     config.action_mailer.delivery_method = :file
     config.action_mailer.file_settings = { location: Rails.root.join("tmp", "mails") }
   end

@@ -57,8 +57,16 @@ Rails.application.configure do
   mailer_host = ENV.fetch("MAILER_HOST", "homeschool.peponi.to")
   config.action_mailer.default_url_options = { host: mailer_host, protocol: "https" }
 
-  # Outgoing mail: same ENV contract as development (see .env.example). Kamal injects these from deploy.yml / .kamal/secrets.
-  if ENV["SMTP_ADDRESS"].present?
+  # Outgoing mail: Brevo API over HTTPS (:443) avoids cloud blocks on SMTP ports (e.g. DigitalOcean).
+  # Fallback: SMTP when BREVO_API_KEY is unset (e.g. non-blocked networks). See .env.example.
+  if ENV["BREVO_API_KEY"].present?
+    config.action_mailer.delivery_method = :brevo
+    config.action_mailer.brevo_settings = {
+      api_key: ENV.fetch("BREVO_API_KEY"),
+      timeout: ENV.fetch("BREVO_HTTP_TIMEOUT", 30).to_i
+    }
+    config.action_mailer.raise_delivery_errors = true
+  elsif ENV["SMTP_ADDRESS"].present?
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {
       address: ENV.fetch("SMTP_ADDRESS"),
@@ -67,9 +75,10 @@ Rails.application.configure do
       user_name: ENV["SMTP_USERNAME"],
       password: ENV["SMTP_PASSWORD"],
       authentication: (ENV["SMTP_AUTHENTICATION"].presence || "plain").to_sym,
-      enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true"
+      enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true",
+      open_timeout: ENV.fetch("SMTP_OPEN_TIMEOUT", 30).to_i,
+      read_timeout: ENV.fetch("SMTP_READ_TIMEOUT", 60).to_i
     }.compact
-    # Surface delivery errors in logs; invite/sign-up code rescues auth/connection failures where needed.
     config.action_mailer.raise_delivery_errors = true
   else
     config.action_mailer.delivery_method = :smtp

@@ -18,6 +18,15 @@ require "rails/test_unit/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Register Brevo delivery before `config/environments/*.rb` runs (same file load order as this file).
+require_relative "../lib/brevo_mail_delivery"
+unless ActionMailer::Base.delivery_methods.key?(:brevo)
+  ActionMailer::Base.add_delivery_method :brevo, BrevoMailDelivery, {
+    api_key: nil,
+    timeout: 30
+  }
+end
+
 module HomeSchoolHub
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.

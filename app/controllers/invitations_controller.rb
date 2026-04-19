@@ -79,7 +79,7 @@ class InvitationsController < ApplicationController
     params.require(:invitation).permit(:child_name, :email, :year_group_key)
   end
 
-  # Use deliver_now so SMTP/template errors surface here (and are rescued) instead of failing Solid Queue enqueue/work.
+  # Use deliver_now so mail errors surface here (and are rescued) instead of failing Solid Queue enqueue/work.
   def send_invitation_email(invitation)
     @invitation_mailer_error_class = nil
     InvitationMailer.with(invitation: invitation).invite.deliver_now
@@ -100,16 +100,21 @@ class InvitationsController < ApplicationController
 
   def invite_delivery_notice(email)
     notice = "Invitation sent to #{email}."
-    if Rails.env.development? && ENV["SMTP_ADDRESS"].blank?
-      notice += " SMTP is not configured, so this message was written to tmp/mails."
+    if Rails.env.development? && ENV["BREVO_API_KEY"].blank? && ENV["SMTP_ADDRESS"].blank?
+      notice += " No Brevo/SMTP configured, so this message was written to tmp/mails."
     end
     notice
   end
 
   def invitation_email_error_message
-    base = "We could not send the invitation email. Confirm MAILER_FROM uses your Gmail address " \
-      "(same as SMTP_USERNAME), and SMTP_PASSWORD is a Google App Password. Redeploy after changing secrets. " \
-      "Server logs include the full error."
-    @invitation_mailer_error_class.present? ? "#{base} (#{@invitation_mailer_error_class})" : base
+    base = "We could not send the invitation email. With Brevo: confirm BREVO_API_KEY, " \
+      "MAILER_FROM matches a verified sender in Brevo, then redeploy. Server logs include the full error."
+    suffix = @invitation_mailer_error_class.present? ? " (#{@invitation_mailer_error_class})" : ""
+    timeout_hint = if %w[Net::OpenTimeout Net::ReadTimeout].include?(@invitation_mailer_error_class)
+      " If you use SMTP (not Brevo), outbound port #{ENV.fetch('SMTP_PORT', '587')} may be blocked on your host."
+    else
+      ""
+    end
+    base + suffix + timeout_hint
   end
 end
