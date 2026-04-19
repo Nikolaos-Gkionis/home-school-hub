@@ -81,15 +81,19 @@ class InvitationsController < ApplicationController
 
   # Use deliver_now so SMTP/template errors surface here (and are rescued) instead of failing Solid Queue enqueue/work.
   def send_invitation_email(invitation)
+    @invitation_mailer_error_class = nil
     InvitationMailer.with(invitation: invitation).invite.deliver_now
     true
   rescue Net::SMTPAuthenticationError => e
+    @invitation_mailer_error_class = e.class.name
     Rails.logger.warn("Invitation SMTP auth failed: #{e.message}")
     false
   rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, SocketError => e
+    @invitation_mailer_error_class = e.class.name
     Rails.logger.warn("Invitation SMTP connection failed (#{e.class}): #{e.message}")
     false
   rescue StandardError => e
+    @invitation_mailer_error_class = e.class.name
     Rails.logger.error("Invitation email failed (#{e.class}): #{e.message}\n#{e.backtrace&.first(12)&.join("\n")}")
     false
   end
@@ -103,7 +107,9 @@ class InvitationsController < ApplicationController
   end
 
   def invitation_email_error_message
-    "We could not send the invitation email. Confirm MAILER_FROM matches your Gmail address, " \
-      "SMTP_USERNAME / SMTP_PASSWORD (App Password) are set for production, then redeploy. Check server logs for the exact error."
+    base = "We could not send the invitation email. Confirm MAILER_FROM uses your Gmail address " \
+      "(same as SMTP_USERNAME), and SMTP_PASSWORD is a Google App Password. Redeploy after changing secrets. " \
+      "Server logs include the full error."
+    @invitation_mailer_error_class.present? ? "#{base} (#{@invitation_mailer_error_class})" : base
   end
 end
