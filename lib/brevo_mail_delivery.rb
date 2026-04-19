@@ -90,11 +90,11 @@ class BrevoMailDelivery
 
   def recipients(mail, field)
     addrs = case field
-            when :to then mail.to_addrs
-            when :cc then mail.cc_addrs
-            when :bcc then mail.bcc_addrs
-            else []
-            end
+    when :to then mail.to_addrs
+    when :cc then mail.cc_addrs
+    when :bcc then mail.bcc_addrs
+    else []
+    end
     Array(addrs).filter_map do |a|
       next if a.blank?
 

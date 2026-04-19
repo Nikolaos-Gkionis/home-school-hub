@@ -167,7 +167,7 @@ Add registry password and any other secret **references** (1Password, `ENV`, etc
 
   Then in `.kamal/secrets`: `OAK_API_TOKEN=...`
 
-- **Email (Brevo, recommended on DigitalOcean):** The app sends mail via **Brevo’s REST API over HTTPS (443)** so it works when [SMTP ports are blocked](https://docs.digitalocean.com/support/why-is-smtp-blocked). In [`config/deploy.yml`](../../config/deploy.yml), `env.secret` lists **`BREVO_API_KEY`** and **`MAILER_FROM`**. Add them to [`.kamal/secrets`](../../.kamal/secrets) (or export before `bin/kamal deploy`). In [Brevo](https://app.brevo.com), verify **Senders & IP** for the address used in **`MAILER_FROM`**. See [`.env.example`](../../.env.example).
+- **Email (Brevo, recommended on DigitalOcean):** The app sends mail via **Brevo’s REST API over HTTPS (443)** so it works when [SMTP ports are blocked](https://docs.digitalocean.com/support/why-is-smtp-blocked). In [`config/deploy.yml`](../../config/deploy.yml), `env.secret` lists **`BREVO_API_KEY`** and **`MAILER_FROM`**. Kamal reads [`.kamal/secrets`](../../.kamal/secrets) with **Dotenv** (not bash): use `KEY=value` and `$(...)` only—no `if`/`source`. This repo’s template pulls Brevo values from the project **`.env`** via [`.kamal/fetch_env_secret.rb`](../../.kamal/fetch_env_secret.rb). In [Brevo](https://app.brevo.com), verify **Senders & IP** for **`MAILER_FROM`**. See [`.env.example`](../../.env.example).
   - Edit **`MAILER_HOST`** in `deploy.yml` `env.clear` to match **`proxy.host`** (public URL for mailer links).
 
 After changing secrets, redeploy so containers pick up new values.
