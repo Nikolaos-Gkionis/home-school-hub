@@ -16,7 +16,7 @@ class InvitationsController < ApplicationController
       if send_invitation_email(@invitation)
         redirect_to new_invitation_path, notice: invite_delivery_notice(@invitation.email)
       else
-        redirect_to new_invitation_path, alert: smtp_auth_error_message
+        redirect_to new_invitation_path, alert: invitation_email_error_message
       end
     else
       render :new, status: :unprocessable_entity
@@ -62,7 +62,7 @@ class InvitationsController < ApplicationController
     if send_invitation_email(invitation)
       redirect_back fallback_location: parent_family_path, notice: invite_delivery_notice(invitation.email)
     else
-      redirect_back fallback_location: parent_family_path, alert: smtp_auth_error_message
+      redirect_back fallback_location: parent_family_path, alert: invitation_email_error_message
     end
   end
 
@@ -79,11 +79,18 @@ class InvitationsController < ApplicationController
     params.require(:invitation).permit(:child_name, :email, :year_group_key)
   end
 
+  # Use deliver_now so SMTP/template errors surface here (and are rescued) instead of failing Solid Queue enqueue/work.
   def send_invitation_email(invitation)
-    delivery = Rails.env.production? ? :deliver_later : :deliver_now
-    InvitationMailer.with(invitation: invitation).invite.public_send(delivery)
+    InvitationMailer.with(invitation: invitation).invite.deliver_now
     true
-  rescue Net::SMTPAuthenticationError
+  rescue Net::SMTPAuthenticationError => e
+    Rails.logger.warn("Invitation SMTP auth failed: #{e.message}")
+    false
+  rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT, SocketError => e
+    Rails.logger.warn("Invitation SMTP connection failed (#{e.class}): #{e.message}")
+    false
+  rescue StandardError => e
+    Rails.logger.error("Invitation email failed (#{e.class}): #{e.message}\n#{e.backtrace&.first(12)&.join("\n")}")
     false
   end
 
@@ -95,7 +102,8 @@ class InvitationsController < ApplicationController
     notice
   end
 
-  def smtp_auth_error_message
-    "SMTP authentication failed. Check SMTP_USERNAME and SMTP_PASSWORD in .env (use a Gmail App Password, not your normal Gmail password), then restart the server."
+  def invitation_email_error_message
+    "We could not send the invitation email. Confirm MAILER_FROM matches your Gmail address, " \
+      "SMTP_USERNAME / SMTP_PASSWORD (App Password) are set for production, then redeploy. Check server logs for the exact error."
   end
 end

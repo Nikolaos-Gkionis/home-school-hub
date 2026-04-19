@@ -41,6 +41,8 @@ env:
     # Gmail: full account email + Google "App Password" (not your normal password). See .env.example.
     - SMTP_USERNAME
     - SMTP_PASSWORD
+    # Must match authenticated mailbox for Gmail (e.g. "Home School Hub <you@gmail.com>"). Set in .kamal/secrets.
+    - MAILER_FROM
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -55,9 +57,6 @@ env:
     SMTP_DOMAIN: gmail.com
     SMTP_AUTHENTICATION: plain
     SMTP_ENABLE_STARTTLS_AUTO: "true"
-
-    # "From" header; for Gmail use the same address as SMTP_USERNAME for best deliverability.
-    MAILER_FROM: "Home School Hub <change-me@gmail.com>"
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3

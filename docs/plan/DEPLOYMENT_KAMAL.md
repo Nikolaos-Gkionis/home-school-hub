@@ -169,7 +169,7 @@ Add registry password and any other secret **references** (1Password, `ENV`, etc
 
 - **SMTP (Gmail or any provider):** [`config/deploy.yml`](../../config/deploy.yml) already lists `SMTP_ADDRESS`, `SMTP_PORT`, `MAILER_HOST`, `MAILER_FROM` under `env.clear`, and `SMTP_USERNAME` / `SMTP_PASSWORD` under `env.secret`. Set real values before deploy:
   - Edit **`MAILER_HOST`** to match **`proxy.host`** (the public URL users open).
-  - Edit **`MAILER_FROM`** to a valid sender (for Gmail, use the same mailbox as **`SMTP_USERNAME`**).
+  - Set **`MAILER_FROM`** in [`.kamal/secrets`](../../.kamal/secrets) (it is listed under `env.secret` in `deploy.yml`). For Gmail, use the **same address** as **`SMTP_USERNAME`** (e.g. `"Home School Hub <you@gmail.com>"`), not a random `no-reply@…` domain unless that address is a verified Gmail alias.
   - Export **`SMTP_USERNAME`** (full email) and **`SMTP_PASSWORD`** (Google **App Password**, not your normal password) before `bin/kamal deploy`, or assign them in [`.kamal/secrets`](../../.kamal/secrets) without committing. See [`.env.example`](../../.env.example).
 
 After changing secrets, redeploy so containers pick up new values.
