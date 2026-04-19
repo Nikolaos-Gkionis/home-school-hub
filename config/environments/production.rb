@@ -59,10 +59,10 @@ Rails.application.configure do
 
   # Outgoing mail: Brevo API over HTTPS (:443) avoids cloud blocks on SMTP ports (e.g. DigitalOcean).
   # Fallback: SMTP when BREVO_API_KEY is unset (e.g. non-blocked networks). See .env.example.
-  if ENV["BREVO_API_KEY"].present?
+  if ENV["BREVO_API_KEY"].to_s.strip.present?
     config.action_mailer.delivery_method = :brevo
     config.action_mailer.brevo_settings = {
-      api_key: ENV.fetch("BREVO_API_KEY"),
+      api_key: ENV.fetch("BREVO_API_KEY").strip,
       timeout: ENV.fetch("BREVO_HTTP_TIMEOUT", 30).to_i
     }
     config.action_mailer.raise_delivery_errors = true
@@ -101,4 +101,11 @@ Rails.application.configure do
 
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # If neither Brevo nor SMTP is configured, the app falls back to localhost SMTP (not useful on a VPS).
+  config.after_initialize do
+    if ENV["BREVO_API_KEY"].to_s.strip.blank? && ENV["SMTP_ADDRESS"].to_s.strip.blank?
+      Rails.logger.warn("Mail misconfiguration: set BREVO_API_KEY (recommended) or SMTP_ADDRESS in Kamal env; otherwise no real email will be sent.")
+    end
+  end
 end

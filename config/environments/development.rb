@@ -36,10 +36,10 @@ Rails.application.configure do
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
-  if ENV["BREVO_API_KEY"].present?
+  if ENV["BREVO_API_KEY"].to_s.strip.present?
     config.action_mailer.delivery_method = :brevo
     config.action_mailer.brevo_settings = {
-      api_key: ENV.fetch("BREVO_API_KEY"),
+      api_key: ENV.fetch("BREVO_API_KEY").strip,
       timeout: ENV.fetch("BREVO_HTTP_TIMEOUT", 30).to_i
     }
     config.action_mailer.raise_delivery_errors = true

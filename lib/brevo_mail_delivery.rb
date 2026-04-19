@@ -21,15 +21,18 @@ class BrevoMailDelivery
   end
 
   def deliver!(mail)
-    api_key = settings[:api_key].to_s
+    api_key = settings[:api_key].to_s.strip
     raise ArgumentError, "Brevo api_key is blank" if api_key.blank?
 
     payload = build_payload(mail)
     response = post_json(payload)
-    return mail if response.is_a?(Net::HTTPSuccess)
+    unless response.is_a?(Net::HTTPSuccess)
+      body = response.body.to_s.byteslice(0, 500)
+      raise "Brevo send failed (#{response.code}): #{body}"
+    end
 
-    body = response.body.to_s.byteslice(0, 500)
-    raise "Brevo send failed (#{response.code}): #{body}"
+    log_brevo_success(response, payload)
+    mail
   end
 
   private
@@ -113,6 +116,19 @@ class BrevoMailDelivery
         [ nil, body ]
       end
     end
+  end
+
+  def log_brevo_success(response, payload)
+    data = JSON.parse(response.body)
+    to_emails = Array(payload[:to]).map { |h| h[:email] }.join(", ")
+    if data.is_a?(Hash) && data["messageId"].present?
+      Rails.logger.info("Brevo transactional email accepted (HTTP #{response.code}) messageId=#{data['messageId']} to=#{to_emails}")
+    else
+      # Rare: 2xx without messageId — log body so we can debug "success in app but nothing in Brevo".
+      Rails.logger.warn("Brevo HTTP #{response.code} but unexpected JSON (check API key & Brevo account): #{response.body.to_s.byteslice(0, 400)}")
+    end
+  rescue JSON::ParserError
+    Rails.logger.warn("Brevo HTTP #{response.code} non-JSON body: #{response.body.to_s.byteslice(0, 400)}")
   end
 
   def post_json(payload)
