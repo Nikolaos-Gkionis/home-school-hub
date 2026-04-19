@@ -67,9 +67,10 @@ class BrevoMailDelivery
   end
 
   def sender_hash(mail)
-    addr = mail.from_addrs&.first
-    if addr.present?
-      return { email: addr.address, name: (addr.display_name.presence || nil) }.compact
+    # ActionMailer often leaves From/To as plain strings; Mail::Message#*_addrs returns those strings, not Mail::Address.
+    addr = coerce_mail_address(mail.from_addrs&.first)
+    if addr&.address.present?
+      return { email: addr.address, name: addr.display_name.presence }.compact
     end
 
     parsed = parse_mailer_from_string(ENV["MAILER_FROM"].to_s)
@@ -96,10 +97,22 @@ class BrevoMailDelivery
     else []
     end
     Array(addrs).filter_map do |a|
-      next if a.blank?
+      addr = coerce_mail_address(a)
+      next if addr.blank? || addr.address.blank?
 
-      { email: a.address, name: (a.display_name.presence || nil) }.compact
+      { email: addr.address, name: addr.display_name.presence }.compact
     end
+  end
+
+  # Mail::Message#to_addrs / #from_addrs can return String or Mail::Address depending on how the header was set.
+  def coerce_mail_address(value)
+    return nil if value.blank?
+    return value if value.is_a?(Mail::Address)
+
+    Mail::Address.new(value.to_s.strip)
+  rescue Mail::Field::ParseError
+    email = value.to_s[/\S+@\S+/]
+    email.present? ? Mail::Address.new(email) : nil
   end
 
   def extract_parts(mail)
