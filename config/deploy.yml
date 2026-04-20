@@ -38,6 +38,7 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    - OAK_API_TOKEN
     # Brevo: https://app.brevo.com → SMTP & API → API keys (transactional). Uses HTTPS so it works on DO.
     - BREVO_API_KEY
     # "From" for mailers — must be a verified sender/domain in Brevo (e.g. "Home School Hub <you@yourdomain.com>").
