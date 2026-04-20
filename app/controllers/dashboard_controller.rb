@@ -4,7 +4,7 @@ class DashboardController < ApplicationController
   before_action :authenticate_user!
 
   def show
-    @lessons = current_user.visible_lessons_relation
+    @lessons = visible_lessons_with_auto_sync
     @lesson = find_lesson
     hydrate_oak_lesson! if @lesson
     persist_lesson_context! if @lesson
@@ -12,8 +12,21 @@ class DashboardController < ApplicationController
 
   private
 
-  def find_lesson
+  def visible_lessons_with_auto_sync
     rel = current_user.visible_lessons_relation
+    return rel if rel.exists?
+    return rel unless Oak::ApiClient.configured?
+
+    # If no lessons are present yet, bootstrap them from Oak automatically.
+    Oak::Importer.call
+    current_user.visible_lessons_relation
+  rescue StandardError => e
+    Rails.logger.warn("[DashboardController] auto-sync failed: #{e.class}: #{e.message}")
+    rel
+  end
+
+  def find_lesson
+    rel = @lessons || current_user.visible_lessons_relation
     yk = current_user.active_learner&.year_group_key
 
     lesson = rel.find_by(id: params[:lesson_id]) if params[:lesson_id].present?
