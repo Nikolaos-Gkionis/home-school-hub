@@ -55,11 +55,14 @@ class SidebarPreferencesController < ApplicationController
   def update_preferred_subjects_from_form!
     all = OakCurriculum.hub_subject_filter_options
     chosen = Array(params[:preferred_subjects]).map(&:to_s).reject(&:blank?).uniq.sort
-    if chosen.empty?
-      current_user.update!(preferred_subjects: nil)
+    normalized = chosen.empty? || chosen == all ? nil : chosen
+
+    # Child dashboards read subject filters from the active learner first.
+    if current_user.learner? && current_user.active_learner.present?
+      current_user.active_learner.update!(preferred_subjects: normalized)
       return
     end
 
-    current_user.update!(preferred_subjects: chosen == all ? nil : chosen)
+    current_user.update!(preferred_subjects: normalized)
   end
 end
