@@ -43,6 +43,6 @@ class ApplicationController < ActionController::Base
   end
 
   def role_insights_path(user = current_user)
-    user.parent? ? parent_family_path : child_profile_path
+    user.parent? ? insights_path : child_profile_path
   end
 end

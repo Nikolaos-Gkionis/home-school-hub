@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   root "pages#home"
 
   get "dashboard", to: "legacy_redirects#dashboard"
-  get "insights", to: "legacy_redirects#insights"
+  get "insights", to: "insights#show"
 
   namespace :parent do
     get "dashboard", to: "dashboards#show"
