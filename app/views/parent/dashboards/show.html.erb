@@ -6,6 +6,11 @@
       title: "Dashboard",
       description: "Family progress across child accounts." %>
 
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/50 p-3 text-sm text-[var(--color-text-muted)] shadow-sm">
+    Charts and detailed trend data are available in
+    <%= link_to "Insights", insights_path, class: "font-medium text-[var(--color-accent)] underline hover:opacity-90" %>.
+  </div>
+
   <% m = @metrics %>
   <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
     <% [
