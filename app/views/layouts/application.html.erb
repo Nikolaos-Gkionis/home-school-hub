@@ -117,7 +117,8 @@
                       <div>
                         <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Subjects to show</p>
                         <p class="mt-0.5 text-[10px] text-[var(--color-text-muted)]">Tick more to widen the tree; untick to hide. Save when done.</p>
-                        <%= form_with url: sidebar_preferences_path, method: :patch, class: "mt-2 space-y-2", data: { turbo: true } do %>
+                        <%= form_with url: sidebar_preferences_path, method: :patch, class: "mt-2 space-y-2", data: { turbo: true, controller: "subjects-form" } do %>
+                          <%= hidden_field_tag "preferred_subjects[]", "" %>
                           <% selected = current_user.shows_all_subjects? ? all_subjects : (current_user.effective_preferred_subjects || []) %>
                           <div class="sidebar-subjects-scroll space-y-1 text-[11px]">
                             <% all_subjects.each do |subj| %>

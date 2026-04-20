@@ -12,7 +12,10 @@ class SidebarPreferencesController < ApplicationController
     if params.key?(:preferred_subjects)
       update_preferred_subjects_from_form!
       current_user.resync_hub_after_visible_scope_change!
-      redirect_to role_home_path, notice: "Subjects updated."
+      respond_to do |format|
+        format.json { head :ok }
+        format.html { redirect_to role_home_path, notice: "Subjects updated." }
+      end
       return
     end
 
@@ -51,7 +54,7 @@ class SidebarPreferencesController < ApplicationController
 
   def update_preferred_subjects_from_form!
     all = OakCurriculum.hub_subject_filter_options
-    chosen = Array(params[:preferred_subjects]).map(&:to_s).uniq.sort
+    chosen = Array(params[:preferred_subjects]).map(&:to_s).reject(&:blank?).uniq.sort
     if chosen.empty?
       current_user.update!(preferred_subjects: nil)
       return
