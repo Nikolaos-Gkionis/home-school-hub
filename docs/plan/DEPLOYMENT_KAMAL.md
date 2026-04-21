@@ -234,6 +234,32 @@ Curriculum import: `bin/rails curriculum:oak_sync` (requires `OAK_API_TOKEN` in 
 
 ## 11. Troubleshooting
 
+### SSH: `Net::SSH::AuthenticationFailed` (Kamal setup / deploy)
+
+Kamal uses the same SSH login you would use in a terminal. Fix SSH **before** running `bin/kamal setup` again.
+
+1. **Confirm manual login** (same user Kamal uses — default `root`):
+   ```bash
+   ssh -v root@YOUR_DROPLET_IP
+   ```
+   If that fails, try `ubuntu@YOUR_DROPLET_IP` (some images use a non-root user). Whichever user works, set `ssh.user` in [`config/deploy.yml`](../../config/deploy.yml) to that name.
+
+2. **Use the same key DigitalOcean has**  
+   When you created the droplet, you selected one or more **SSH keys**. Your laptop must use the **matching private key**. If you use a named key:
+   ```bash
+   ssh -i ~/.ssh/your_do_key root@YOUR_DROPLET_IP
+   ```
+   Tell Kamal to use it by uncommenting `ssh.keys` in `deploy.yml` and listing that path.
+
+3. **ssh-agent**  
+   If the key has a passphrase: `ssh-add ~/.ssh/your_key` so the agent offers it.
+
+4. **No key on the droplet**  
+   In **DigitalOcean** → your droplet → **Access** → **Launch Droplet Console**, sign in and add your public key to `/root/.ssh/authorized_keys` (or the `ubuntu` user’s file), or reset SSH keys from the control panel per DO docs.
+
+5. **Debug Kamal SSH**  
+   Temporarily set `ssh.log_level: debug` under `ssh:` in `deploy.yml` to see more detail.
+
 | Symptom | What to check |
 |---------|----------------|
 | Certificate fails | DNS **A** record points to this droplet; ports **80/443** open; no conflicting service on 80/443. |

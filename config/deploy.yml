@@ -99,9 +99,15 @@ builder:
   #   - GITHUB_TOKEN
   #   - RAILS_MASTER_KEY
 
-# Use a different ssh user than root
-# ssh:
-#   user: app
+# SSH must match a login that works manually: ssh <user>@161.35.185.189
+# Default Kamal user is root. If your droplet uses another account (e.g. ubuntu), set user below.
+# If the wrong key is offered, set keys: to your private key path (see DEPLOYMENT_KAMAL.md).
+ssh:
+  user: root
+  # log_level: debug   # uncomment temporarily while fixing "Authentication failed"
+  # keys:
+  #   - ~/.ssh/id_ed25519
+  #   - ~/.ssh/id_rsa
 
 # Use accessory services (secrets come from .kamal/secrets).
 # accessories:

@@ -9,6 +9,7 @@ export default class extends Controller {
     "progressTrack",
     "headerTitle",
     "questionText",
+    "questionMedia",
     "instructionPill",
     "options",
     "hintSection",
@@ -77,6 +78,7 @@ export default class extends Controller {
     this.headerTitleTarget.textContent = this.titleValue
     const round = this.rounds[this.index]
     this.questionTextTarget.textContent = round.raw.question || ""
+    this._renderQuestionMedia(round.raw)
     this.instructionPillTarget.textContent = round.multi ? "Select all that apply" : "Select one answer"
 
     if (round.hint) {
@@ -141,10 +143,12 @@ export default class extends Controller {
 
       const text = document.createElement("span")
       text.className = "min-w-0 flex-1 text-left text-base font-normal text-neutral-900 dark:text-[var(--color-text)]"
-      text.textContent = (answer.content || "").toString().toLowerCase()
+      text.textContent = this._answerText(answer)
 
       btn.appendChild(left)
       btn.appendChild(text)
+      const answerMedia = this._buildMediaElement(answer, this._answerText(answer))
+      if (answerMedia) btn.appendChild(answerMedia)
       this.optionsTarget.appendChild(btn)
     })
     this.checkBtnTarget.disabled = this.selected.size === 0
@@ -189,7 +193,7 @@ export default class extends Controller {
 
       const text = document.createElement("span")
       text.className = "min-w-0 flex-1 text-left text-base text-neutral-900 dark:text-[var(--color-text)]"
-      text.textContent = (answer.content || "").toString().toLowerCase()
+      text.textContent = this._answerText(answer)
 
       if (isCorrect) {
         const tick = document.createElement("span")
@@ -203,9 +207,66 @@ export default class extends Controller {
         wrap.appendChild(left)
         wrap.appendChild(text)
       }
+      const answerMedia = this._buildMediaElement(answer, this._answerText(answer))
+      if (answerMedia) wrap.appendChild(answerMedia)
 
       this.optionsTarget.appendChild(wrap)
     })
+  }
+
+  _renderQuestionMedia(question) {
+    if (!this.hasQuestionMediaTarget) return
+    this.questionMediaTarget.replaceChildren()
+    const media = this._buildMediaElement(question, question?.question || "Question image")
+    if (media) {
+      this.questionMediaTarget.classList.remove("hidden")
+      this.questionMediaTarget.appendChild(media)
+    } else {
+      this.questionMediaTarget.classList.add("hidden")
+    }
+  }
+
+  _answerText(answer) {
+    return this._firstText([
+      answer?.content,
+      answer?.text,
+      answer?.label,
+      answer?.matchOption?.content,
+      answer?.correctChoice?.content,
+    ])
+  }
+
+  _buildMediaElement(row, alt) {
+    const url = this._extractImageUrl(row)
+    if (!url) return null
+
+    const img = document.createElement("img")
+    img.src = url
+    img.alt = this._firstText([row?.text, alt, "Quiz image"])
+    img.loading = "lazy"
+    img.className =
+      "mt-3 max-h-72 w-full rounded-xl border border-neutral-200 object-contain bg-white p-2 dark:border-[var(--color-border)] dark:bg-[var(--color-surface)]"
+    return img
+  }
+
+  _extractImageUrl(row) {
+    const candidates = [
+      row?.imageUrl,
+      row?.image?.url,
+      row?.imageObject?.url,
+      row?.media?.url,
+      row?.asset?.url,
+    ]
+    const content = row?.content
+    if (typeof content === "string" && /^https?:\/\//i.test(content)) candidates.push(content)
+    return this._firstText(candidates)
+  }
+
+  _firstText(candidates) {
+    for (const candidate of candidates) {
+      if (typeof candidate === "string" && candidate.trim().length > 0) return candidate.trim()
+    }
+    return ""
   }
 
   _optionBaseClass(selected) {
