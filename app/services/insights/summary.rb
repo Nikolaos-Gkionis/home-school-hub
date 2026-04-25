@@ -36,6 +36,7 @@ module Insights
 
       per_learner = users.map { |u| learner_row(u) }
       daily_lessons = daily_lesson_breakdown(users)
+      daily_time = daily_time_breakdown(users)
 
       {
         learner_count: users.size,
@@ -50,7 +51,10 @@ module Insights
         per_learner: per_learner,
         daily_lesson_dates: daily_lessons[:dates],
         daily_lesson_rows: daily_lessons[:rows],
-        daily_lesson_totals: daily_lessons[:totals]
+        daily_lesson_totals: daily_lessons[:totals],
+        daily_time_dates: daily_time[:dates],
+        daily_time_rows: daily_time[:rows],
+        daily_time_totals: daily_time[:totals]
       }
     end
 
@@ -119,6 +123,37 @@ module Insights
       end
 
       totals = all_dates.index_with { |date| rows.sum { |row| row[:by_date][date].to_i } }
+
+      { dates: all_dates, rows: rows, totals: totals }
+    end
+
+    def daily_time_breakdown(users)
+      user_ids = users.map(&:id)
+      grouped = LessonTimeLog.where(user_id: user_ids)
+                             .group(:user_id)
+                             .group(:logged_on)
+                             .sum(:seconds)
+      grouped_by_string_date = grouped.each_with_object({}) do |((uid, date), seconds), acc|
+        acc[[ uid, date.to_s ]] = seconds
+      end
+
+      all_dates = grouped.keys.map { |(_, date)| date.to_s }.uniq.sort.last(14)
+      rows = users.map do |user|
+        by_date = all_dates.index_with do |date|
+          (grouped_by_string_date.fetch([ user.id, date ], 0).to_f / 60.0).round(1)
+        end
+
+        {
+          user_id: user.id,
+          label: user.email,
+          by_date: by_date,
+          total: by_date.values.sum.round(1)
+        }
+      end
+
+      totals = all_dates.index_with do |date|
+        rows.sum { |row| row[:by_date][date].to_f }.round(1)
+      end
 
       { dates: all_dates, rows: rows, totals: totals }
     end

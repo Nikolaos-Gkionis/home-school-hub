@@ -75,6 +75,9 @@ class Insights::SummaryTest < ActiveSupport::TestCase
     LessonCompletion.create!(user: child_one, lesson: lesson, completed_at: day_one.noon)
     LessonCompletion.create!(user: child_one, lesson: lesson_two, completed_at: day_two.noon)
     LessonCompletion.create!(user: child_two, lesson: lesson, completed_at: day_two.noon)
+    LessonTimeLog.create!(user: child_one, lesson: lesson, logged_on: day_one, seconds: 120)
+    LessonTimeLog.create!(user: child_one, lesson: lesson_two, logged_on: day_two, seconds: 180)
+    LessonTimeLog.create!(user: child_two, lesson: lesson, logged_on: day_two, seconds: 60)
 
     metrics = Insights::Summary.call(viewer: parent, scope_user: nil)
 
@@ -90,5 +93,18 @@ class Insights::SummaryTest < ActiveSupport::TestCase
     assert_equal 1, row_two[:total]
     assert_equal 1, metrics[:daily_lesson_totals][day_one.to_s]
     assert_equal 2, metrics[:daily_lesson_totals][day_two.to_s]
+
+    assert_equal [ day_one.to_s, day_two.to_s ], metrics[:daily_time_dates]
+    time_row_one = metrics[:daily_time_rows].find { |row| row[:user_id] == child_one.id }
+    time_row_two = metrics[:daily_time_rows].find { |row| row[:user_id] == child_two.id }
+
+    assert_equal 2.0, time_row_one[:by_date][day_one.to_s]
+    assert_equal 3.0, time_row_one[:by_date][day_two.to_s]
+    assert_equal 5.0, time_row_one[:total]
+    assert_equal 0.0, time_row_two[:by_date][day_one.to_s]
+    assert_equal 1.0, time_row_two[:by_date][day_two.to_s]
+    assert_equal 1.0, time_row_two[:total]
+    assert_equal 2.0, metrics[:daily_time_totals][day_one.to_s]
+    assert_equal 4.0, metrics[:daily_time_totals][day_two.to_s]
   end
 end
