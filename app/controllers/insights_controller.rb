@@ -17,7 +17,7 @@ class InsightsController < ApplicationController
 
     @insights_filter_id = filter_id.to_s
     @metrics = Insights::Summary.call(viewer: current_user, scope_user: @scope_user)
-    @children = current_user.parent? ? current_user.children.order(:email).to_a : []
+    @children = current_user.parent? ? current_user.children.includes(:learners).order(:email).to_a : []
   end
 
   private

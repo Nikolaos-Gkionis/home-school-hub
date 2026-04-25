@@ -27,4 +27,68 @@ class Insights::SummaryTest < ActiveSupport::TestCase
     assert_equal 1, metrics[:lessons_completed]
     assert_equal 1, metrics[:learner_count]
   end
+
+  test "parent insights includes daily learner breakdown and totals" do
+    parent = User.create!(
+      email: "insights-parent-#{SecureRandom.hex(4)}@example.com",
+      password: "password123456",
+      password_confirmation: "password123456",
+      role: User::ROLE_PARENT
+    )
+    child_one = User.create!(
+      email: "insights-child-one-#{SecureRandom.hex(4)}@example.com",
+      password: "password123456",
+      password_confirmation: "password123456",
+      role: User::ROLE_LEARNER,
+      parent_id: parent.id
+    )
+    child_two = User.create!(
+      email: "insights-child-two-#{SecureRandom.hex(4)}@example.com",
+      password: "password123456",
+      password_confirmation: "password123456",
+      role: User::ROLE_LEARNER,
+      parent_id: parent.id
+    )
+    lesson = Lesson.create!(
+      year_group_key: "year_8",
+      subject: "Science",
+      unit: "Unit B",
+      title: "Insights daily lesson",
+      external_url: "https://www.thenational.academy/pupils/lessons/insights-daily",
+      oak_lesson_slug: "insights-daily-#{SecureRandom.hex(4)}",
+      content_mode: Lesson::CONTENT_MODE_OAK_HUB,
+      position: 1
+    )
+    lesson_two = Lesson.create!(
+      year_group_key: "year_8",
+      subject: "Science",
+      unit: "Unit C",
+      title: "Insights daily lesson two",
+      external_url: "https://www.thenational.academy/pupils/lessons/insights-daily-two",
+      oak_lesson_slug: "insights-daily-two-#{SecureRandom.hex(4)}",
+      content_mode: Lesson::CONTENT_MODE_OAK_HUB,
+      position: 2
+    )
+
+    day_one = Date.new(2026, 4, 20)
+    day_two = Date.new(2026, 4, 21)
+    LessonCompletion.create!(user: child_one, lesson: lesson, completed_at: day_one.noon)
+    LessonCompletion.create!(user: child_one, lesson: lesson_two, completed_at: day_two.noon)
+    LessonCompletion.create!(user: child_two, lesson: lesson, completed_at: day_two.noon)
+
+    metrics = Insights::Summary.call(viewer: parent, scope_user: nil)
+
+    assert_equal [ day_one.to_s, day_two.to_s ], metrics[:daily_lesson_dates]
+    row_one = metrics[:daily_lesson_rows].find { |row| row[:user_id] == child_one.id }
+    row_two = metrics[:daily_lesson_rows].find { |row| row[:user_id] == child_two.id }
+
+    assert_equal 1, row_one[:by_date][day_one.to_s]
+    assert_equal 1, row_one[:by_date][day_two.to_s]
+    assert_equal 2, row_one[:total]
+    assert_equal 0, row_two[:by_date][day_one.to_s]
+    assert_equal 1, row_two[:by_date][day_two.to_s]
+    assert_equal 1, row_two[:total]
+    assert_equal 1, metrics[:daily_lesson_totals][day_one.to_s]
+    assert_equal 2, metrics[:daily_lesson_totals][day_two.to_s]
+  end
 end

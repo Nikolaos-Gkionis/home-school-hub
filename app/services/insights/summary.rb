@@ -35,6 +35,7 @@ module Insights
       by_subject = completions.joins(:lesson).group("lessons.subject").count
 
       per_learner = users.size > 1 ? users.map { |u| learner_row(u) } : []
+      daily_lessons = users.size > 1 ? daily_lesson_breakdown(users) : { dates: [], rows: [], totals: {} }
 
       {
         learner_count: users.size,
@@ -46,7 +47,10 @@ module Insights
         sections_explored: sections_explored,
         completions_by_week: by_week,
         completions_by_subject: by_subject,
-        per_learner: per_learner
+        per_learner: per_learner,
+        daily_lesson_dates: daily_lessons[:dates],
+        daily_lesson_rows: daily_lessons[:rows],
+        daily_lesson_totals: daily_lessons[:totals]
       }
     end
 
@@ -91,6 +95,32 @@ module Insights
       end
 
       [ @viewer ]
+    end
+
+    def daily_lesson_breakdown(users)
+      user_ids = users.map(&:id)
+      grouped = LessonCompletion.where(user_id: user_ids)
+                               .group(:user_id)
+                               .group("DATE(completed_at)")
+                               .count
+
+      all_dates = grouped.keys.map { |(_, date)| date.to_s }.uniq.sort.last(14)
+      rows = users.map do |user|
+        by_date = all_dates.index_with do |date|
+          grouped.fetch([ user.id, date ], 0)
+        end
+
+        {
+          user_id: user.id,
+          label: user.email,
+          by_date: by_date,
+          total: by_date.values.sum
+        }
+      end
+
+      totals = all_dates.index_with { |date| rows.sum { |row| row[:by_date][date].to_i } }
+
+      { dates: all_dates, rows: rows, totals: totals }
     end
   end
 end
