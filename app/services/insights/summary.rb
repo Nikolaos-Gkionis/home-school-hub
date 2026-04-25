@@ -34,8 +34,8 @@ module Insights
       end
       by_subject = completions.joins(:lesson).group("lessons.subject").count
 
-      per_learner = users.size > 1 ? users.map { |u| learner_row(u) } : []
-      daily_lessons = users.size > 1 ? daily_lesson_breakdown(users) : { dates: [], rows: [], totals: {} }
+      per_learner = users.map { |u| learner_row(u) }
+      daily_lessons = daily_lesson_breakdown(users)
 
       {
         learner_count: users.size,
