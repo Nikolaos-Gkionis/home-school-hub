@@ -8,6 +8,7 @@ module Parent
     before_action :require_parent!
     before_action :set_child
     before_action :set_checkpoint_test, only: [ :show, :answer_key ]
+    before_action :set_checkpoint_print_child_name, only: [ :show, :answer_key ]
 
     def create
       subject = params[:subject].to_s
@@ -46,6 +47,11 @@ module Parent
     def set_checkpoint_test
       @checkpoint_test = CheckpointTest.find_by!(id: params[:id], parent: current_user, child: @child)
       @questions = Array(@checkpoint_test.questions_json)
+    end
+
+    def set_checkpoint_print_child_name
+      @checkpoint_print_child_name =
+        @child.learners.order(:position).first&.display_name || @child.email
     end
   end
 end
