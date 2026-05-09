@@ -38,6 +38,33 @@ class CheckpointTestsGeneratorTest < ActiveSupport::TestCase
     assert_operator mc_count, :>=, required_mc
   end
 
+  def test_falls_back_to_keyword_based_multiple_choice_when_quiz_payload_has_no_mc
+    parent = create_parent(email: "parent-generator-fallback@example.com")
+    child = create_child(parent:, email: "child-generator-fallback@example.com")
+    subject = "Mathematics"
+
+    20.times do |idx|
+      lesson = Lesson.create!(
+        title: "Fallback lesson #{idx + 1}",
+        external_url: "https://example.com/fallback/#{idx + 1}",
+        subject: subject,
+        unit: "Unit #{(idx / 5) + 1}",
+        year_group_key: child.learners.first.year_group_key,
+        quizzes_json: { "starterQuiz" => [], "exitQuiz" => [] },
+        summary_json: summary_payload(idx)
+      )
+      LessonCompletion.create!(user: child, lesson:, completed_at: Time.current - idx.hours)
+    end
+
+    checkpoint_test = CheckpointTests::Generator.call(parent:, child:, subject:)
+    questions = Array(checkpoint_test.questions_json)
+    mc_count = questions.count { |q| q["type"] == "multiple_choice" }
+    required_mc = (questions.size * 0.7).floor
+
+    assert_operator questions.size, :>=, 40
+    assert_operator mc_count, :>=, required_mc
+  end
+
   private
 
   def quiz_payload(seed)
