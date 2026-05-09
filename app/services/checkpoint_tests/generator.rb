@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "set"
+require "cgi"
 
 module CheckpointTests
   class Generator
@@ -139,18 +140,18 @@ module CheckpointTests
     end
 
     def question_prompt(question)
-      question["questionStem"].to_s.strip.presence ||
-        question["question"].to_s.strip.presence ||
-        question["prompt"].to_s.strip
+      normalize_text(question["questionStem"]) ||
+        normalize_text(question["question"]) ||
+        normalize_text(question["prompt"])
     end
 
     def answer_options(question)
       Array(question["answers"]).map do |answer|
         next unless answer.is_a?(Hash)
 
-        answer["answer"].to_s.strip.presence ||
-          answer["answerText"].to_s.strip.presence ||
-          answer["text"].to_s.strip
+        normalize_text(answer["answer"]) ||
+          normalize_text(answer["answerText"]) ||
+          normalize_text(answer["text"])
       end.compact
     end
 
@@ -242,6 +243,19 @@ module CheckpointTests
       end
 
       rows
+    end
+
+    def normalize_text(value)
+      raw = value.is_a?(String) ? value : value.to_s
+      return nil if raw.blank?
+
+      cleaned = CGI.unescapeHTML(raw)
+      cleaned = cleaned.gsub(/<[^>]+>/, " ")
+      cleaned = cleaned.gsub(/\s+/, " ").strip
+      return nil if cleaned.blank?
+      return nil if cleaned.match?(/\A[\p{Punct}\s]+\z/)
+
+      cleaned
     end
 
     def free_text_pool(lessons)

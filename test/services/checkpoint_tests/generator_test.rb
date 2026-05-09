@@ -65,6 +65,45 @@ class CheckpointTestsGeneratorTest < ActiveSupport::TestCase
     assert_operator mc_count, :>=, required_mc
   end
 
+  def test_rejects_visually_empty_quiz_options_and_uses_meaningful_mc_content
+    parent = create_parent(email: "parent-generator-empty-options@example.com")
+    child = create_child(parent:, email: "child-generator-empty-options@example.com")
+    subject = "English"
+
+    20.times do |idx|
+      lesson = Lesson.create!(
+        title: "Empty options lesson #{idx + 1}",
+        external_url: "https://example.com/empty-options/#{idx + 1}",
+        subject: subject,
+        unit: "Unit #{(idx / 5) + 1}",
+        year_group_key: child.learners.first.year_group_key,
+        quizzes_json: {
+          "starterQuiz" => [
+            {
+              "questionType" => "multiple-choice",
+              "questionStem" => "Which sentence best explains the main idea?",
+              "answers" => [
+                { "answer" => "   ", "distractor" => true },
+                { "answer" => "&nbsp;", "distractor" => true },
+                { "answer" => "<b> </b>", "distractor" => false },
+                { "answer" => "\n\t", "distractor" => true }
+              ]
+            }
+          ],
+          "exitQuiz" => []
+        },
+        summary_json: summary_payload(idx)
+      )
+      LessonCompletion.create!(user: child, lesson:, completed_at: Time.current - idx.minutes)
+    end
+
+    checkpoint_test = CheckpointTests::Generator.call(parent:, child:, subject:)
+    mc_questions = Array(checkpoint_test.questions_json).select { |q| q["type"] == "multiple_choice" }
+
+    assert mc_questions.any?
+    assert mc_questions.none? { |q| Array(q["options"]).any? { |opt| opt.to_s.strip.blank? } }
+  end
+
   private
 
   def quiz_payload(seed)
