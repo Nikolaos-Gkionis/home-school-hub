@@ -15,6 +15,8 @@ module Parent
     def child
       @child = current_user.children.find(params[:id])
       @metrics = Insights::Summary.call(viewer: current_user, scope_user: @child)
+      @eligible_checkpoint_subjects = CheckpointTest.eligible_subjects_for(@child)
+      @checkpoint_tests = CheckpointTest.where(parent: current_user, child: @child).recent_first.limit(10)
     end
 
     def edit_child

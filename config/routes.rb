@@ -16,6 +16,13 @@ Rails.application.routes.draw do
     get "children/:id/edit", to: "families#edit_child", as: :edit_child
     patch "children/:id", to: "families#update_child", as: :update_child
     delete "children/:id", to: "families#destroy_child", as: :remove_child
+    resources :children, only: [] do
+      resources :checkpoint_tests, only: [ :create, :show ] do
+        member do
+          get :answer_key
+        end
+      end
+    end
   end
 
   namespace :child do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_17_130439) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_09_083000) do
   create_table "badges", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -18,6 +18,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_17_130439) do
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_badges_on_key", unique: true
+  end
+
+  create_table "checkpoint_tests", force: :cascade do |t|
+    t.integer "child_id", null: false
+    t.integer "completed_lessons_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.integer "parent_id", null: false
+    t.integer "question_count", default: 0, null: false
+    t.json "questions_json", default: [], null: false
+    t.string "subject", null: false
+    t.json "units_json", default: [], null: false
+    t.datetime "updated_at", null: false
+    t.index ["child_id", "subject", "created_at"], name: "index_checkpoint_tests_on_child_id_and_subject_and_created_at"
+    t.index ["child_id"], name: "index_checkpoint_tests_on_child_id"
+    t.index ["parent_id"], name: "index_checkpoint_tests_on_parent_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -161,6 +176,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_17_130439) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  add_foreign_key "checkpoint_tests", "users", column: "child_id"
+  add_foreign_key "checkpoint_tests", "users", column: "parent_id"
   add_foreign_key "invitations", "users", column: "parent_id"
   add_foreign_key "learners", "users"
   add_foreign_key "lesson_completions", "lessons"

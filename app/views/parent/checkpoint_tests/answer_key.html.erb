@@ -1,0 +1,34 @@
+<% content_for :title, "Checkpoint test answers — HomeSchool Hub" %>
+
+<div class="mx-auto w-full max-w-4xl space-y-4 pb-8">
+  <div class="rounded-xl border border-[var(--color-border)] bg-white p-4 text-black shadow-sm print:shadow-none">
+    <div class="mb-4 flex items-center justify-between border-b border-gray-300 pb-3">
+      <div>
+        <h1 class="text-xl font-bold">Checkpoint test (answer key)</h1>
+        <p class="text-sm">
+          Subject: <strong><%= @checkpoint_test.subject %></strong> ·
+          Child: <strong><%= @child.email %></strong>
+        </p>
+      </div>
+      <button type="button" onclick="window.print();" class="rounded-md border border-gray-500 px-3 py-1 text-xs font-semibold text-gray-800 print:hidden">
+        Print
+      </button>
+    </div>
+
+    <ol class="space-y-3 pl-5">
+      <% @questions.each_with_index do |question, index| %>
+        <li>
+          <p class="font-medium"><%= index + 1 %>. <%= question["prompt"] %></p>
+          <p class="text-sm"><strong>Answer:</strong> <%= question["answer"] %></p>
+          <p class="text-xs text-gray-600"><%= question["lesson_title"] %> · <%= question["unit"] %></p>
+        </li>
+      <% end %>
+    </ol>
+  </div>
+
+  <div class="print:hidden">
+    <%= link_to "Open questions file", parent_child_checkpoint_test_path(@child, @checkpoint_test), class: "text-sm font-medium text-[var(--color-accent)] underline" %>
+    ·
+    <%= link_to "Back to child details", parent_child_path(@child), class: "text-sm font-medium text-[var(--color-accent)] underline" %>
+  </div>
+</div>
