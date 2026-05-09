@@ -4,6 +4,8 @@ require "set"
 
 module CheckpointTests
   class Generator
+    MULTIPLE_CHOICE_RATIO = 0.7
+
     class Error < StandardError; end
 
     class << self
@@ -56,7 +58,7 @@ module CheckpointTests
       free_pool = free_text_pool(lessons)
       target = CheckpointTest::TARGET_QUESTION_COUNT
 
-      mc_target = [ (target * 0.55).round, mc_pool.size ].min
+      mc_target = [ (target * MULTIPLE_CHOICE_RATIO).round, mc_pool.size ].min
       free_target = [ target - mc_target, free_pool.size ].min
       remaining = target - (mc_target + free_target)
 

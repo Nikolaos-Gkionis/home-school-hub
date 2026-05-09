@@ -31,6 +31,11 @@ class CheckpointTestsGeneratorTest < ActiveSupport::TestCase
     types = Array(checkpoint_test.questions_json).map { |q| q["type"] }.uniq
     assert_includes types, "multiple_choice"
     assert_includes types, "free_text"
+
+    questions = Array(checkpoint_test.questions_json)
+    mc_count = questions.count { |q| q["type"] == "multiple_choice" }
+    required_mc = (questions.size * 0.7).floor
+    assert_operator mc_count, :>=, required_mc
   end
 
   private
