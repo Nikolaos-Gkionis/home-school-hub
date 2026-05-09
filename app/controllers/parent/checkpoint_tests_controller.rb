@@ -29,7 +29,18 @@ module Parent
     private
 
     def set_child
-      @child = current_user.children.find(params[:child_id])
+      child_id = params[:child_id].to_i
+
+      @child = current_user.children.find_by(id: child_id)
+      return if @child
+
+      # Families without invited child accounts log activity on the parent account itself.
+      if current_user.children.none? && child_id == current_user.id
+        @child = current_user
+        return
+      end
+
+      raise ActiveRecord::RecordNotFound
     end
 
     def set_checkpoint_test

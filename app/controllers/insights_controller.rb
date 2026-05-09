@@ -18,6 +18,19 @@ class InsightsController < ApplicationController
     @insights_filter_id = filter_id.to_s
     @metrics = Insights::Summary.call(viewer: current_user, scope_user: @scope_user)
     @children = current_user.parent? ? current_user.children.includes(:learners).order(:email).to_a : []
+    @checkpoint_child =
+      if current_user.parent? && @scope_user&.learner?
+        @scope_user
+      elsif current_user.parent? && current_user.children.none?
+        current_user
+      end
+    @eligible_checkpoint_subjects = @checkpoint_child ? CheckpointTest.eligible_subjects_for(@checkpoint_child) : []
+    @recent_checkpoint_tests =
+      if @checkpoint_child
+        CheckpointTest.where(parent: current_user, child: @checkpoint_child).recent_first.limit(10)
+      else
+        []
+      end
   end
 
   private
