@@ -1,4 +1,17 @@
 <% content_for :title, "Checkpoint test questions — HomeSchool Hub" %>
+<% content_for :head do %>
+  <style media="print">
+    /* Let the browser paginate the full document instead of clipping to the app viewport shell. */
+    html,
+    body,
+    #main-content,
+    #main-content > div {
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+    }
+  </style>
+<% end %>
 
 <div class="mx-auto w-full max-w-4xl space-y-4 pb-8">
   <div class="rounded-xl border border-[var(--color-border)] bg-white p-4 text-black shadow-sm print:shadow-none">
