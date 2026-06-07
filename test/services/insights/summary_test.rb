@@ -107,4 +107,48 @@ class Insights::SummaryTest < ActiveSupport::TestCase
     assert_equal 2.0, metrics[:daily_time_totals][day_one.to_s]
     assert_equal 4.0, metrics[:daily_time_totals][day_two.to_s]
   end
+
+  test "multiple sessions on the same day aggregate into one daily column" do
+    parent = User.create!(
+      email: "insights-parent-#{SecureRandom.hex(4)}@example.com",
+      password: "password123456",
+      password_confirmation: "password123456",
+      role: User::ROLE_PARENT
+    )
+    child = User.create!(
+      email: "insights-child-#{SecureRandom.hex(4)}@example.com",
+      password: "password123456",
+      password_confirmation: "password123456",
+      role: User::ROLE_LEARNER,
+      parent_id: parent.id
+    )
+    lessons = 3.times.map do |idx|
+      Lesson.create!(
+        year_group_key: "year_8",
+        subject: "Science",
+        unit: "Unit #{idx}",
+        title: "Same-day lesson #{idx}",
+        external_url: "https://www.thenational.academy/pupils/lessons/same-day-#{idx}",
+        oak_lesson_slug: "same-day-#{SecureRandom.hex(4)}",
+        content_mode: Lesson::CONTENT_MODE_OAK_HUB,
+        position: idx + 1
+      )
+    end
+
+    day = Date.new(2026, 6, 7)
+    lessons.each_with_index do |lesson, idx|
+      LessonCompletion.create!(user: child, lesson:, completed_at: day.to_time.change(hour: 9 + idx))
+      LessonTimeLog.create!(user: child, lesson:, logged_on: day, seconds: 60 * (idx + 1))
+    end
+
+    metrics = Insights::Summary.call(viewer: parent, scope_user: child)
+
+    assert_equal [ day.to_s ], metrics[:daily_lesson_dates]
+    assert_equal 3, metrics[:daily_lesson_rows].sole[:by_date][day.to_s]
+    assert_equal 3, metrics[:daily_lesson_totals][day.to_s]
+
+    assert_equal [ day.to_s ], metrics[:daily_time_dates]
+    assert_equal 6.0, metrics[:daily_time_rows].sole[:by_date][day.to_s]
+    assert_equal 6.0, metrics[:daily_time_totals][day.to_s]
+  end
 end

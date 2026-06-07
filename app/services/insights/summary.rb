@@ -103,15 +103,33 @@ module Insights
 
     def daily_lesson_breakdown(users)
       user_ids = users.map(&:id)
-      grouped = LessonCompletion.where(user_id: user_ids)
-                               .group(:user_id)
-                               .group("DATE(completed_at)")
-                               .count
+      grouped = Hash.new(0)
+      LessonCompletion.where(user_id: user_ids).pluck(:user_id, :completed_at).each do |user_id, completed_at|
+        grouped[[ user_id, calendar_date(completed_at) ]] += 1
+      end
 
-      all_dates = grouped.keys.map { |(_, date)| date.to_s }.uniq.sort.last(14)
+      build_daily_rows(users, grouped) { |count| count.to_i }
+    end
+
+    def daily_time_breakdown(users)
+      user_ids = users.map(&:id)
+      grouped = Hash.new(0)
+      LessonTimeLog.where(user_id: user_ids).pluck(:user_id, :logged_on, :seconds).each do |user_id, logged_on, seconds|
+        grouped[[ user_id, calendar_date(logged_on) ]] += seconds.to_i
+      end
+
+      result = build_daily_rows(users, grouped) { |seconds| (seconds.to_f / 60.0).round(1) }
+      result[:rows].each { |row| row[:total] = row[:total].round(1) }
+      result[:totals] = result[:totals].transform_values { |total| total.round(1) }
+      result
+    end
+
+    # One column per calendar day, no matter how many logins/sessions that day.
+    def build_daily_rows(users, grouped)
+      all_dates = grouped.keys.map { |(_, date)| date }.uniq.sort.last(14)
       rows = users.map do |user|
         by_date = all_dates.index_with do |date|
-          grouped.fetch([ user.id, date ], 0)
+          yield grouped[[ user.id, date ]]
         end
 
         {
@@ -122,40 +140,20 @@ module Insights
         }
       end
 
-      totals = all_dates.index_with { |date| rows.sum { |row| row[:by_date][date].to_i } }
+      totals = all_dates.index_with { |date| rows.sum { |row| row[:by_date][date].to_f } }
 
       { dates: all_dates, rows: rows, totals: totals }
     end
 
-    def daily_time_breakdown(users)
-      user_ids = users.map(&:id)
-      grouped = LessonTimeLog.where(user_id: user_ids)
-                             .group(:user_id)
-                             .group(:logged_on)
-                             .sum(:seconds)
-      grouped_by_string_date = grouped.each_with_object({}) do |((uid, date), seconds), acc|
-        acc[[ uid, date.to_s ]] = seconds
+    def calendar_date(value)
+      case value
+      when Date
+        value.to_s
+      when Time, DateTime
+        value.in_time_zone.to_date.to_s
+      else
+        value.to_time.in_time_zone.to_date.to_s
       end
-
-      all_dates = grouped.keys.map { |(_, date)| date.to_s }.uniq.sort.last(14)
-      rows = users.map do |user|
-        by_date = all_dates.index_with do |date|
-          (grouped_by_string_date.fetch([ user.id, date ], 0).to_f / 60.0).round(1)
-        end
-
-        {
-          user_id: user.id,
-          label: user.email,
-          by_date: by_date,
-          total: by_date.values.sum.round(1)
-        }
-      end
-
-      totals = all_dates.index_with do |date|
-        rows.sum { |row| row[:by_date][date].to_f }.round(1)
-      end
-
-      { dates: all_dates, rows: rows, totals: totals }
     end
   end
 end
