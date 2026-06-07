@@ -4,6 +4,7 @@ class InsightsController < ApplicationController
   before_action :authenticate_user!
 
   INSIGHTS_CHILD_SESSION_KEY = :insights_child_id
+  DAILY_DATES_PER_PAGE = 5
 
   def show
     filter_id = resolve_filter_child_id
@@ -17,6 +18,8 @@ class InsightsController < ApplicationController
 
     @insights_filter_id = filter_id.to_s
     @metrics = Insights::Summary.call(viewer: current_user, scope_user: @scope_user)
+    @daily_dates_per_page = DAILY_DATES_PER_PAGE
+    assign_daily_date_page!
     @children = current_user.parent? ? current_user.children.includes(:learners).order(:email).to_a : []
     @checkpoint_child =
       if current_user.parent? && @scope_user&.learner?
@@ -58,5 +61,24 @@ class InsightsController < ApplicationController
     return u if u && current_user.family_can_view?(u)
 
     nil
+  end
+
+  def assign_daily_date_page!
+    all_dates = (@metrics[:daily_lesson_dates] + @metrics[:daily_time_dates]).uniq.sort
+    @daily_dates_total_count = all_dates.size
+    @daily_dates = []
+    @daily_dates_page = 1
+    @daily_dates_total_pages = 0
+    return if all_dates.empty?
+
+    per_page = DAILY_DATES_PER_PAGE
+    @daily_dates_total_pages = (all_dates.size.to_f / per_page).ceil
+    @daily_dates_page = params.fetch(:daily_page, 1).to_i
+    @daily_dates_page = 1 if @daily_dates_page < 1
+    @daily_dates_page = @daily_dates_total_pages if @daily_dates_page > @daily_dates_total_pages
+
+    end_index = all_dates.size - ((@daily_dates_page - 1) * per_page)
+    start_index = [ end_index - per_page, 0 ].max
+    @daily_dates = all_dates[start_index...end_index] || []
   end
 end

@@ -108,7 +108,7 @@ module Insights
         grouped[[ user_id, calendar_date(completed_at) ]] += 1
       end
 
-      build_daily_rows(users, grouped) { |count| count.to_i }
+      build_daily_rows(users, grouped, integer_totals: true) { |count| count.to_i }
     end
 
     def daily_time_breakdown(users)
@@ -125,8 +125,8 @@ module Insights
     end
 
     # One column per calendar day, no matter how many logins/sessions that day.
-    def build_daily_rows(users, grouped)
-      all_dates = grouped.keys.map { |(_, date)| date }.uniq.sort.last(14)
+    def build_daily_rows(users, grouped, integer_totals: false)
+      all_dates = grouped.keys.map { |(_, date)| date }.uniq.sort
       rows = users.map do |user|
         by_date = all_dates.index_with do |date|
           yield grouped[[ user.id, date ]]
@@ -140,7 +140,10 @@ module Insights
         }
       end
 
-      totals = all_dates.index_with { |date| rows.sum { |row| row[:by_date][date].to_f } }
+      totals = all_dates.index_with do |date|
+        sum = rows.sum { |row| row[:by_date][date].to_f }
+        integer_totals ? sum.to_i : sum
+      end
 
       { dates: all_dates, rows: rows, totals: totals }
     end

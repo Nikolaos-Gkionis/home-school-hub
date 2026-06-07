@@ -1,0 +1,20 @@
+<% if @daily_dates_total_pages > 1 %>
+  <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--color-text-muted)]">
+    <p class="whitespace-nowrap">
+      <%= insights_day_label(@daily_dates.first) %> – <%= insights_day_label(@daily_dates.last) %>
+      · page <%= @daily_dates_page %> of <%= @daily_dates_total_pages %>
+    </p>
+    <div class="flex items-center gap-2">
+      <% if @daily_dates_page < @daily_dates_total_pages %>
+        <%= link_to "Older",
+            insights_daily_page_url(@daily_dates_page + 1),
+            class: "rounded-md border border-[var(--color-border)] px-2 py-1 font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-white/5" %>
+      <% end %>
+      <% if @daily_dates_page > 1 %>
+        <%= link_to "Newer",
+            insights_daily_page_url(@daily_dates_page - 1),
+            class: "rounded-md border border-[var(--color-border)] px-2 py-1 font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-white/5" %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
