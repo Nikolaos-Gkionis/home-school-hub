@@ -69,6 +69,6 @@ gem "devise", "~> 5.0"
 group :test do
   # System / browser tests + axe-core audits (contrast, ARIA, keyboard, etc.)
   gem "capybara", "~> 3.40"
-  gem "selenium-webdriver", "~> 4.43"
+  gem "selenium-webdriver", "~> 4.44"
   gem "capybara_accessibility_audit", "~> 0.2.0"
 end
