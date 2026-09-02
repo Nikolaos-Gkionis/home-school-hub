@@ -115,5 +115,21 @@ module Oak
       assert lesson.assets_json.is_a?(Hash) # kept previous assets when fetch failed
       assert lesson.assets_json["assets"].present?
     end
+
+    test "reports rate_limited when Oak returns 429" do
+      lesson = Lesson.create!(
+        year_group_key: "year_8",
+        subject: "Science",
+        unit: "Forces",
+        title: "Gravity",
+        external_url: "https://www.thenational.academy/pupils/lessons/rate-limited-lesson",
+        oak_lesson_slug: "rate-limited-lesson",
+        content_mode: Lesson::CONTENT_MODE_OAK_HUB
+      )
+
+      fetcher = ->(_path) { raise ApiClient::RateLimited.new("slow down") }
+      result = LessonHydrator.new(lesson, fetcher: fetcher).call
+      assert_equal :rate_limited, result.reason
+    end
   end
 end

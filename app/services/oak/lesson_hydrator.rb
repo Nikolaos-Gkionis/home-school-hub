@@ -49,6 +49,8 @@ module Oak
       HydrationResult.new(lesson: @lesson, reason: nil)
     rescue ApiClient::Unauthorized
       HydrationResult.new(lesson: @lesson, reason: :unauthorized)
+    rescue ApiClient::RateLimited
+      HydrationResult.new(lesson: @lesson, reason: :rate_limited)
     rescue JSON::ParserError => e
       Rails.logger.warn("[Oak::LessonHydrator] JSON parse error: #{e.message}")
       HydrationResult.new(lesson: @lesson, reason: :bad_response)
@@ -72,7 +74,7 @@ module Oak
       return data if data.is_a?(Hash)
 
       wrap_fallback(fallback)
-    rescue ApiClient::Unauthorized
+    rescue ApiClient::Unauthorized, ApiClient::RateLimited
       raise
     rescue StandardError => e
       Rails.logger.warn("[Oak::LessonHydrator] #{path}: #{e.class}: #{e.message}")
@@ -81,6 +83,8 @@ module Oak
 
     def fetch_transcript_json(slug)
       @fetcher.call("/lessons/#{slug}/transcript")
+    rescue ApiClient::RateLimited
+      raise
     rescue ApiClient::BadResponse => e
       raise unless e.http_code == 404
 

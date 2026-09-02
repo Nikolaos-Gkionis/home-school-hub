@@ -17,7 +17,9 @@ module Oak
 
           next if lesson.summary_json.is_a?(Hash) && lesson.summary_json["lessonTitle"].present?
 
-          LessonHydrator.call(lesson)
+          result = LessonHydrator.call(lesson)
+          break if result.reason == :rate_limited
+
           hydrated += 1
           sleep(sleep_s) if sleep_s.positive?
         end

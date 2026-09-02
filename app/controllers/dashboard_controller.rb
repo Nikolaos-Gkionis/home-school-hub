@@ -17,8 +17,12 @@ class DashboardController < ApplicationController
     return rel if rel.exists?
     return rel unless Oak::ApiClient.configured?
 
-    # If no lessons are present yet, bootstrap them from Oak automatically.
-    Oak::Importer.call
+    # If no lessons are present yet, bootstrap this learner's year from Oak.
+    # Do not hydrate the whole catalogue here — that is what tripped Oak's rate limit.
+    yk = current_user.active_learner&.year_group_key
+    return rel if yk.blank?
+
+    Oak::Importer.call(year_groups: [ yk ], hydrate: false)
     current_user.visible_lessons_relation
   rescue StandardError => e
     Rails.logger.warn("[DashboardController] auto-sync failed: #{e.class}: #{e.message}")

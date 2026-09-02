@@ -13,10 +13,12 @@ module Oak
       end
     end
 
-    def initialize(limit_per_subject: nil)
+    def initialize(limit_per_subject: nil, year_groups: nil, hydrate: nil)
       raw = limit_per_subject || ENV["OAK_IMPORT_LIMIT"].presence&.to_i
       # Treat 0 as unset so a mistaken OAK_IMPORT_LIMIT=0 does not skip all lessons.
       @limit_per_subject = raw&.nonzero?&.to_i
+      @year_groups = Array(year_groups).map(&:to_s).reject(&:blank?)
+      @hydrate = hydrate.nil? ? ENV["OAK_SKIP_POST_IMPORT_HYDRATE"] != "1" : hydrate
     end
 
     def call
@@ -25,11 +27,18 @@ module Oak
         return { created: 0, updated: 0, skipped: true, hydrated: 0 }
       end
 
+      created = 0
+      updated = 0
       cfg = load_config
-      year_groups = Array(cfg["year_groups"])
+      year_groups = years_to_import(Array(cfg["year_groups"]))
       subjects = Array(cfg["subjects"])
       created = 0
       updated = 0
+
+      if year_groups.empty?
+        Rails.logger.warn("[Oak::Importer] No year groups to import (check config/oak_curriculum.yml or OAK_SYNC_YEARS).")
+        return { created: 0, updated: 0, skipped: true, hydrated: 0 }
+      end
 
       year_groups.each do |year_key|
         ks = KeyStageForYear.call(year_key)
@@ -45,12 +54,15 @@ module Oak
       end
 
       hydrated = 0
-      if ENV["OAK_SKIP_POST_IMPORT_HYDRATE"] != "1"
+      if @hydrate
         r = PostImportHydrator.call
         hydrated = r[:hydrated].to_i
       end
 
       { created:, updated:, skipped: false, hydrated: }
+    rescue ApiClient::RateLimited => e
+      Rails.logger.error("[Oak::Importer] Stopped: #{e.message}")
+      { created:, updated:, hydrated: 0, error: e.message, rate_limited: true }
     rescue ApiClient::Unauthorized => e
       Rails.logger.error("[Oak::Importer] #{e.message}")
       { created: 0, updated: 0, hydrated: 0, error: e.message }
@@ -62,6 +74,15 @@ module Oak
       raise "Missing #{CONFIG_PATH}" unless CONFIG_PATH.exist?
 
       YAML.load_file(CONFIG_PATH)
+    end
+
+    # OAK_SYNC_YEARS=year_8 (comma or space separated) imports only those years.
+    def years_to_import(configured)
+      keys = configured.map(&:to_s)
+      wanted = @year_groups.presence || ENV["OAK_SYNC_YEARS"].to_s.split(/[\s,]+/).map(&:strip).reject(&:blank?)
+      return keys if wanted.blank?
+
+      keys & wanted
     end
 
     def import_subject_year!(year_key:, year_slug:, key_stage:, subject_slug:, display_name:)
@@ -87,6 +108,8 @@ module Oak
               "unitOrder" => i + 1
             }
           end
+        rescue ApiClient::RateLimited
+          raise
         rescue ApiClient::BadResponse => e
           Rails.logger.warn("[Oak::Importer] #{subject_slug} @ #{year_key} key-stages list: #{e.message}")
           return { created: 0, updated: 0 }
@@ -105,6 +128,8 @@ module Oak
         unit_summary =
           begin
             ApiClient.get_json("/units/#{unit_slug}/summary")
+          rescue ApiClient::RateLimited
+            raise
           rescue ApiClient::BadResponse => e
             if copyright_blocked_error?(e)
               Rails.logger.info("[Oak::Importer] #{subject_slug} @ #{year_key} unit #{unit_slug}: unit summary unavailable (copyright); using sequence assets + per-lesson summaries.")
@@ -161,6 +186,8 @@ module Oak
 
       phase = SequenceUnitList.sequence_phase(year_key)
       Array(ApiClient.get_json("/sequences/#{subject_slug}-#{phase}/assets?year=#{y}"))
+    rescue ApiClient::RateLimited
+      raise
     rescue ApiClient::BadResponse => e
       Rails.logger.warn("[Oak::Importer] sequence assets #{subject_slug} @ #{year_key}: #{e.message}")
       []
@@ -186,6 +213,8 @@ module Oak
         unit_slug: summary["unitSlug"].to_s,
         title: summary["lessonTitle"].to_s
       }
+    rescue ApiClient::RateLimited
+      raise
     rescue ApiClient::BadResponse
       @lesson_meta_cache[slug] = nil
     end

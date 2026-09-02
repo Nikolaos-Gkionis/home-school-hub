@@ -21,6 +21,8 @@ module Oak
       return nil unless block.is_a?(Hash)
 
       normalize_units_from_block(block)
+    rescue ApiClient::RateLimited
+      raise
     rescue ApiClient::BadResponse => e
       Rails.logger.warn("[Oak::SequenceUnitList] #{subject_slug} year #{year}: #{e.message}")
       nil
