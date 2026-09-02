@@ -6,6 +6,7 @@
 
 year_groups:
   - year_7
+  - year_8
 
 subjects:
   - slug: art

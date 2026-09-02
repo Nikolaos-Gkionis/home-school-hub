@@ -72,7 +72,8 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
     patch parent_update_child_path(child), params: {
       child: {
         child_name: "Updated Child Name",
-        email: "updated-child@example.com"
+        email: "updated-child@example.com",
+        year_group_key: child.learners.first.year_group_key
       }
     }
 
@@ -80,6 +81,49 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
     child.reload
     assert_equal "updated-child@example.com", child.email
     assert_equal "Updated Child Name", child.learners.order(:position).first.display_label
+  end
+
+  def test_parent_can_move_child_from_year_7_to_year_8
+    parent = create_parent(email: "parent-year-move@example.com")
+    child = create_child(parent:, email: "child-year-move@example.com", year_group_key: "year_7")
+
+    sign_in_as(parent)
+    patch parent_update_child_path(child), params: {
+      child: {
+        child_name: child.learners.first.display_name,
+        email: child.email,
+        year_group_key: "year_8"
+      }
+    }
+
+    assert_redirected_to parent_family_path
+    child.reload
+    assert_equal [ "year_8" ], child.learner_year_keys
+    assert_equal "year_8", child.active_learner.year_group_key
+  end
+
+  def test_child_can_activate_their_own_year
+    parent = create_parent(email: "parent-activate@example.com")
+    child = create_child(parent:, email: "child-activate@example.com", year_group_key: "year_7")
+    year_eight = child.learners.create!(year_group_key: "year_8")
+
+    sign_in_as(child)
+    patch activate_learner_path(year_eight)
+
+    assert_redirected_to child_dashboard_path
+    child.reload
+    assert_equal year_eight.id, child.active_learner_id
+  end
+
+  def test_child_cannot_add_a_school_year
+    parent = create_parent(email: "parent-no-add-year@example.com")
+    child = create_child(parent:, email: "child-no-add-year@example.com")
+
+    sign_in_as(child)
+    post learners_path, params: { year_group_key: "year_8" }
+
+    assert_redirected_to child_dashboard_path
+    assert_equal 1, child.learners.count
   end
 
   def test_invited_child_sign_up_links_parent_and_redirects_to_child_dashboard
@@ -151,7 +195,7 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
     parent
   end
 
-  def create_child(parent:, email:)
+  def create_child(parent:, email:, year_group_key: Curriculum::YearGroups.all_year_keys.first)
     child = User.create!(
       email:,
       password: "Password123!",
@@ -160,7 +204,7 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
       parent:,
       setup_completed_at: Time.current
     )
-    child.learners.create!(year_group_key: Curriculum::YearGroups.all_year_keys.first)
+    child.learners.create!(year_group_key:)
     child.update!(active_learner: child.learners.first)
     child
   end

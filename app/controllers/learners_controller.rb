@@ -4,7 +4,9 @@ class LearnersController < ApplicationController
   include RoleAccess
 
   before_action :authenticate_user!
-  before_action :require_parent!
+  # Adding/removing years is parent-only. Switching the active year is allowed
+  # for the signed-in owner (a child uses this from the sidebar).
+  before_action :require_parent!, except: :activate
 
   def new
     @phases = Curriculum::YearGroups::PHASES
@@ -29,7 +31,7 @@ class LearnersController < ApplicationController
   def activate
     learner = current_user.learners.find(params[:id])
     current_user.update!(active_learner: learner)
-    redirect_back fallback_location: parent_dashboard_path
+    redirect_back fallback_location: role_home_path
   end
 
   def destroy

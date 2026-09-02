@@ -13,8 +13,14 @@
     <% if @children.any? %>
       <ul class="space-y-2 text-sm">
         <% @children.each do |child| %>
+          <% year_key = child.active_learner&.year_group_key || child.learners.order(:position).first&.year_group_key %>
           <li class="flex items-center justify-between rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
-            <span><%= child.email %></span>
+            <span>
+              <%= child.email %>
+              <% if year_key.present? %>
+                <span class="text-xs text-[var(--color-text-muted)]">· <%= Curriculum::YearGroups.label_for_year(year_key) %></span>
+              <% end %>
+            </span>
             <div class="flex items-center gap-2">
               <%= link_to "Edit", parent_edit_child_path(child), class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
               <%= button_to "Remove",

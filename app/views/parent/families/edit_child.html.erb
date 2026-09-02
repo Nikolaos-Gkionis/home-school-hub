@@ -4,7 +4,7 @@
   <%= render "shared/hub_page_header",
       kicker: "Parent",
       title: "Edit child details",
-      description: "Update the child name shown in the app and their login email." %>
+      description: "Update the child name, login email, and school year. Changing year moves them onto that curriculum." %>
 
   <%= form_with url: parent_update_child_path(@child), method: :patch, scope: :child, class: "space-y-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm" do |f| %>
     <div>
@@ -15,6 +15,15 @@
     <div>
       <%= f.label :email, "Login email", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
       <%= f.email_field :email, value: @child.email, required: true, class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :year_group_key, "School year", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
+      <%= f.select :year_group_key,
+          Curriculum::YearGroups.all_year_keys.map { |k| [ Curriculum::YearGroups.label_for_year(k), k ] },
+          { selected: @year_group_key },
+          class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+      <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">Year 7 progress is kept. The lesson tree will show the year you pick here.</p>
     </div>
 
     <div class="flex items-center gap-2">

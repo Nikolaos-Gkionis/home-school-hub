@@ -138,6 +138,31 @@ class User < ApplicationRecord
       relation.first
   end
 
+  # A child's school year lives on a Learner row, not on the User.
+  # "Move" updates that row (or activates an existing row for the new year)
+  # so they see Year 8 instead of stacking a second unused year.
+  def move_to_year_group!(year_key)
+    yk = year_key.to_s
+    unless Curriculum::YearGroups.all_year_keys.include?(yk)
+      raise ArgumentError, "unknown year group: #{yk}"
+    end
+
+    target = learners.find_by(year_group_key: yk)
+    if target.nil?
+      primary = learners.order(:position).first
+      if primary
+        primary.update!(year_group_key: yk)
+        target = primary
+      else
+        target = learners.create!(year_group_key: yk)
+      end
+    end
+
+    update!(active_learner: target)
+    resync_hub_after_visible_scope_change!
+    target
+  end
+
   def resync_hub_after_visible_scope_change!
     rel = visible_lessons_relation
     allowed_ids = rel.pluck(:id)
