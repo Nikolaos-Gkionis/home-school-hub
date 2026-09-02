@@ -39,6 +39,8 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, child.email
     assert_includes response.body, invite.email
+    assert_includes response.body, "Change year"
+    assert_includes response.body, "Family"
   end
 
   def test_child_cannot_access_parent_family_page
@@ -124,6 +126,35 @@ class RoleFlowsTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to child_dashboard_path
     assert_equal 1, child.learners.count
+  end
+
+  def test_parent_dashboard_shows_change_year_for_each_child
+    parent = create_parent(email: "parent-dash-year@example.com")
+    child = create_child(parent:, email: "child-dash-year@example.com", year_group_key: "year_7")
+
+    sign_in_as(parent)
+    get parent_dashboard_path
+
+    assert_response :success
+    assert_includes response.body, "Change year"
+    assert_includes response.body, "Year 7"
+    assert_includes response.body, parent_edit_child_path(child)
+  end
+
+  def test_child_can_switch_year_from_profile
+    parent = create_parent(email: "parent-profile-year@example.com")
+    child = create_child(parent:, email: "child-profile-year@example.com", year_group_key: "year_7")
+
+    sign_in_as(child)
+    get child_profile_path
+    assert_response :success
+    assert_includes response.body, "School year"
+    assert_includes response.body, "Switch year"
+
+    patch child_profile_path, params: { year_group_key: "year_8" }
+    assert_redirected_to child_dashboard_path
+    child.reload
+    assert_equal "year_8", child.current_year_group_key
   end
 
   def test_invited_child_sign_up_links_parent_and_redirects_to_child_dashboard

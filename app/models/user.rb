@@ -60,6 +60,15 @@ class User < ApplicationRecord
     learners.distinct.pluck(:year_group_key).compact
   end
 
+  # The year currently shown in the lesson tree (active slot, or the first slot).
+  def current_year_group_key
+    active_learner&.year_group_key || learners.order(:position).first&.year_group_key
+  end
+
+  def family_display_name
+    learners.order(:position).first&.display_name || email
+  end
+
   def needs_setup?
     false
   end

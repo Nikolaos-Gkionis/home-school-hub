@@ -21,8 +21,8 @@ module Parent
 
     def edit_child
       @child = current_user.children.find(params[:id])
-      @child_name = primary_child_name(@child)
-      @year_group_key = current_year_group_key(@child)
+      @child_name = @child.family_display_name
+      @year_group_key = @child.current_year_group_key
     end
 
     def update_child
@@ -33,7 +33,7 @@ module Parent
 
       unless Curriculum::YearGroups.all_year_keys.include?(new_year)
         @child_name = new_name
-        @year_group_key = current_year_group_key(@child)
+        @year_group_key = @child.current_year_group_key
         redirect_to parent_edit_child_path(@child), alert: "That school year is not available."
         return
       end
@@ -48,7 +48,7 @@ module Parent
       redirect_to parent_family_path, notice: "Updated #{new_email} — now on #{year_label}."
     rescue ActiveRecord::RecordInvalid
       @child_name = new_name
-      @year_group_key = new_year.presence || current_year_group_key(@child)
+      @year_group_key = new_year.presence || @child.current_year_group_key
       render :edit_child, status: :unprocessable_entity
     end
 
@@ -67,14 +67,6 @@ module Parent
 
     def child_params
       params.require(:child).permit(:child_name, :email, :year_group_key)
-    end
-
-    def primary_child_name(child)
-      child.learners.order(:position).first&.display_name || child.email
-    end
-
-    def current_year_group_key(child)
-      child.active_learner&.year_group_key || child.learners.order(:position).first&.year_group_key
     end
   end
 end

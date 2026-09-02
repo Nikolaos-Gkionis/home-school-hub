@@ -18,6 +18,22 @@
   </section>
 
   <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
+    <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">School year</h2>
+    <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+      This chooses which lessons appear in <strong class="text-[var(--color-text)]">My learning</strong>.
+    </p>
+    <%= form_with url: child_profile_path, method: :patch, class: "mt-4 space-y-3" do %>
+      <div>
+        <%= label_tag :year_group_key, "School year", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
+        <%= select_tag :year_group_key,
+            options_for_select(Curriculum::YearGroups.select_options, @year_group_key),
+            class: "mt-1.5 block w-full max-w-xs rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+      </div>
+      <%= submit_tag "Switch year", class: "cursor-pointer rounded-md bg-[var(--color-accent)] px-3 py-2 text-xs font-semibold text-[var(--color-bg)]" %>
+    <% end %>
+  </section>
+
+  <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
     <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">My progress</h2>
     <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div>

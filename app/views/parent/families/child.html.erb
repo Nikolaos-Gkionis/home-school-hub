@@ -3,8 +3,12 @@
 <div class="mx-auto w-full max-w-4xl space-y-6 pb-8">
   <%= render "shared/hub_page_header",
       kicker: "Parent",
-      title: @child.email,
-      description: "Progress for this child account only." %>
+      title: @child.family_display_name,
+      description: "#{@child.email} · #{Curriculum::YearGroups.label_for_year(@child.current_year_group_key)}" %>
+
+  <p>
+    <%= link_to "Change school year", parent_edit_child_path(@child), class: "inline-flex rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+  </p>
 
   <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
     <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">

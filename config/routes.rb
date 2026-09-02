@@ -28,6 +28,7 @@ Rails.application.routes.draw do
   namespace :child do
     get "dashboard", to: "dashboards#show"
     get "profile", to: "profiles#show"
+    patch "profile", to: "profiles#update"
   end
 
   get "setup/years", to: "setup#years", as: :setup_years

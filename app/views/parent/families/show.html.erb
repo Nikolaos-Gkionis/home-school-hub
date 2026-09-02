@@ -3,8 +3,8 @@
 <div class="mx-auto w-full max-w-5xl space-y-6 pb-8">
   <%= render "shared/hub_page_header",
       kicker: "Parent",
-      title: "Sent invites",
-      description: "Track all invitations from your parent account." %>
+      title: "Family",
+      description: "Manage each child's school year, login details, and invitations." %>
 
   <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
     <div class="mb-3 flex items-center justify-between gap-3">
@@ -13,16 +13,18 @@
     <% if @children.any? %>
       <ul class="space-y-2 text-sm">
         <% @children.each do |child| %>
-          <% year_key = child.active_learner&.year_group_key || child.learners.order(:position).first&.year_group_key %>
-          <li class="flex items-center justify-between rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
+          <% year_key = child.current_year_group_key %>
+          <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
             <span>
-              <%= child.email %>
+              <strong class="text-[var(--color-text)]"><%= child.family_display_name %></strong>
+              <span class="text-[var(--color-text-muted)]"> · <%= child.email %></span>
               <% if year_key.present? %>
-                <span class="text-xs text-[var(--color-text-muted)]">· <%= Curriculum::YearGroups.label_for_year(year_key) %></span>
+                <span class="mt-0.5 block text-xs text-[var(--color-text-muted)]">School year: <%= Curriculum::YearGroups.label_for_year(year_key) %></span>
               <% end %>
             </span>
             <div class="flex items-center gap-2">
-              <%= link_to "Edit", parent_edit_child_path(child), class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+              <%= link_to "Change year", parent_edit_child_path(child), class: "rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+              <%= link_to "Edit details", parent_edit_child_path(child), class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
               <%= button_to "Remove",
                   parent_remove_child_path(child),
                   method: :delete,

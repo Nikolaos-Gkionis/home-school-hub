@@ -81,7 +81,10 @@
                         form: { class: "w-full" },
                         class: "sidebar-nav-link flex w-full items-center gap-2 truncate rounded-md px-2 py-1.5 text-left text-[11px] #{active ? "border-l-4 border-[var(--color-accent)] bg-white/5 font-medium text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:bg-white/5"}" do %>
                       <i class="fa-solid fa-graduation-cap fa-fw shrink-0 text-[10px]" aria-hidden="true"></i>
-                      <span class="sidebar-nav-label truncate"><%= lr.display_name %></span>
+                      <span class="sidebar-nav-label min-w-0 truncate">
+                        <%= lr.display_name %>
+                        <span class="font-normal text-[var(--color-text-muted)]"> · <%= Curriculum::YearGroups.label_for_year(lr.year_group_key) %></span>
+                      </span>
                     <% end %>
                   <% end %>
                 </div>

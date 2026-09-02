@@ -45,6 +45,10 @@ module Curriculum
       year_key.to_s.humanize
     end
 
+    def self.select_options
+      all_year_keys.map { |k| [ label_for_year(k), k ] }
+    end
+
     def self.phases_for_years(year_keys)
       set = year_keys.map(&:to_s).to_set
       PHASES.select { |p| p[:years].any? { |y| set.include?(y[:key]) } }

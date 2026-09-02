@@ -20,7 +20,7 @@
     <div>
       <%= f.label :year_group_key, "School year", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
       <%= f.select :year_group_key,
-          Curriculum::YearGroups.all_year_keys.map { |k| [ Curriculum::YearGroups.label_for_year(k), k ] },
+          Curriculum::YearGroups.select_options,
           { selected: @year_group_key },
           class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
       <p class="mt-1 text-[11px] text-[var(--color-text-muted)]">Year 7 progress is kept. The lesson tree will show the year you pick here.</p>

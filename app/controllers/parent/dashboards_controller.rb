@@ -9,6 +9,7 @@ module Parent
 
     def show
       @metrics = Insights::Summary.call(viewer: current_user, scope_user: nil)
+      @children = current_user.children.includes(:learners, :active_learner).order(:email)
       @sent_invitations = current_user.invitations.order(created_at: :desc)
     end
   end
