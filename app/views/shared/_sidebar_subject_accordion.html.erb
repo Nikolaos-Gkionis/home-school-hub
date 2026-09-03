@@ -42,15 +42,31 @@
         <% end %>
 
         <div class="ml-0.5 space-y-0.5 border-l border-[var(--color-border)]/25 py-0.5 pl-1.5">
-          <% lessons.sort_by(&:position).each do |lesson| %>
-            <% active = highlight.present? && highlight.to_i == lesson.id %>
-            <%= link_to current_user.parent? ? parent_dashboard_path(lesson_id: lesson.id) : child_dashboard_path(lesson_id: lesson.id),
-                class: "flex min-w-0 items-start gap-1.5 rounded px-1.5 py-1 text-[11px] hover:bg-white/5 sm:text-xs #{active ? "bg-white/10 font-semibold text-[var(--color-accent)] ring-1 ring-inset ring-[var(--color-accent)]/50" : "text-[var(--color-text-muted)]"}",
-                **(active ? { aria: { current: "page" } } : {}) do %>
-              <i class="fa-solid fa-book fa-fw mt-0.5 shrink-0 text-[9px] opacity-70" aria-hidden="true"></i>
-              <span class="min-w-0 flex-1 leading-snug">
-                <span class="line-clamp-3 break-words"><%= lesson.title %></span>
+          <% locked = !user.unit_unlocked?(subject, unit, year_group_key: year_key) %>
+          <% unlock_plan = locked ? user.plan_for_unit(subject, unit, year_group_key: year_key) : nil %>
+          <% if locked %>
+            <p class="flex items-start gap-1.5 rounded-xl px-1.5 py-1 text-xs text-[var(--color-locked)]">
+              <i class="fa-solid fa-lock mt-0.5 shrink-0" aria-hidden="true"></i>
+              <span>
+                Locked
+                <% if unlock_plan %>
+                  · unlocks in <%= Curriculum::AcademicYear.label_for(unlock_plan.month) %>
+                <% else %>
+                  · ask a parent to add this to a month
+                <% end %>
               </span>
+            </p>
+          <% else %>
+            <% lessons.sort_by(&:position).each do |lesson| %>
+              <% active = highlight.present? && highlight.to_i == lesson.id %>
+              <%= link_to current_user.parent? ? parent_dashboard_path(lesson_id: lesson.id) : child_dashboard_path(lesson_id: lesson.id),
+                  class: "flex min-w-0 items-start gap-1.5 rounded-xl px-1.5 py-1.5 text-xs hover:bg-[var(--color-hover)] #{active ? "bg-[var(--color-nav-active)] font-semibold text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"}",
+                  **(active ? { aria: { current: "page" } } : {}) do %>
+                <i class="fa-solid fa-book fa-fw mt-0.5 shrink-0 text-[9px] opacity-70" aria-hidden="true"></i>
+                <span class="min-w-0 flex-1 leading-snug">
+                  <span class="line-clamp-3 break-words"><%= lesson.title %></span>
+                </span>
+              <% end %>
             <% end %>
           <% end %>
         </div>

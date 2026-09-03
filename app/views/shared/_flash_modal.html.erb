@@ -5,10 +5,10 @@
   <div
     data-controller="flash-modal"
     data-action="click->flash-modal#closeOnBackdrop"
-    class="fixed inset-0 z-[200] flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px]"
+    class="fixed inset-0 z-[200] flex items-center justify-center bg-stone-900/40 p-4 backdrop-blur-[2px]"
   >
     <div
-      class="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl shadow-black/40"
+      class="hub-card w-full max-w-md p-6"
       role="<%= variant == "alert" ? "alertdialog" : "dialog" %>"
       aria-modal="true"
       aria-labelledby="flash-modal-title"
@@ -16,7 +16,7 @@
     >
       <div class="flex gap-4">
         <div
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl <%= variant == "alert" ? "bg-red-500/15 text-red-300" : "bg-[var(--color-accent)]/15 text-[var(--color-accent)]" %>"
+          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl <%= variant == "alert" ? "bg-[color-mix(in_srgb,var(--color-danger)_15%,white)] text-[var(--color-danger)]" : "bg-[var(--color-hover)] text-[var(--color-accent)]" %>"
           aria-hidden="true"
         >
           <% if variant == "alert" %>
@@ -26,8 +26,8 @@
           <% end %>
         </div>
         <div class="min-w-0 flex-1 pt-0.5">
-          <h2 id="flash-modal-title" class="font-display text-base font-semibold text-[var(--color-text)]">
-            <%= variant == "alert" ? "Something went wrong" : "Notice" %>
+          <h2 id="flash-modal-title" class="font-display text-lg font-semibold text-[var(--color-text)]">
+            <%= variant == "alert" ? "Something went wrong" : "Nice!" %>
           </h2>
           <p id="flash-modal-body" class="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]"><%= body %></p>
           <div class="mt-6 flex justify-end">
@@ -35,7 +35,7 @@
               type="button"
               data-flash-modal-primary
               data-action="click->flash-modal#dismiss"
-              class="inline-flex items-center justify-center rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-bg)] shadow-sm hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+              class="hub-btn hub-btn-primary hub-btn-sm"
             >
               OK
             </button>

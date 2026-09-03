@@ -3,12 +3,12 @@
 <div class="mx-auto w-full max-w-6xl space-y-6 pb-8">
   <%= render "shared/hub_page_header",
       kicker: "Parent",
-      title: "Dashboard",
-      description: "Family progress across child accounts." %>
+      title: "Family dashboard",
+      description: "A snapshot of how everyone is getting on — then jump into a child’s year plan." %>
 
-  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/50 p-3 text-sm text-[var(--color-text-muted)] shadow-sm">
+  <div class="hub-card text-sm text-[var(--color-text-muted)]">
     Charts and detailed trend data are available in
-    <%= link_to "Insights", insights_path, class: "font-medium text-[var(--color-accent)] underline hover:opacity-90" %>.
+    <%= link_to "Insights", insights_path, class: "font-semibold text-[var(--color-accent)] underline hover:opacity-90" %>.
   </div>
 
   <% m = @metrics %>
@@ -20,30 +20,30 @@
       [ "Quiz success", "#{(m[:quiz_success_ratio].to_f * 100).round(1)}%" ],
       [ "Time (minutes)", m[:time_minutes] ]
     ].each do |label, value| %>
-      <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
-        <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]"><%= label %></p>
-        <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= value %></p>
-      </div>
+      <%= render "shared/hub_metric", label: label, value: value %>
     <% end %>
   </div>
 
-  <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
-    <div class="mb-3 flex items-center justify-between gap-2">
-      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Children and school year</h2>
-      <%= link_to "Family", parent_family_path, class: "text-xs font-medium text-[var(--color-accent)] hover:underline" %>
+  <section class="hub-card">
+    <div class="mb-4 flex items-center justify-between gap-2">
+      <h2 class="font-display text-lg font-semibold text-[var(--color-text)]">Children and school year</h2>
+      <%= link_to "Family", parent_family_path, class: "text-sm font-semibold text-[var(--color-accent)] hover:underline" %>
     </div>
     <% if @children.any? %>
-      <ul class="space-y-2 text-sm">
+      <ul class="space-y-2">
         <% @children.each do |child| %>
           <% year_key = child.current_year_group_key %>
-          <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
+          <li class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-3">
             <span>
               <strong><%= child.family_display_name %></strong>
               <% if year_key.present? %>
                 <span class="text-[var(--color-text-muted)]"> · <%= Curriculum::YearGroups.label_for_year(year_key) %></span>
               <% end %>
             </span>
-            <%= link_to "Change year", parent_edit_child_path(child), class: "rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+            <span class="flex flex-wrap items-center gap-2">
+              <%= link_to "Year plan", parent_child_plan_path(child), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+              <%= link_to "Change year", parent_edit_child_path(child), class: "hub-btn hub-btn-primary hub-btn-sm" %>
+            </span>
           </li>
         <% end %>
       </ul>
@@ -52,29 +52,29 @@
     <% end %>
   </section>
 
-  <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
-    <div class="mb-3 flex items-center justify-between gap-2">
-      <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Sent invites</h2>
-      <%= link_to "Invite child", new_invitation_path, class: "rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+  <section class="hub-card">
+    <div class="mb-4 flex items-center justify-between gap-2">
+      <h2 class="font-display text-lg font-semibold text-[var(--color-text)]">Sent invites</h2>
+      <%= link_to "Invite child", new_invitation_path, class: "hub-btn hub-btn-primary hub-btn-sm" %>
     </div>
     <% if @sent_invitations.any? %>
       <ul class="space-y-2 text-sm">
         <% @sent_invitations.each do |invite| %>
-          <li class="flex items-center justify-between rounded-lg border border-[var(--color-border)]/70 px-3 py-2">
+          <li class="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[var(--color-border)] px-4 py-3">
             <span><strong><%= invite.child_name %></strong> - <%= invite.email %></span>
             <% status = invite.accepted_at.present? ? "Accepted" : "Pending" %>
             <span class="text-xs text-[var(--color-text-muted)]"><%= status %> · sent <%= invite.created_at.to_date %></span>
             <div class="ml-3 flex items-center gap-2">
               <% if invite.accepted_at.blank? %>
-                <%= link_to "Edit", edit_invitation_path(invite), class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+                <%= link_to "Edit", edit_invitation_path(invite), class: "hub-btn hub-btn-ghost hub-btn-sm" %>
               <% end %>
               <% if invite.accepted_at.blank? && !invite.expired? %>
-                <%= button_to "Resend", resend_invitation_path(invite), method: :post, class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+                <%= button_to "Resend", resend_invitation_path(invite), method: :post, class: "hub-btn hub-btn-ghost hub-btn-sm" %>
               <% end %>
               <%= button_to "Delete", invitation_path(invite),
                   method: :delete,
                   form: { data: { turbo_confirm: "Delete invite for #{invite.email}?" } },
-                  class: "rounded border border-[var(--color-border)] px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:bg-white/5" %>
+                  class: "hub-btn hub-btn-ghost hub-btn-sm" %>
             </div>
           </li>
         <% end %>

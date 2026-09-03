@@ -8,7 +8,7 @@
 
   <%= form_with model: @invitation, url: invitation_path(@invitation), method: :patch, class: "space-y-4" do |f| %>
     <% if @invitation.errors.any? %>
-      <ul class="list-inside list-disc text-sm text-red-300">
+      <ul class="list-inside list-disc text-sm text-[var(--color-danger)]">
         <% @invitation.errors.full_messages.each do |m| %>
           <li><%= m %></li>
         <% end %>
@@ -16,26 +16,26 @@
     <% end %>
 
     <div>
-      <%= f.label :child_name, "Child name", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
-      <%= f.text_field :child_name, required: true, class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+      <%= f.label :child_name, "Child name", class: "hub-label" %>
+      <%= f.text_field :child_name, required: true, class: "hub-input" %>
     </div>
 
     <div>
-      <%= f.label :email, class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
-      <%= f.email_field :email, required: true, class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+      <%= f.label :email, class: "hub-label" %>
+      <%= f.email_field :email, required: true, class: "hub-input" %>
     </div>
 
     <div>
-      <%= f.label :year_group_key, "School year", class: "block text-xs font-medium text-[var(--color-text-muted)]" %>
+      <%= f.label :year_group_key, "School year", class: "hub-label" %>
       <%= f.select :year_group_key,
           Curriculum::YearGroups.all_year_keys.map { |k| [ Curriculum::YearGroups.label_for_year(k), k ] },
           {},
-          class: "mt-1.5 block w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm" %>
+          class: "hub-select" %>
     </div>
 
     <div class="flex items-center gap-2">
-      <%= f.submit "Save invite", class: "cursor-pointer rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-bg)]" %>
-      <%= link_to "Cancel", parent_family_path, class: "text-xs text-[var(--color-text-muted)] hover:underline" %>
+      <%= f.submit "Save invite", class: "hub-btn hub-btn-primary" %>
+      <%= link_to "Cancel", parent_family_path, class: "hub-btn hub-btn-ghost" %>
     </div>
   <% end %>
 </div>

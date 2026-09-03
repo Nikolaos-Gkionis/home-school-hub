@@ -1,0 +1,11 @@
+<%# locals: title:, body:, icon: "fa-book-open" %>
+<div class="hub-card text-center">
+  <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-hover)] text-2xl text-[var(--color-accent)]" aria-hidden="true">
+    <i class="fa-solid <%= local_assigns[:icon].presence || "fa-book-open" %>"></i>
+  </div>
+  <h2 class="font-display text-xl font-semibold text-[var(--color-text)]"><%= title %></h2>
+  <% if local_assigns[:body].present? %>
+    <p class="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]"><%= body %></p>
+  <% end %>
+  <%= yield if block_given? %>
+</div>

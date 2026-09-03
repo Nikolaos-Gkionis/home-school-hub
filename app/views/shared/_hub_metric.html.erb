@@ -1,0 +1,8 @@
+<%# locals: label:, value:, hint: nil %>
+<div class="hub-card">
+  <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]"><%= label %></p>
+  <p class="mt-1 font-display text-3xl font-semibold text-[var(--color-accent)]"><%= value %></p>
+  <% if local_assigns[:hint].present? %>
+    <p class="mt-1 text-xs text-[var(--color-text-muted)]"><%= hint %></p>
+  <% end %>
+</div>

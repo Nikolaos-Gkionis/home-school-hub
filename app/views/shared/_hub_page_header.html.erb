@@ -1,10 +1,10 @@
 <%# locals: title:, kicker: nil, description: nil %>
 <div class="hub-page-header space-y-2">
   <% if local_assigns[:kicker].present? %>
-    <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]"><%= kicker %></p>
+    <p class="text-sm font-semibold text-[var(--color-accent)]"><%= kicker %></p>
   <% end %>
-  <h1 class="font-display text-xl font-bold text-[var(--color-text)] sm:text-2xl"><%= title %></h1>
+  <h1 class="font-display text-2xl font-semibold text-[var(--color-text)] sm:text-3xl"><%= title %></h1>
   <% if local_assigns[:description].present? %>
-    <p class="text-sm leading-relaxed text-[var(--color-text-muted)]"><%= description %></p>
+    <p class="max-w-2xl text-base leading-relaxed text-[var(--color-text-muted)]"><%= description %></p>
   <% end %>
 </div>

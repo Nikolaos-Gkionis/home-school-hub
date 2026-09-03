@@ -16,14 +16,14 @@
               [ [ "All learners", "" ] ] + @children.map { |c| [ c.learners.min_by(&:position)&.display_name || c.email, c.id ] },
               @insights_filter_id
             ),
-            class: "rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5 text-xs",
+            class: "hub-select text-sm",
             onchange: "this.form.requestSubmit()" %>
       <% end %>
     <% end %>
   </header>
 
   <% if current_user.parent? %>
-    <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+    <section class="hub-card">
       <div class="mb-3 flex items-center justify-between gap-2">
         <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Checkpoint tests</h2>
         <p class="text-xs text-[var(--color-text-muted)]">60-90 min · 40-50 questions</p>
@@ -44,7 +44,7 @@
             <%= button_to "Create #{subject} checkpoint",
                 parent_child_checkpoint_tests_path(@checkpoint_child, subject: subject),
                 method: :post,
-                class: "rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+                class: "hub-btn hub-btn-primary hub-btn-sm" %>
           <% end %>
         </div>
       <% else %>
@@ -87,13 +87,7 @@
     ].each do |entry| %>
       <% label, val = entry[0], entry[1] %>
       <% hint = entry[2] %>
-      <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
-        <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]"><%= label %></p>
-        <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= val %></p>
-        <% if hint.present? %>
-          <p class="mt-1 text-[10px] text-[var(--color-text-muted)]"><%= hint %></p>
-        <% end %>
-      </div>
+      <%= render "shared/hub_metric", label: label, value: val, hint: hint %>
     <% end %>
   </div>
 
@@ -112,7 +106,7 @@
       ) do %>
 
   <% if m[:per_learner].present? %>
-    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+    <div class="hub-card">
       <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Learner comparison</h2>
       <p class="mt-1 text-xs text-[var(--color-text-muted)]">Grouped bars: lessons completed, sections viewed, and quiz attempts per child account.</p>
       <div class="relative mt-4 h-64 w-full min-h-[16rem] max-h-[28rem] sm:h-72">
@@ -120,7 +114,7 @@
       </div>
     </div>
 
-    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+    <div class="hub-card">
       <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">By learner</h2>
       <p class="mt-1 text-xs text-[var(--color-text-muted)]">Each row is data for that child’s account only.</p>
       <div class="mt-3 overflow-x-auto">
@@ -172,7 +166,7 @@
   <% end %>
 
   <div class="grid gap-6 lg:grid-cols-2">
-    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+    <div class="hub-card">
       <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Completions by week</h2>
       <p class="mt-1 text-xs text-[var(--color-text-muted)]">Last 12 weeks · hover a bar for the full date range.</p>
       <% if week_sorted.any? %>
@@ -184,7 +178,7 @@
       <% end %>
     </div>
 
-    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+    <div class="hub-card">
       <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">By subject</h2>
       <p class="mt-1 text-xs text-[var(--color-text-muted)]">Top subjects by lesson completions (up to 10).</p>
       <% if subject_sorted.any? %>

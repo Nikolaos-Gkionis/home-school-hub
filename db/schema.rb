@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_09_083000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_03_141000) do
   create_table "badges", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -137,6 +137,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_083000) do
     t.index ["year_group_key", "subject", "unit_position"], name: "index_lessons_on_year_subject_unit_position_order"
   end
 
+  create_table "unit_month_plans", force: :cascade do |t|
+    t.integer "academic_year", null: false
+    t.datetime "created_at", null: false
+    t.integer "month", null: false
+    t.string "subject", null: false
+    t.string "unit", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.string "year_group_key", null: false
+    t.index ["user_id", "year_group_key", "academic_year", "month"], name: "index_unit_month_plans_on_month"
+    t.index ["user_id", "year_group_key", "academic_year", "subject", "unit"], name: "index_unit_month_plans_unique_unit", unique: true
+    t.index ["user_id"], name: "index_unit_month_plans_on_user_id"
+  end
+
   create_table "user_badges", force: :cascade do |t|
     t.datetime "awarded_at", null: false
     t.integer "badge_id", null: false
@@ -153,7 +167,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_083000) do
   create_table "users", force: :cascade do |t|
     t.integer "active_learner_id"
     t.datetime "created_at", null: false
-    t.string "current_theme", default: "cosmic_voyager", null: false
+    t.string "current_theme", default: "academy", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.integer "last_active_lesson_id"
@@ -188,6 +202,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_083000) do
   add_foreign_key "lesson_section_views", "users"
   add_foreign_key "lesson_time_logs", "lessons"
   add_foreign_key "lesson_time_logs", "users"
+  add_foreign_key "unit_month_plans", "users"
   add_foreign_key "user_badges", "badges"
   add_foreign_key "user_badges", "users"
   add_foreign_key "users", "learners", column: "active_learner_id"

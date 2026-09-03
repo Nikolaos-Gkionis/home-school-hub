@@ -7,17 +7,27 @@
     <%= csp_meta_tag %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Marcellus&family=Orbitron:wght@500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="<%= google_fonts_href %>" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="<%= ThemeManager.body_class_for("cosmic_voyager") %> min-h-full bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
+  <body class="<%= ThemeManager.body_class_for %> min-h-full bg-[var(--color-bg)] font-sans text-[var(--color-text)] antialiased">
     <%= render "shared/flash_modal" %>
     <%= render "shared/confirm_dialog" %>
 
     <div class="flex min-h-full flex-col">
-      <main id="main-content" class="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6">
+      <header class="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-5 sm:px-6">
+        <%= link_to root_path, class: "font-display text-xl font-semibold text-[var(--color-accent)]" do %>
+          <i class="fa-solid fa-graduation-cap mr-1.5" aria-hidden="true"></i>
+          HomeSchool Hub
+        <% end %>
+        <div class="flex items-center gap-2">
+          <%= link_to "Sign in", new_user_session_path, class: "hub-btn hub-btn-ghost hub-btn-sm" %>
+          <%= link_to "Sign up", new_user_registration_path, class: "hub-btn hub-btn-primary hub-btn-sm" %>
+        </div>
+      </header>
+      <main id="main-content" class="mx-auto w-full max-w-3xl flex-1 px-4 py-6 sm:px-6">
         <%= yield %>
       </main>
     </div>

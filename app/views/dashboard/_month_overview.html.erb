@@ -1,0 +1,35 @@
+<% content_for :title, "#{@plan_month_label} — HomeSchool Hub" %>
+
+<div class="mx-auto w-full max-w-5xl space-y-6 pb-8">
+  <%= render "shared/hub_page_header",
+      kicker: "This month",
+      title: "#{@plan_month_label}'s lessons",
+      description: current_user.pacing_active? ? "These are the units your parent unlocked for this month." : "Your parent has not made a monthly plan yet, so you can browse freely. Here is a starter set of units." %>
+
+  <% if @month_units.blank? %>
+    <%= render "shared/hub_empty_state",
+        title: "Nothing planned for #{@plan_month_label} yet",
+        body: "Ask a parent to assign Oak units on your year plan.",
+        icon: "fa-calendar-day" %>
+  <% else %>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <% @month_units.each do |row| %>
+        <div class="hub-card">
+          <div class="mb-2 flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full" style="<%= subject_swatch_style(row[:subject]) %>" aria-hidden="true"></span>
+            <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]"><%= row[:subject] %></p>
+          </div>
+          <h2 class="font-display text-lg font-semibold text-[var(--color-text)]"><%= row[:unit] %></h2>
+          <p class="mt-1 text-sm text-[var(--color-text-muted)]"><%= row[:done] %> / <%= row[:total] %> lessons done</p>
+          <div class="mt-2 h-2 overflow-hidden rounded-full bg-[var(--color-hover)]">
+            <% pct = row[:total].positive? ? (row[:done] * 100.0 / row[:total]) : 0 %>
+            <div class="h-full rounded-full bg-[var(--color-accent)]" style="width: <%= pct %>%"></div>
+          </div>
+          <% if row[:first_lesson] %>
+            <%= link_to "Open first lesson", child_dashboard_path(lesson_id: row[:first_lesson].id), class: "hub-btn hub-btn-primary hub-btn-sm mt-4" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

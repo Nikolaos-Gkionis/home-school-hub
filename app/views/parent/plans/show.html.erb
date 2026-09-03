@@ -1,0 +1,70 @@
+<% content_for :title, "Year plan — #{@child.family_display_name}" %>
+
+<div class="mx-auto w-full max-w-5xl space-y-6 pb-8">
+  <%= render "shared/hub_page_header",
+      kicker: @child.family_display_name,
+      title: "Year plan · #{Curriculum::YearGroups.label_for_year(@year_key)}",
+      description: "Tick the Oak units for each month (September to July). Later months stay locked for your child until that month arrives." %>
+
+  <% if @year_key.blank? %>
+    <p class="hub-card text-sm text-[var(--color-text-muted)]">Set a school year for this child first.</p>
+  <% else %>
+    <div class="flex flex-wrap gap-2">
+      <% Curriculum::AcademicYear::PLAN_MONTHS.each do |month| %>
+        <% done, total = @month_counts[month] %>
+        <%= link_to parent_child_plan_path(@child, month: month),
+            class: "rounded-2xl border px-3 py-2 text-sm #{month == @month ? "border-[var(--color-accent)] bg-[var(--color-nav-active)] font-semibold text-[var(--color-accent)]" : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-hover)]"}" do %>
+          <span class="block"><%= Curriculum::AcademicYear.short_label(month) %></span>
+          <span class="block text-xs text-[var(--color-text-muted)]"><%= done %> / <%= total %></span>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <%= button_to "Spread remaining units",
+          spread_parent_child_plan_path(@child),
+          method: :post,
+          params: { month: @month },
+          class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+      <%= link_to "Child details", parent_child_path(@child), class: "hub-btn hub-btn-ghost hub-btn-sm" %>
+    </div>
+
+    <%= form_with url: parent_child_plan_path(@child), method: :patch, class: "space-y-4" do %>
+      <%= hidden_field_tag :month, @month %>
+      <%= hidden_field_tag "assigned_units[]", "" %>
+
+      <h2 class="font-display text-xl font-semibold text-[var(--color-text)]"><%= Curriculum::AcademicYear.label_for(@month) %></h2>
+
+      <% if @units_by_subject.blank? %>
+        <p class="hub-card text-sm text-[var(--color-text-muted)]">No Oak units found for this year. Sync the curriculum first.</p>
+      <% else %>
+        <% @units_by_subject.each do |subject, units| %>
+          <section class="hub-card">
+            <div class="mb-3 flex items-center gap-2">
+              <span class="h-3 w-3 rounded-full" style="<%= subject_swatch_style(subject) %>" aria-hidden="true"></span>
+              <h3 class="font-display text-lg font-semibold"><%= subject %></h3>
+            </div>
+            <div class="space-y-1">
+              <% units.each do |lesson| %>
+                <% key = Lesson.compose_unit_key(lesson.subject, lesson.unit) %>
+                <% other = @plans_by_unit_key[key] %>
+                <% checked = @assigned_keys.include?(key) %>
+                <label class="flex min-h-11 cursor-pointer items-start gap-3 rounded-xl px-2 py-2 hover:bg-[var(--color-hover)]">
+                  <%= check_box_tag "assigned_units[]", key, checked, class: "mt-1 rounded border-[var(--color-border)] text-[var(--color-accent)]" %>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-medium"><%= lesson.unit %></span>
+                    <% if other && other.month != @month %>
+                      <span class="text-xs text-[var(--color-text-muted)]">Currently in <%= Curriculum::AcademicYear.label_for(other.month) %> — ticking moves it here.</span>
+                    <% end %>
+                  </span>
+                </label>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+      <% end %>
+
+      <%= submit_tag "Save #{Curriculum::AcademicYear.label_for(@month)}", class: "hub-btn hub-btn-primary" %>
+    <% end %>
+  <% end %>
+</div>

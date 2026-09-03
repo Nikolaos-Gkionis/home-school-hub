@@ -5,6 +5,13 @@ class DashboardController < ApplicationController
 
   def show
     @lessons = visible_lessons_with_auto_sync
+    if params[:overview] == "month"
+      @month_overview = true
+      @lesson = nil
+      load_month_overview
+      return
+    end
+
     @lesson = find_lesson
     hydrate_oak_lesson! if @lesson
     persist_lesson_context! if @lesson
@@ -30,7 +37,7 @@ class DashboardController < ApplicationController
   end
 
   def find_lesson
-    rel = @lessons || current_user.visible_lessons_relation
+    rel = current_user.playable_lessons_relation
     yk = current_user.active_learner&.year_group_key
 
     lesson = rel.find_by(id: params[:lesson_id]) if params[:lesson_id].present?
@@ -45,6 +52,49 @@ class DashboardController < ApplicationController
 
   def default_starting_lesson(rel)
     current_user.first_visible_hub_lesson_in(rel)
+  end
+
+  def load_month_overview
+    @plan_month = Curriculum::AcademicYear.current_month
+    @plan_month_label = Curriculum::AcademicYear.label_for(@plan_month)
+    yk = current_user.current_year_group_key
+    @month_units = []
+    return if yk.blank?
+
+    completed = current_user.lesson_completions.pluck(:lesson_id).to_set
+    plans = if current_user.pacing_active?
+      current_user.unit_month_plans.where(
+        year_group_key: yk,
+        academic_year: Curriculum::AcademicYear.start_year,
+        month: @plan_month
+      )
+    else
+      []
+    end
+
+    units = if plans.present?
+      plans.map { |plan| { subject: plan.subject, unit: plan.unit } }
+    else
+      Lesson.where(year_group_key: yk)
+        .where.not(subject: Lesson::OAK_SUBJECT_NAME)
+        .select(:subject, :unit, :unit_position)
+        .group_by { |l| [ l.subject, l.unit ] }
+        .keys
+        .first(12)
+        .map { |subject, unit| { subject: subject, unit: unit } }
+    end
+
+    @month_units = units.map do |row|
+      lessons = Lesson.where(year_group_key: yk, subject: row[:subject], unit: row[:unit]).ordered
+      ids = lessons.map(&:id)
+      done = ids.count { |id| completed.include?(id) }
+      row.merge(
+        lessons: lessons,
+        done: done,
+        total: ids.size,
+        first_lesson: lessons.first
+      )
+    end
   end
 
   def hydrate_oak_lesson!

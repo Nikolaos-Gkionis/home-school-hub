@@ -1,16 +1,19 @@
-<h2>Resend unlock instructions</h2>
+<% content_for :title, "Resend unlock — HomeSchool Hub" %>
 
-<%= form_for(resource, as: resource_name, url: unlock_path(resource_name), html: { method: :post }) do |f| %>
+<p class="mt-4 text-sm text-[var(--color-text-muted)]">We'll email unlock instructions</p>
+<h1 class="mt-1 font-display text-2xl font-semibold text-[var(--color-text)]">Unlock your account</h1>
+
+<%= form_for(resource, as: resource_name, url: unlock_path(resource_name), html: { method: :post, class: "mt-6 space-y-4" }) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+  <div>
+    <%= f.label :email, class: "hub-label" %>
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "hub-input" %>
   </div>
 
-  <div class="actions">
-    <%= f.submit "Resend unlock instructions" %>
-  </div>
+  <%= f.submit "Resend unlock instructions", class: "hub-btn hub-btn-primary w-full" %>
 <% end %>
 
-<%= render "devise/shared/links" %>
+<div class="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+  <%= render "devise/shared/links" %>
+</div>

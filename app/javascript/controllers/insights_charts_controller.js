@@ -16,10 +16,10 @@ export default class extends Controller {
     Chart.register(...registerables)
     this.Chart = Chart
 
-    const text = this.cssVar("--color-text") || "#e2e8f0"
-    const muted = this.cssVar("--color-text-muted") || "#94a3b8"
-    const accent = this.cssVar("--color-accent") || "#a78bfa"
-    const border = this.cssVar("--color-border") || "rgba(167, 139, 250, 0.25)"
+    const text = this.cssVar("--color-text") || "#1c1917"
+    const muted = this.cssVar("--color-text-muted") || "#57534e"
+    const accent = this.cssVar("--color-accent") || "#0f766e"
+    const border = this.cssVar("--color-border") || "rgba(15, 118, 110, 0.2)"
 
     this.accentRgb = accent
     this.chartTextColor = text

@@ -46,6 +46,10 @@ class Lesson < ApplicationRecord
     "#{subject}#{UNIT_KEY_SEP}#{unit}"
   end
 
+  def self.parse_unit_key(key)
+    key.to_s.split(UNIT_KEY_SEP, 2)
+  end
+
   def self.compose_nav_subject_key(year_key, subject)
     "#{year_key}#{UNIT_KEY_SEP}#{subject}"
   end

@@ -1,7 +1,7 @@
-<%# optional: title %>
-<div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm ring-1 ring-[var(--color-accent)]/8">
+<%# locals: title: nil %>
+<div class="hub-card">
   <% if local_assigns[:title].present? %>
-    <p class="mb-3 font-display text-sm font-semibold text-[var(--color-text)]"><%= title %></p>
+    <p class="mb-3 font-display text-lg font-semibold text-[var(--color-text)]"><%= title %></p>
   <% end %>
   <%= yield %>
 </div>

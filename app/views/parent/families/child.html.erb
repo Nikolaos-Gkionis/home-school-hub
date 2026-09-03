@@ -6,30 +6,19 @@
       title: @child.family_display_name,
       description: "#{@child.email} · #{Curriculum::YearGroups.label_for_year(@child.current_year_group_key)}" %>
 
-  <p>
-    <%= link_to "Change school year", parent_edit_child_path(@child), class: "inline-flex rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+  <p class="flex flex-wrap gap-2">
+    <%= link_to "Year plan", parent_child_plan_path(@child), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+    <%= link_to "Change school year", parent_edit_child_path(@child), class: "hub-btn hub-btn-primary hub-btn-sm" %>
   </p>
 
   <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">
-      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Lessons completed</p>
-      <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= @metrics[:lessons_completed] %></p>
-    </div>
-    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">
-      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Sections viewed</p>
-      <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= @metrics[:sections_explored] %></p>
-    </div>
-    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">
-      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Quiz success</p>
-      <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= (@metrics[:quiz_success_ratio].to_f * 100).round(1) %>%</p>
-    </div>
-    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4">
-      <p class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">Time (min)</p>
-      <p class="mt-1 font-display text-2xl font-bold text-[var(--color-accent)]"><%= @metrics[:time_minutes] %></p>
-    </div>
+    <%= render "shared/hub_metric", label: "Lessons completed", value: @metrics[:lessons_completed] %>
+    <%= render "shared/hub_metric", label: "Sections viewed", value: @metrics[:sections_explored] %>
+    <%= render "shared/hub_metric", label: "Quiz success", value: "#{(@metrics[:quiz_success_ratio].to_f * 100).round(1)}%" %>
+    <%= render "shared/hub_metric", label: "Time (min)", value: @metrics[:time_minutes] %>
   </div>
 
-  <section class="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-sm">
+  <section class="hub-card">
     <div class="mb-3 flex items-center justify-between gap-2">
       <h2 class="font-display text-sm font-semibold text-[var(--color-text)]">Checkpoint tests</h2>
       <p class="text-xs text-[var(--color-text-muted)]">60-90 min · 40-50 questions</p>
@@ -44,7 +33,7 @@
           <%= button_to "Create #{subject} checkpoint",
               parent_child_checkpoint_tests_path(@child, subject: subject),
               method: :post,
-              class: "rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-bg)]" %>
+              class: "hub-btn hub-btn-primary hub-btn-sm" %>
         <% end %>
       </div>
     <% else %>
@@ -75,5 +64,5 @@
     <% end %>
   </section>
 
-  <%= link_to "Back to family", parent_family_path, class: "text-sm text-[var(--color-accent)] hover:underline" %>
+  <%= link_to "Back to family", parent_family_path, class: "hub-btn hub-btn-ghost" %>
 </div>

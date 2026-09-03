@@ -1,27 +1,27 @@
 <% content_for :title, "Dashboard — HomeSchool Hub" %>
 
-<% if @lesson.blank? %>
-  <div class="oak-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/50 p-6 shadow-sm">
-    <h1 class="font-display text-lg font-semibold text-[var(--color-text)]">No lessons in your scope yet</h1>
-    <p class="mt-2 text-sm text-[var(--color-text-muted)]">
-      Add your Oak API token and run <code class="rounded bg-black/20 px-1 text-xs">bin/rails curriculum:oak_sync</code>, or widen subject filters in the sidebar.
-    </p>
-  </div>
+<% if @month_overview %>
+  <%= render "dashboard/month_overview" %>
+<% elsif @lesson.blank? %>
+  <%= render "shared/hub_empty_state",
+      title: "No lessons in your scope yet",
+      body: "Ask a parent to pick your year, or widen subject filters in the sidebar. If you are setting the hub up, add an Oak API token and run bin/rails curriculum:oak_sync.",
+      icon: "fa-book-open" %>
 <% else %>
   <div
-    class="flex h-full min-h-0 w-full max-w-none flex-col gap-2 sm:gap-3"
+    class="flex h-full min-h-0 w-full max-w-none flex-col gap-3"
     data-controller="lesson-timer"
     data-lesson-timer-url-value="<%= lesson_time_log_path(lesson_id: @lesson.id) %>"
     data-lesson-timer-interval-value="45"
   >
     <header class="flex flex-none flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <div class="min-w-0">
-        <h1 class="font-display truncate text-base font-semibold tracking-tight text-[var(--color-text)] sm:text-lg">
+        <h1 class="font-display truncate text-lg font-semibold tracking-tight text-[var(--color-text)] sm:text-xl">
           <%= @lesson.title %>
         </h1>
         <% meta = @lesson.summary_data %>
         <% line = [ meta["subjectTitle"].presence || @lesson.subject, meta["keyStageTitle"], @lesson.unit ].compact.join(" · ") %>
-        <p class="mt-0.5 truncate text-xs text-[var(--color-text-muted)] sm:text-sm" title="<%= line %>">
+        <p class="mt-0.5 truncate text-sm text-[var(--color-text-muted)]" title="<%= line %>">
           <%= line %>
         </p>
       </div>
@@ -31,12 +31,12 @@
               @lesson.oak_pupil_lesson_url,
               target: "_blank",
               rel: "noopener noreferrer",
-              class: "inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-accent)]/50 hover:bg-white/5 sm:px-3.5 sm:text-sm" %>
+              class: "hub-btn hub-btn-secondary hub-btn-sm" %>
         <%= render "lessons/status", lesson: @lesson, user: current_user %>
       </div>
     </header>
 
-    <div class="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/35 p-2 sm:rounded-2xl sm:p-3">
+    <div class="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-[var(--shadow-card)] sm:p-3">
       <%= render "dashboard/lesson_content", lesson: @lesson, user: current_user %>
     </div>
   </div>

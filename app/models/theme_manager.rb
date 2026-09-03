@@ -1,21 +1,34 @@
 # frozen_string_literal: true
 
+# Maps a stored theme key to the CSS class on <body>.
+# Older sci-fi keys still resolve so existing User rows keep working.
 class ThemeManager
+  CANONICAL = "academy"
+
   PRESETS = {
-    "cosmic_voyager" => true,
-    "forest_ranger" => true,
-    "cyberpunk_scholar" => true,
-    "desert_explorer" => true
+    CANONICAL => true
   }.freeze
 
   DISPLAY_NAMES = {
-    "cosmic_voyager" => "Cosmic Voyager",
-    "forest_ranger" => "Forest Ranger",
-    "cyberpunk_scholar" => "Cyberpunk Scholar",
-    "desert_explorer" => "Desert Explorer"
+    CANONICAL => "Academy"
   }.freeze
 
-  def self.body_class_for(theme_key)
-    "theme-#{theme_key.to_s.tr('_', '-')}"
+  LEGACY_KEYS = %w[
+    cosmic_voyager
+    forest_ranger
+    cyberpunk_scholar
+    desert_explorer
+  ].freeze
+
+  def self.canonical_key(theme_key)
+    key = theme_key.to_s
+    return CANONICAL if PRESETS.key?(key)
+    return CANONICAL if LEGACY_KEYS.include?(key)
+
+    CANONICAL
+  end
+
+  def self.body_class_for(_theme_key = nil)
+    "theme-academy"
   end
 end

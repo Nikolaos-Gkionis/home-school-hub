@@ -1,0 +1,7 @@
+<%# Optional wrapper when a view wants a styled button element.
+    Most call sites should use class: "hub-btn hub-btn-primary" on link_to / button_to / submit.
+    locals: variant: "primary" %>
+<% variant = local_assigns[:variant].presence || "primary" %>
+<button type="<%= local_assigns[:type].presence || "button" %>" class="hub-btn hub-btn-<%= variant %>">
+  <%= yield %>
+</button>

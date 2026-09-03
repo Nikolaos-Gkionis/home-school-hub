@@ -17,6 +17,9 @@ Rails.application.routes.draw do
     patch "children/:id", to: "families#update_child", as: :update_child
     delete "children/:id", to: "families#destroy_child", as: :remove_child
     resources :children, only: [] do
+      resource :plan, only: [ :show, :update ], controller: "plans" do
+        post :spread
+      end
       resources :checkpoint_tests, only: [ :create, :show ] do
         member do
           get :answer_key

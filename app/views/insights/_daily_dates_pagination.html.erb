@@ -8,12 +8,12 @@
       <% if @daily_dates_page < @daily_dates_total_pages %>
         <%= link_to "Older",
             insights_daily_page_url(@daily_dates_page + 1),
-            class: "rounded-md border border-[var(--color-border)] px-2 py-1 font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-white/5" %>
+            class: "hub-btn hub-btn-secondary hub-btn-sm" %>
       <% end %>
       <% if @daily_dates_page > 1 %>
         <%= link_to "Newer",
             insights_daily_page_url(@daily_dates_page - 1),
-            class: "rounded-md border border-[var(--color-border)] px-2 py-1 font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-white/5" %>
+            class: "hub-btn hub-btn-secondary hub-btn-sm" %>
       <% end %>
     </div>
   </div>

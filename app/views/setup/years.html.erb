@@ -13,7 +13,7 @@
         <%= render layout: "shared/hub_card", locals: { title: phase[:label] } do %>
           <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <% phase[:years].each do |y| %>
-              <label class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-xs ring-1 ring-[var(--color-border)]/50 hover:bg-white/5">
+              <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-sm ring-1 ring-[var(--color-border)]/50 hover:bg-[var(--color-hover)]">
                 <%= check_box_tag "year_group_keys[]", y[:key], false,
                     class: "rounded border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-accent)]" %>
                 <span><%= y[:label] %></span>
@@ -24,7 +24,6 @@
       <% end %>
     </fieldset>
 
-    <%= submit_tag "Continue to subjects",
-        class: "w-full cursor-pointer rounded-xl bg-[var(--color-accent)] px-4 py-3 text-sm font-semibold text-[var(--color-bg)] shadow-md hover:brightness-110" %>
+    <%= submit_tag "Continue to subjects", class: "hub-btn hub-btn-primary w-full" %>
   <% end %>
 </div>

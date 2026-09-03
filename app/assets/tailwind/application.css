@@ -1,7 +1,199 @@
 @import "tailwindcss";
 
+/* Tailwind v4: these become font-display / font-sans utilities. */
+@theme {
+  --font-display: "Fredoka", ui-rounded, system-ui, sans-serif;
+  --font-sans: "Lexend", ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * One playful academy theme (Khan/Oak inspired).
+ * Tokens live on :root so JS (Chart.js) can read them from documentElement.
+ */
+:root,
+.theme-academy {
+  --color-bg: #fff6eb;
+  --color-surface: #ffffff;
+  --color-accent: #0f766e;
+  --color-accent-2: #ea580c;
+  --color-on-accent: #fffdf8;
+  --color-text: #1c1917;
+  --color-text-muted: #57534e;
+  --color-border: rgba(15, 118, 110, 0.2);
+  --color-success: #15803d;
+  --color-warning: #c2410c;
+  --color-danger: #b91c1c;
+  --color-locked: #a8a29e;
+  --color-hover: rgba(15, 118, 110, 0.08);
+  --color-nav-active: rgba(15, 118, 110, 0.14);
+  --radius-card: 1.25rem;
+  --shadow-card: 0 10px 30px -12px rgba(28, 25, 23, 0.18);
+  --font-body: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fredoka", ui-rounded, system-ui, sans-serif;
+
+  --subject-maths: #2563eb;
+  --subject-english: #d97706;
+  --subject-science: #0d9488;
+  --subject-biology: #16a34a;
+  --subject-chemistry: #7c3aed;
+  --subject-physics: #0284c7;
+  --subject-history: #e11d48;
+  --subject-geography: #059669;
+  --subject-art: #db2777;
+  --subject-computing: #4f46e5;
+  --subject-music: #c026d3;
+  --subject-drama: #ea580c;
+  --subject-pe: #65a30d;
+  --subject-french: #1d4ed8;
+  --subject-german: #ca8a04;
+  --subject-spanish: #dc2626;
+  --subject-re: #7c3aed;
+  --subject-rshe: #ec4899;
+  --subject-citizenship: #0f766e;
+  --subject-dt: #b45309;
+  --subject-default: #0f766e;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+
+  body.theme-academy {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
 @layer components {
-  /* Sidebar “Subjects to show”: predictable height + touch scroll (avoids tiny max-h-40 trap). */
+  .hub-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 0.9rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: filter 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .hub-btn:active {
+    transform: translateY(1px);
+  }
+
+  .hub-btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--color-accent) 72%, #000);
+  }
+
+  .hub-btn-primary:hover {
+    filter: brightness(1.06);
+  }
+
+  .hub-btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-accent);
+    border: 2px solid var(--color-border);
+  }
+
+  .hub-btn-secondary:hover {
+    background-color: var(--color-hover);
+  }
+
+  .hub-btn-ghost {
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 2px solid transparent;
+  }
+
+  .hub-btn-ghost:hover {
+    background-color: var(--color-hover);
+    color: var(--color-text);
+  }
+
+  .hub-btn-danger {
+    background-color: var(--color-danger);
+    color: #fff;
+  }
+
+  .hub-btn-sm {
+    min-height: 2.25rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8125rem;
+    border-radius: 0.75rem;
+    box-shadow: none;
+  }
+
+  .hub-input,
+  .hub-select,
+  textarea.hub-input {
+    display: block;
+    width: 100%;
+    min-height: 2.75rem;
+    border-radius: 0.85rem;
+    border: 2px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    padding: 0.5rem 0.85rem;
+    font-size: 0.9375rem;
+  }
+
+  .hub-input:focus,
+  .hub-select:focus,
+  textarea.hub-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
+  }
+
+  .hub-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .hub-card {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    padding: 1.1rem 1.2rem;
+  }
+
+  .sidebar-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 0.9rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--color-text);
+    min-height: 2.75rem;
+  }
+
+  .sidebar-nav-link:hover {
+    background-color: var(--color-hover);
+  }
+
+  .sidebar-nav-link.is-active {
+    background-color: var(--color-nav-active);
+    color: var(--color-accent);
+    font-weight: 650;
+  }
+
   .sidebar-subjects-scroll {
     max-height: min(42dvh, 14rem);
     overflow-y: auto;
@@ -30,13 +222,11 @@
     background: transparent;
   }
 
-  /* Native <dialog> used for Turbo confirmations */
   .hub-confirm-dialog::backdrop {
-    background-color: rgb(0 0 0 / 0.55);
-    backdrop-filter: blur(2px);
+    background-color: rgb(28 25 23 / 0.45);
+    backdrop-filter: blur(3px);
   }
 
-  /* Sidebar: `<details>` chevrons rotate when open (summary points right → down). */
   .sidebar-details-chevron {
     display: inline-flex;
     align-items: center;
@@ -47,86 +237,101 @@
     transition: transform 0.2s ease, color 0.15s ease;
   }
 
-  @media (min-width: 640px) {
-    .sidebar-details-chevron {
-      font-size: 1.05rem;
-    }
-  }
-
   details[open] > summary .sidebar-details-chevron {
     transform: rotate(90deg);
     color: var(--color-accent);
   }
 
-  /* Toggle: one « icon; flip so » when sidebar is collapsed (expand). */
   nav.app-sidebar .sidebar-toggle-chevron {
     transition: transform 0.2s ease;
   }
 
-  nav.app-sidebar[data-collapsed="true"] .sidebar-toggle-chevron {
-    transform: scaleX(-1);
-  }
-
-  nav.app-sidebar[data-collapsed="true"] .sidebar-brand-text {
+  .sidebar-backdrop {
     display: none;
   }
 
-  /* Collapsed: only the expand/collapse control (chevron) — hide nav, lessons, footer */
-  nav.app-sidebar[data-collapsed="true"] .sidebar-brand-row {
-    justify-content: center;
+  .sidebar-mobile-toggle,
+  .mobile-topbar {
+    display: none;
   }
 
-  /* Must win over Tailwind `flex` / `flex-col` on these elements (utilities beat @layer components). */
-  nav.app-sidebar[data-collapsed="true"] .sidebar-top-links,
-  nav.app-sidebar[data-collapsed="true"] .sidebar-expandable {
-    display: none !important;
+  /* Phone: overlay drawer. Ignore the desktop collapsed width. */
+  @media (max-width: 767px) {
+    .mobile-topbar,
+    .sidebar-mobile-toggle {
+      display: flex;
+    }
+
+    .sidebar-desktop-toggle {
+      display: none;
+    }
+
+    .sidebar-backdrop[data-open="true"] {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgb(28 25 23 / 0.4);
+    }
+
+    nav.app-sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 50;
+      width: min(20rem, 88vw) !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      transform: translateX(-110%);
+      transition: transform 0.2s ease;
+      box-shadow: var(--shadow-card);
+    }
+
+    nav.app-sidebar[data-mobile-open="true"] {
+      transform: translateX(0);
+    }
   }
 
-  nav.app-sidebar[data-collapsed="true"] {
-    overflow: hidden;
-  }
-}
+  /* Desktop collapse: hide labels, keep the chevron. */
+  @media (min-width: 768px) {
+    nav.app-sidebar[data-collapsed="true"] .sidebar-toggle-chevron {
+      transform: scaleX(-1);
+    }
 
-@layer base {
-  .theme-cosmic-voyager {
-    --color-bg: #0f0c29;
-    --color-surface: #1a1744;
-    --color-accent: #a78bfa;
-    --color-text: #e2e8f0;
-    --color-text-muted: #94a3b8;
-    --color-border: rgba(167, 139, 250, 0.25);
-    --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
-  }
+    nav.app-sidebar[data-collapsed="true"] .sidebar-brand-text {
+      display: none;
+    }
 
-  /* Light woodland: mint page, deep-green type and accents */
-  .theme-forest-ranger {
-    --color-bg: #f0fdf4;
-    --color-surface: #ecfdf5;
-    --color-accent: #15803d;
-    --color-text: #14532d;
-    --color-text-muted: #3f6212;
-    --color-border: rgba(21, 128, 61, 0.22);
-    --font-display: "Fraunces", ui-serif, Georgia, serif;
+    nav.app-sidebar[data-collapsed="true"] .sidebar-brand-row {
+      justify-content: center;
+    }
+
+    nav.app-sidebar[data-collapsed="true"] .sidebar-top-links,
+    nav.app-sidebar[data-collapsed="true"] .sidebar-expandable {
+      display: none !important;
+    }
+
+    nav.app-sidebar[data-collapsed="true"] {
+      overflow: hidden;
+    }
   }
 
-  .theme-cyberpunk-scholar {
-    --color-bg: #0d0221;
-    --color-surface: #1a0b2e;
-    --color-accent: #f472b6;
-    --color-text: #fae8ff;
-    --color-text-muted: #e9d5ff;
-    --color-border: rgba(244, 114, 182, 0.3);
-    --font-display: "Orbitron", ui-sans-serif, system-ui, sans-serif;
+  .oak-step-intro {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, white);
+    background: color-mix(in srgb, var(--color-accent) 10%, white);
   }
 
-  /* Light desert: warm paper — accent dark enough for WCAG AA vs cream bg and button labels */
-  .theme-desert-explorer {
-    --color-bg: #fffbeb;
-    --color-surface: #fff7e6;
-    --color-accent: #78350f;
-    --color-text: #431407;
-    --color-text-muted: #92400e;
-    --color-border: rgba(120, 53, 15, 0.22);
-    --font-display: "Marcellus", ui-serif, Georgia, serif;
+  .oak-step-quiz {
+    border-color: color-mix(in srgb, var(--color-success) 40%, white);
+    background: color-mix(in srgb, var(--color-success) 10%, white);
+  }
+
+  .oak-step-video {
+    border-color: color-mix(in srgb, var(--subject-computing) 40%, white);
+    background: color-mix(in srgb, var(--subject-computing) 10%, white);
+  }
+
+  .oak-step-exit {
+    border-color: color-mix(in srgb, var(--color-accent-2) 40%, white);
+    background: color-mix(in srgb, var(--color-accent-2) 10%, white);
   }
 }

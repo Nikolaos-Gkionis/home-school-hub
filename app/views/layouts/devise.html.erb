@@ -7,18 +7,21 @@
     <%= csp_meta_tag %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Marcellus&family=Orbitron:wght@500;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="<%= google_fonts_href %>" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="<%= ThemeManager.body_class_for("cosmic_voyager") %> min-h-dvh bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
+  <body class="<%= ThemeManager.body_class_for %> min-h-dvh bg-[var(--color-bg)] font-sans text-[var(--color-text)] antialiased">
     <%= render "shared/flash_modal" %>
     <%= render "shared/confirm_dialog" %>
 
     <main id="main-content" class="flex min-h-dvh items-center justify-center p-4">
-      <div class="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-xl">
-        <div class="font-display text-2xl font-bold tracking-tight text-[var(--color-accent)]">HomeSchool Hub</div>
+      <div class="hub-card w-full max-w-md p-8">
+        <%= link_to root_path, class: "font-display text-2xl font-semibold tracking-tight text-[var(--color-accent)]" do %>
+          <i class="fa-solid fa-graduation-cap mr-1.5" aria-hidden="true"></i>
+          HomeSchool Hub
+        <% end %>
         <%= yield %>
       </div>
     </main>

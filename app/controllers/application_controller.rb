@@ -3,6 +3,8 @@ class ApplicationController < ActionController::Base
 
   stale_when_importmap_changes
 
+  layout :choose_layout
+
   before_action :ensure_setup_complete, if: :user_signed_in?
   before_action :configure_permitted_parameters, if: :devise_controller?
 
@@ -13,6 +15,14 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def choose_layout
+    if devise_controller? && !user_signed_in?
+      "devise"
+    else
+      "application"
+    end
+  end
 
   def ensure_setup_complete
     return if devise_controller?

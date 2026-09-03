@@ -24,12 +24,14 @@ class User < ApplicationRecord
   has_many :user_badges, dependent: :destroy
   has_many :badges, through: :user_badges
   has_many :lesson_time_logs, dependent: :destroy
+  has_many :unit_month_plans, dependent: :destroy
 
   validates :current_theme, inclusion: { in: ThemeManager::PRESETS.keys }
   validates :role, inclusion: { in: [ ROLE_PARENT, ROLE_LEARNER ] }
   validate :active_learner_belongs_to_user, if: :active_learner_foreign_key_set?
   validate :role_parent_child_consistency
 
+  before_validation :normalize_current_theme
   after_commit :consume_pending_invite, on: :create
 
   def parent?
@@ -82,6 +84,52 @@ class User < ApplicationRecord
     subs = effective_preferred_subjects
     rel = rel.where(subject: subs) if subs.present?
     rel
+  end
+
+  def pacing_active?(year_group_key: current_year_group_key, academic_year: Curriculum::AcademicYear.start_year)
+    return false if year_group_key.blank?
+
+    unit_month_plans.where(year_group_key: year_group_key, academic_year: academic_year).exists?
+  end
+
+  def plan_for_unit(subject, unit, year_group_key: current_year_group_key, academic_year: Curriculum::AcademicYear.start_year)
+    unit_month_plans.find_by(
+      year_group_key: year_group_key,
+      academic_year: academic_year,
+      subject: subject,
+      unit: unit
+    )
+  end
+
+  # Oak "getting started" units stay open. If a parent has not made a plan yet,
+  # everything stays open so existing families are not locked out.
+  def unit_unlocked?(subject, unit, year_group_key: current_year_group_key)
+    return true if subject.to_s == Lesson::OAK_SUBJECT_NAME
+    return true unless pacing_active?(year_group_key: year_group_key)
+
+    plan = plan_for_unit(subject, unit, year_group_key: year_group_key)
+    return false if plan.nil?
+
+    Curriculum::AcademicYear.month_unlocked?(plan.month)
+  end
+
+  def playable_lessons_relation
+    rel = visible_lessons_relation
+    return rel unless pacing_active?
+
+    yk = current_year_group_key
+    oak_ids = rel.where(subject: Lesson::OAK_SUBJECT_NAME).pluck(:id)
+    pairs = unit_month_plans.where(
+      year_group_key: yk,
+      academic_year: Curriculum::AcademicYear.start_year,
+      month: Curriculum::AcademicYear.unlocked_months
+    ).pluck(:subject, :unit)
+
+    assigned_ids = pairs.flat_map do |subject, unit|
+      rel.where(year_group_key: yk, subject: subject, unit: unit).pluck(:id)
+    end
+
+    rel.where(id: (oak_ids + assigned_ids).uniq)
   end
 
   def effective_preferred_subjects
@@ -189,6 +237,10 @@ class User < ApplicationRecord
   end
 
   private
+
+  def normalize_current_theme
+    self.current_theme = ThemeManager.canonical_key(current_theme)
+  end
 
   def consume_pending_invite
     token = pending_invite_token
