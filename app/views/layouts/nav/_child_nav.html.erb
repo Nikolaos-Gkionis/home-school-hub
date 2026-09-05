@@ -1,9 +1,14 @@
-<% dash = request.path == child_dashboard_path && params[:overview] != "month" %>
+<% dash = request.path == child_dashboard_path && params[:overview].blank? %>
 <% month = request.path == child_dashboard_path && params[:overview] == "month" %>
+<% week = request.path == child_dashboard_path && params[:overview] == "week" %>
 <% profile = request.path == child_profile_path %>
 <%= link_to child_dashboard_path, class: "sidebar-nav-link #{dash ? "is-active" : ""}" do %>
   <i class="fa-solid fa-house fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>
   <span class="sidebar-nav-label truncate">My learning</span>
+<% end %>
+<%= link_to child_dashboard_path(overview: "week"), class: "sidebar-nav-link #{week ? "is-active" : ""}" do %>
+  <i class="fa-solid fa-calendar-week fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>
+  <span class="sidebar-nav-label truncate">This week</span>
 <% end %>
 <%= link_to child_dashboard_path(overview: "month"), class: "sidebar-nav-link #{month ? "is-active" : ""}" do %>
   <i class="fa-solid fa-calendar-day fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>

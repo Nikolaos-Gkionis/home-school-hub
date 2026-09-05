@@ -25,4 +25,17 @@ class CurriculumAcademicYearTest < ActiveSupport::TestCase
     unlocked = Curriculum::AcademicYear.unlocked_months(Date.new(2027, 1, 12))
     assert_equal [ 9, 10, 11, 12, 1 ], unlocked
   end
+
+  test "calendar year for a plan month follows the September start" do
+    assert_equal 2026, Curriculum::AcademicYear.calendar_year_for(9, 2026)
+    assert_equal 2027, Curriculum::AcademicYear.calendar_year_for(1, 2026)
+  end
+
+  test "September 2026 school weeks start on the Monday before the 1st" do
+    mondays = Curriculum::AcademicYear.school_week_mondays(9, 2026)
+
+    assert_equal Date.new(2026, 8, 31), mondays.first
+    assert_equal Date.new(2026, 9, 28), mondays.last
+    assert_equal 5, mondays.size
+  end
 end

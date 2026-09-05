@@ -1,6 +1,8 @@
 <% dash = request.path == parent_dashboard_path %>
-<% fam = request.path.start_with?("/parent/family") || request.path.start_with?("/parent/children") %>
+<% week = request.path.match?(%r{/parent/children/\d+/week\z}) %>
+<% fam = request.path.start_with?("/parent/family") || (request.path.start_with?("/parent/children") && !week) %>
 <% ins = request.path == insights_path %>
+<% first_child = current_user.children.first %>
 <%= link_to parent_dashboard_path, class: "sidebar-nav-link #{dash ? "is-active" : ""}" do %>
   <i class="fa-solid fa-house fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>
   <span class="sidebar-nav-label truncate">Dashboard</span>
@@ -8,6 +10,12 @@
 <%= link_to insights_path, class: "sidebar-nav-link #{ins ? "is-active" : ""}" do %>
   <i class="fa-solid fa-chart-column fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>
   <span class="sidebar-nav-label truncate">Insights</span>
+<% end %>
+<% if first_child %>
+  <%= link_to parent_child_week_path(first_child), class: "sidebar-nav-link #{week ? "is-active" : ""}" do %>
+    <i class="fa-solid fa-calendar-week fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>
+    <span class="sidebar-nav-label truncate">Weekly calendar</span>
+  <% end %>
 <% end %>
 <%= link_to parent_family_path, class: "sidebar-nav-link #{fam ? "is-active" : ""}" do %>
   <i class="fa-solid fa-people-roof fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>

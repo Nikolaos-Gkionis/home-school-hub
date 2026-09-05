@@ -1,0 +1,30 @@
+<% content_for :title, "This week — HomeSchool Hub" %>
+
+<div class="mx-auto w-full max-w-6xl space-y-6 pb-8">
+  <%= render "shared/hub_page_header",
+      kicker: "This week",
+      title: "#{@calendar.month_label} timetable",
+      description: "A 9:00–15:15 calendar: coloured lesson blocks from this month’s units, 15-minute comfort breaks, and a 30-minute lunch. Drag a block to swap it." %>
+
+  <div class="flex flex-wrap gap-2">
+    <% Curriculum::AcademicYear::PLAN_MONTHS.each do |month| %>
+      <% unlocked = !current_user.pacing_active? || Curriculum::AcademicYear.month_unlocked?(month) %>
+      <% if unlocked %>
+        <%= link_to Curriculum::AcademicYear.short_label(month),
+            child_dashboard_path(overview: "week", month: month),
+            class: "rounded-2xl border px-3 py-2 text-sm #{month == @calendar.month ? "border-[var(--color-accent)] bg-[var(--color-nav-active)] font-semibold text-[var(--color-accent)]" : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-hover)]"}" %>
+      <% else %>
+        <span class="rounded-2xl border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-locked)]"><%= Curriculum::AcademicYear.short_label(month) %></span>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if @calendar.has_units %>
+    <%= render "shared/week_calendar", calendar: @calendar %>
+  <% else %>
+    <%= render "shared/hub_empty_state",
+        title: "No units planned for #{@calendar.month_label} yet",
+        body: "Ask a parent to tick Oak units on your year plan. This timetable is built from those monthly picks.",
+        icon: "fa-calendar-week" %>
+  <% end %>
+</div>

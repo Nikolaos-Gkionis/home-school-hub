@@ -2,6 +2,8 @@
 
 <% if @month_overview %>
   <%= render "dashboard/month_overview" %>
+<% elsif @week_overview %>
+  <%= render "dashboard/week_overview" %>
 <% elsif @lesson.blank? %>
   <%= render "shared/hub_empty_state",
       title: "No lessons in your scope yet",

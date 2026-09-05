@@ -28,7 +28,7 @@ class ApplicationController < ActionController::Base
     return if devise_controller?
     return if controller_name.in?(%w[
       pages invitations legacy_redirects sidebar_preferences setup
-      lesson_completions lesson_progresses oak_assets lesson_time_logs themes
+      lesson_completions lesson_progresses oak_assets lesson_time_logs themes week_slots
     ])
     return if request.path.start_with?("/rails/")
     return if request.path.start_with?("/invitations/accept")

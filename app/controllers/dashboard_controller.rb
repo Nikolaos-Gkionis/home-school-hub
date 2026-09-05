@@ -12,6 +12,13 @@ class DashboardController < ApplicationController
       return
     end
 
+    if params[:overview] == "week"
+      @week_overview = true
+      @lesson = nil
+      load_week_overview
+      return
+    end
+
     @lesson = find_lesson
     hydrate_oak_lesson! if @lesson
     persist_lesson_context! if @lesson
@@ -40,14 +47,25 @@ class DashboardController < ApplicationController
     rel = current_user.playable_lessons_relation
     yk = current_user.active_learner&.year_group_key
 
-    lesson = rel.find_by(id: params[:lesson_id]) if params[:lesson_id].present?
-
-    if lesson.nil? && current_user.last_active_lesson_id.present?
-      la = rel.find_by(id: current_user.last_active_lesson_id)
-      lesson = la if la && (yk.blank? || la.year_group_key == yk)
+    # Honour the clicked lesson id first. Subject filters must not send the
+    # child to a different lesson than the one on the calendar block.
+    if params[:lesson_id].present?
+      requested = Lesson.find_by(id: params[:lesson_id])
+      return requested if requested && lesson_open_for_child?(requested, yk)
     end
 
-    lesson || default_starting_lesson(rel)
+    if current_user.last_active_lesson_id.present?
+      la = rel.find_by(id: current_user.last_active_lesson_id)
+      return la if la && (yk.blank? || la.year_group_key == yk)
+    end
+
+    default_starting_lesson(rel)
+  end
+
+  def lesson_open_for_child?(lesson, year_key)
+    return false if year_key.present? && lesson.year_group_key != year_key
+
+    current_user.unit_unlocked?(lesson.subject, lesson.unit, year_group_key: lesson.year_group_key)
   end
 
   def default_starting_lesson(rel)
@@ -95,6 +113,23 @@ class DashboardController < ApplicationController
         first_lesson: lessons.first
       )
     end
+  end
+
+  def load_week_overview
+    @calendar = Curriculum::WeekCalendar.call(
+      child: current_user,
+      month: selected_week_month,
+      week_monday: params[:week],
+      completed_lesson_ids: current_user.lesson_completions.pluck(:lesson_id)
+    )
+  end
+
+  def selected_week_month
+    month = params[:month].to_i
+    return Curriculum::AcademicYear.current_month unless Curriculum::AcademicYear.plan_month?(month)
+    return Curriculum::AcademicYear.current_month if current_user.pacing_active? && !Curriculum::AcademicYear.month_unlocked?(month)
+
+    month
   end
 
   def hydrate_oak_lesson!

@@ -24,6 +24,7 @@
             </span>
             <div class="flex flex-wrap items-center gap-2">
               <%= link_to "Year plan", parent_child_plan_path(child), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+              <%= link_to "Weekly calendar", parent_child_week_path(child), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
               <%= link_to "Change year", parent_edit_child_path(child), class: "hub-btn hub-btn-primary hub-btn-sm" %>
               <%= link_to "Edit details", parent_edit_child_path(child), class: "hub-btn hub-btn-ghost hub-btn-sm" %>
               <%= button_to "Remove",

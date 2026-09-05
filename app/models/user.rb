@@ -25,6 +25,7 @@ class User < ApplicationRecord
   has_many :badges, through: :user_badges
   has_many :lesson_time_logs, dependent: :destroy
   has_many :unit_month_plans, dependent: :destroy
+  has_many :week_lesson_slots, dependent: :destroy
 
   validates :current_theme, inclusion: { in: ThemeManager::PRESETS.keys }
   validates :role, inclusion: { in: [ ROLE_PARENT, ROLE_LEARNER ] }

@@ -1,0 +1,29 @@
+<%# locals: slot:, child: nil, draggable: false, date: nil, period_key: nil %>
+<% lesson = slot.lesson %>
+<% child = local_assigns.fetch(:child, nil) %>
+<% draggable = local_assigns.fetch(:draggable, false) %>
+<% href = week_lesson_href(lesson, child: child) %>
+<%= link_to href,
+    class: "week-lesson-block",
+    style: subject_block_style(lesson.subject),
+    target: (child ? "_blank" : nil),
+    rel: (child ? "noopener noreferrer" : nil),
+    data: {
+      date: (draggable && date && period_key) ? date.iso8601 : nil,
+      period: (draggable && date && period_key) ? period_key : nil,
+      action: (draggable && date && period_key) ? "dragstart->week-calendar#dragstart dragend->week-calendar#dragend" : nil
+    }.compact,
+    draggable: (draggable && date && period_key) do %>
+  <p class="week-lesson-subject">
+    <span class="h-2 w-2 rounded-full" style="<%= subject_swatch_style(lesson.subject) %>" aria-hidden="true"></span>
+    <span class="truncate"><%= lesson.subject %></span>
+    <% if slot.completed %>
+      <i class="fa-solid fa-circle-check text-[var(--color-success)]" aria-label="Completed"></i>
+    <% end %>
+    <% if draggable %>
+      <i class="fa-solid fa-grip-vertical ml-auto text-[var(--color-text-muted)]" aria-hidden="true"></i>
+    <% end %>
+  </p>
+  <p class="week-lesson-unit"><%= lesson.unit %></p>
+  <p class="week-lesson-title"><%= lesson.title %></p>
+<% end %>

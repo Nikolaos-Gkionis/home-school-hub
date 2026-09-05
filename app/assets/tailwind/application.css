@@ -31,27 +31,27 @@
   --font-body: "Lexend", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Fredoka", ui-rounded, system-ui, sans-serif;
 
-  --subject-maths: #2563eb;
-  --subject-english: #d97706;
-  --subject-science: #0d9488;
-  --subject-biology: #16a34a;
-  --subject-chemistry: #7c3aed;
-  --subject-physics: #0284c7;
-  --subject-history: #e11d48;
-  --subject-geography: #059669;
-  --subject-art: #db2777;
-  --subject-computing: #4f46e5;
-  --subject-music: #c026d3;
-  --subject-drama: #ea580c;
-  --subject-pe: #65a30d;
-  --subject-french: #1d4ed8;
-  --subject-german: #ca8a04;
-  --subject-spanish: #dc2626;
-  --subject-re: #7c3aed;
-  --subject-rshe: #ec4899;
-  --subject-citizenship: #0f766e;
-  --subject-dt: #b45309;
-  --subject-default: #0f766e;
+  --subject-maths: #1565c0;
+  --subject-english: #e65100;
+  --subject-science: #00695c;
+  --subject-biology: #2e7d32;
+  --subject-chemistry: #6a1b9a;
+  --subject-physics: #0277bd;
+  --subject-history: #b71c1c;
+  --subject-geography: #827717;
+  --subject-art: #c2185b;
+  --subject-computing: #303f9f;
+  --subject-music: #6d4c41;
+  --subject-drama: #d84315;
+  --subject-pe: #558b2f;
+  --subject-french: #5c6bc0;
+  --subject-german: #ff8f00;
+  --subject-spanish: #d32f2f;
+  --subject-re: #a16207;
+  --subject-rshe: #8e24aa;
+  --subject-citizenship: #455a64;
+  --subject-dt: #bf360c;
+  --subject-default: #546e7a;
 }
 
 @layer base {

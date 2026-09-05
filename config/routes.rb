@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       resource :plan, only: [ :show, :update ], controller: "plans" do
         post :spread
       end
+      resource :week, only: :show, controller: "week_calendars"
       resources :checkpoint_tests, only: [ :create, :show ] do
         member do
           get :answer_key
@@ -33,6 +34,9 @@ Rails.application.routes.draw do
     get "profile", to: "profiles#show"
     patch "profile", to: "profiles#update"
   end
+
+  post "week_slots/swap", to: "week_slots#swap", as: :swap_week_slot
+  post "week_slots/reset", to: "week_slots#reset", as: :reset_week_slot
 
   get "setup/years", to: "setup#years", as: :setup_years
   post "setup/years", to: "setup#save_years"

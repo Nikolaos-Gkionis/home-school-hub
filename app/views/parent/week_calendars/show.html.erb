@@ -1,0 +1,34 @@
+<% content_for :title, "Weekly calendar — #{@child.family_display_name}" %>
+
+<div class="mx-auto w-full max-w-6xl space-y-6 pb-8">
+  <%= render "shared/hub_page_header",
+      kicker: @child.family_display_name,
+      title: "#{@calendar.month_label} weekly calendar",
+      description: "A 9:00–15:15 calendar built from the units on the year plan. Each block shows the subject, unit, and lesson. Drag a block to swap it. Comfort breaks are 15 minutes; lunch is 30." %>
+
+  <div class="flex flex-wrap gap-2">
+    <% Curriculum::AcademicYear::PLAN_MONTHS.each do |month| %>
+      <%= link_to Curriculum::AcademicYear.short_label(month),
+          parent_child_week_path(@child, month: month),
+          class: "rounded-2xl border px-3 py-2 text-sm #{month == @calendar.month ? "border-[var(--color-accent)] bg-[var(--color-nav-active)] font-semibold text-[var(--color-accent)]" : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-hover)]"}" %>
+    <% end %>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <%= link_to "Year plan", parent_child_plan_path(@child, month: @calendar.month), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+    <%= link_to "Child details", parent_child_path(@child), class: "hub-btn hub-btn-ghost hub-btn-sm" %>
+  </div>
+
+  <% if @calendar.has_units %>
+    <%= render "shared/week_calendar", calendar: @calendar, child: @child %>
+  <% else %>
+    <%= render "shared/hub_empty_state",
+        title: "Nothing to timetable in #{@calendar.month_label}",
+        body: "Assign Oak units on the year plan, then this calendar will fill itself.",
+        icon: "fa-calendar-week" do %>
+      <div class="mt-4">
+        <%= link_to "Open year plan", parent_child_plan_path(@child, month: @calendar.month), class: "hub-btn hub-btn-primary hub-btn-sm" %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

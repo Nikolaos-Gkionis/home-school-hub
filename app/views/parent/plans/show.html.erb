@@ -26,6 +26,7 @@
           method: :post,
           params: { month: @month },
           class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+      <%= link_to "Weekly calendar", parent_child_week_path(@child, month: @month), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
       <%= link_to "Child details", parent_child_path(@child), class: "hub-btn hub-btn-ghost hub-btn-sm" %>
     </div>
 

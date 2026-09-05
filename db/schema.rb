@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_141000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_05_160000) do
   create_table "badges", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -190,6 +190,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_141000) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  create_table "week_lesson_slots", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "lesson_id"
+    t.string "period_key", null: false
+    t.date "slot_date", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["lesson_id"], name: "index_week_lesson_slots_on_lesson_id"
+    t.index ["user_id", "slot_date", "period_key"], name: "index_week_lesson_slots_unique_slot", unique: true
+    t.index ["user_id"], name: "index_week_lesson_slots_on_user_id"
+  end
+
   add_foreign_key "checkpoint_tests", "users", column: "child_id"
   add_foreign_key "checkpoint_tests", "users", column: "parent_id"
   add_foreign_key "invitations", "users", column: "parent_id"
@@ -209,4 +221,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_141000) do
   add_foreign_key "users", "lessons", column: "last_active_lesson_id"
   add_foreign_key "users", "lessons", column: "last_completed_lesson_id"
   add_foreign_key "users", "users", column: "parent_id"
+  add_foreign_key "week_lesson_slots", "lessons"
+  add_foreign_key "week_lesson_slots", "users"
 end

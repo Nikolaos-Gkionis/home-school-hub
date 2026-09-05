@@ -1,0 +1,195 @@
+<%# locals: calendar:, child: nil %>
+<% child = local_assigns.fetch(:child, nil) %>
+<% week = calendar.selected_week %>
+<% today = calendar.today %>
+<% current_period = Curriculum::WeekCalendar.current_period_key %>
+<% now_line = Curriculum::WeekCalendar.now_line_style %>
+<% display_days = week ? (week.monday..(week.monday + 4)).to_a : [] %>
+
+<% if week.blank? %>
+  <%= render "shared/hub_empty_state",
+      title: "No school days in this month",
+      body: "Try another month on the year plan.",
+      icon: "fa-calendar-week" %>
+<% else %>
+<div
+  class="week-calendar space-y-4"
+  data-controller="week-calendar"
+  data-week-calendar-swap-url-value="<%= swap_week_slot_path %>"
+  data-week-calendar-month-value="<%= calendar.month %>"
+  data-week-calendar-week-value="<%= week.monday.iso8601 %>"
+  <% if child %>data-week-calendar-child-id-value="<%= child.id %>"<% end %>
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <% if calendar.prev_monday %>
+        <%= link_to week_calendar_path_for(week_monday: calendar.prev_monday, month: calendar.month, child: child),
+            class: "hub-btn hub-btn-secondary hub-btn-sm week-screen-only",
+            aria: { label: "Previous week" } do %>
+          <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+          <span>Previous</span>
+        <% end %>
+      <% else %>
+        <span class="hub-btn hub-btn-secondary hub-btn-sm pointer-events-none opacity-40 week-screen-only">Previous</span>
+      <% end %>
+      <% if calendar.next_monday %>
+        <%= link_to week_calendar_path_for(week_monday: calendar.next_monday, month: calendar.month, child: child),
+            class: "hub-btn hub-btn-secondary hub-btn-sm week-screen-only",
+            aria: { label: "Next week" } do %>
+          <span>Next</span>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        <% end %>
+      <% else %>
+        <span class="hub-btn hub-btn-secondary hub-btn-sm pointer-events-none opacity-40 week-screen-only">Next</span>
+      <% end %>
+      <% if calendar.customized %>
+        <%= button_to "Reset week",
+            reset_week_slot_path,
+            method: :post,
+            params: { month: calendar.month, week: week.monday.iso8601, child_id: child&.id }.compact,
+            class: "hub-btn hub-btn-ghost hub-btn-sm week-screen-only",
+            form: { class: "week-screen-only", data: { turbo_confirm: "Put this week back to the automatic timetable?" } } %>
+      <% end %>
+      <button
+        type="button"
+        class="hub-btn hub-btn-secondary hub-btn-sm week-print-btn week-screen-only"
+        data-action="week-calendar#print"
+      >
+        <i class="fa-solid fa-print" aria-hidden="true"></i>
+        <span>Print week</span>
+      </button>
+    </div>
+    <p class="text-sm font-semibold text-[var(--color-text)]"><%= calendar.week_label %></p>
+  </div>
+
+  <% if week.subject_counts.any? %>
+    <div class="flex flex-wrap gap-2">
+      <% week.subject_counts.sort_by { |subject, _| [ Curriculum::WeekCalendar.core_subject?(subject) ? 0 : 1, subject ] }.each do |subject, count| %>
+        <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold text-[var(--color-text)]" style="<%= subject_tint_style(subject) %>">
+          <span class="h-2 w-2 rounded-full" style="<%= subject_swatch_style(subject) %>" aria-hidden="true"></span>
+          <%= subject %> · <%= count %>
+        </span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <p class="text-xs text-[var(--color-text-muted)] week-drag-hint week-screen-only">Drag a lesson block onto another slot to swap it. Comfort breaks are 15 minutes. Lunch is 30 minutes.</p>
+
+  <div id="week-calendar-board" class="week-board">
+    <div class="week-board-head">
+      <div class="week-board-time-gutter" aria-hidden="true"></div>
+      <% display_days.each do |date| %>
+        <% in_month = week.dates.include?(date) %>
+        <div class="week-board-day-head <%= "is-today" if date == today %> <%= "is-out" unless in_month %>">
+          <span class="block text-xs font-semibold uppercase tracking-wide"><%= date.strftime("%a") %></span>
+          <span class="block text-sm"><%= date.strftime("%-d %b") %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="week-board-body">
+      <div class="week-board-time-gutter" style="<%= Curriculum::WeekCalendar.day_height_style %>">
+        <% Curriculum::WeekCalendar::HOUR_MARKS.each do |mark| %>
+          <div class="week-board-hour-label <%= "is-first" if mark == Curriculum::WeekCalendar::HOUR_MARKS.first %> <%= "is-last" if mark == Curriculum::WeekCalendar::HOUR_MARKS.last %>" style="<%= Curriculum::WeekCalendar.hour_mark_style(mark) %>"><%= mark %></div>
+        <% end %>
+      </div>
+
+      <% display_days.each do |date| %>
+        <% in_month = week.dates.include?(date) %>
+        <div class="week-board-day <%= "is-today" if date == today %> <%= "is-out" unless in_month %>" style="<%= Curriculum::WeekCalendar.day_height_style %>">
+          <% Curriculum::WeekCalendar::HOUR_MARKS.each do |mark| %>
+            <div class="week-board-hour-line" style="<%= Curriculum::WeekCalendar.hour_mark_style(mark) %>" aria-hidden="true"></div>
+          <% end %>
+          <% if date == today && now_line %>
+            <div class="week-board-now-line" style="<%= now_line %>" aria-hidden="true">
+              <span class="week-board-now-dot"></span>
+            </div>
+          <% end %>
+
+          <% Curriculum::WeekCalendar::PERIODS.each do |period| %>
+            <% slot = calendar.slot_at(date, period) %>
+            <% now = date == today && period.key == current_period %>
+            <% droppable = in_month && period.lesson? %>
+            <div
+              class="week-board-block week-board-<%= period.kind %> <%= "is-now" if now %> <%= "is-done" if slot&.completed %>"
+              style="<%= Curriculum::WeekCalendar.block_style(period) %>"
+              <% if droppable %>
+                data-droppable="true"
+                data-date="<%= date.iso8601 %>"
+                data-period="<%= period.key %>"
+                data-action="dragover->week-calendar#dragover dragleave->week-calendar#dragleave drop->week-calendar#drop"
+              <% end %>
+            >
+              <% if !in_month %>
+                <p class="week-board-muted">—</p>
+              <% elsif period.kind == :lunch %>
+                <p class="week-board-fixed-label"><i class="fa-solid fa-utensils" aria-hidden="true"></i> Lunch · 30 min</p>
+              <% elsif period.kind == :break %>
+                <p class="week-board-fixed-label"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i> Break</p>
+              <% elsif slot&.lesson %>
+                <%= render "shared/week_calendar_lesson",
+                    slot: slot,
+                    child: child,
+                    draggable: true,
+                    date: date,
+                    period_key: period.key %>
+              <% else %>
+                <p class="week-board-muted">Free study</p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="week-board-mobile">
+    <% display_days.each do |date| %>
+      <% in_month = week.dates.include?(date) %>
+      <section class="hub-card <%= "ring-2 ring-[var(--color-accent)]" if date == today %>">
+        <h2 class="font-display text-lg font-semibold text-[var(--color-text)]">
+          <%= date.strftime("%A") %>
+          <span class="text-sm font-normal text-[var(--color-text-muted)]"> · <%= date.strftime("%-d %B") %></span>
+        </h2>
+        <% unless in_month %>
+          <p class="mt-1 text-sm text-[var(--color-text-muted)]">Outside this month’s plan.</p>
+        <% else %>
+          <ol class="mt-3 space-y-2">
+            <% Curriculum::WeekCalendar::PERIODS.each do |period| %>
+              <% slot = calendar.slot_at(date, period) %>
+              <% droppable = period.lesson? %>
+              <li
+                class="flex gap-3 rounded-xl border border-[var(--color-border)] px-3 py-2 <%= "bg-[var(--color-nav-active)]" if date == today && period.key == current_period %>"
+                <% if droppable %>
+                  data-droppable="true"
+                  data-date="<%= date.iso8601 %>"
+                  data-period="<%= period.key %>"
+                  data-action="dragover->week-calendar#dragover dragleave->week-calendar#dragleave drop->week-calendar#drop"
+                <% end %>
+              >
+                <span class="w-16 shrink-0 text-xs font-semibold text-[var(--color-text-muted)]"><%= period.starts_at %></span>
+                <div class="min-w-0 flex-1">
+                  <% if period.kind == :lunch %>
+                    <p class="text-sm font-semibold text-[var(--color-text-muted)]">Lunch · 30 min</p>
+                  <% elsif period.kind == :break %>
+                    <p class="text-sm font-semibold text-[var(--color-text-muted)]">Comfort break · 15 min</p>
+                  <% elsif slot&.lesson %>
+                    <%= render "shared/week_calendar_lesson",
+                        slot: slot,
+                        child: child,
+                        draggable: true,
+                        date: date,
+                        period_key: period.key %>
+                  <% else %>
+                    <p class="text-sm text-[var(--color-text-muted)]">Free study</p>
+                  <% end %>
+                </div>
+              </li>
+            <% end %>
+          </ol>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+</div>
+<% end %>
