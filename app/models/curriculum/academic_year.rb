@@ -54,18 +54,39 @@ module Curriculum
       date.to_date.beginning_of_week(:monday)
     end
 
-    # Mondays of school weeks that *start* in this plan month.
-    # A week that begins in August is not a September week, even if Thu–Fri
-    # spill into September. That is why September 2026 starts on Monday the 7th.
-    def self.school_week_mondays(month, academic_year)
+    # First Monday that actually sits in the plan month.
+    # 1 September 2026 is a Tuesday, so teaching starts Monday the 7th.
+    def self.first_school_monday(month, academic_year)
       start_date = month_start(month, academic_year)
-      finish = start_date.end_of_month
-      mondays = []
       cursor = monday_of(start_date)
-      cursor += 7 unless date_in_month?(cursor, start_date)
+      date_in_month?(cursor, start_date) ? cursor : cursor + 7
+    end
+
+    # A real school day: Mon–Fri, in this month, on or after the first Monday.
+    def self.school_date?(date, month, academic_year)
+      date = date.to_date
+      start_date = month_start(month, academic_year)
+      return false unless date.wday.between?(1, 5)
+      return false unless date_in_month?(date, start_date)
+
+      date >= first_school_monday(month, academic_year)
+    end
+
+    def self.school_dates_for_monday(monday, month, academic_year)
+      (0..4).filter_map do |offset|
+        date = monday.to_date + offset
+        date if school_date?(date, month, academic_year)
+      end
+    end
+
+    # Mondays of school weeks that start in this plan month.
+    def self.school_week_mondays(month, academic_year)
+      finish = month_start(month, academic_year).end_of_month
+      mondays = []
+      cursor = first_school_monday(month, academic_year)
 
       while cursor <= finish
-        mondays << cursor if (0..4).any? { |offset| date_in_month?(cursor + offset, start_date) }
+        mondays << cursor if school_dates_for_monday(cursor, month, academic_year).any?
         cursor += 7
       end
 

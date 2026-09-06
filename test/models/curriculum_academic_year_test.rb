@@ -39,6 +39,16 @@ class CurriculumAcademicYearTest < ActiveSupport::TestCase
     assert_equal 4, mondays.size
   end
 
+  test "1 to 4 September 2026 are not school days" do
+    (Date.new(2026, 9, 1)..Date.new(2026, 9, 6)).each do |date|
+      assert_not Curriculum::AcademicYear.school_date?(date, 9, 2026), "#{date} should be before term starts"
+    end
+
+    assert Curriculum::AcademicYear.school_date?(Date.new(2026, 9, 7), 9, 2026)
+    assert_equal [ Date.new(2026, 9, 28), Date.new(2026, 9, 29), Date.new(2026, 9, 30) ],
+      Curriculum::AcademicYear.school_dates_for_monday(Date.new(2026, 9, 28), 9, 2026)
+  end
+
   test "October 2026 school weeks start on the first Monday in October" do
     mondays = Curriculum::AcademicYear.school_week_mondays(10, 2026)
 

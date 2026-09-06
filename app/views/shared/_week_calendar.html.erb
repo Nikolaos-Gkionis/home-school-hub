@@ -4,7 +4,8 @@
 <% today = calendar.today %>
 <% current_period = Curriculum::WeekCalendar.current_period_key %>
 <% now_line = Curriculum::WeekCalendar.now_line_style %>
-<% display_days = week ? (week.monday..(week.monday + 4)).to_a : [] %>
+<%# Only the school days in this plan month — no empty 1–4 Sep or 1–2 Oct columns. %>
+<% display_days = week ? week.dates : [] %>
 
 <% if week.blank? %>
   <%= render "shared/hub_empty_state",
@@ -75,7 +76,7 @@
 
   <p class="text-xs text-[var(--color-text-muted)] week-drag-hint week-screen-only">Drag a lesson block onto another slot to swap it. Comfort breaks are 15 minutes. Lunch is 30 minutes.</p>
 
-  <div id="week-calendar-board" class="week-board">
+  <div id="week-calendar-board" class="week-board" style="--week-days: <%= display_days.size %>;">
     <div class="week-board-head">
       <div class="week-board-time-gutter" aria-hidden="true"></div>
       <% display_days.each do |date| %>

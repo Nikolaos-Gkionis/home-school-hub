@@ -56,7 +56,7 @@
 .week-board-head,
 .week-board-body {
   display: grid;
-  grid-template-columns: 3.4rem repeat(5, minmax(0, 1fr));
+  grid-template-columns: 3.4rem repeat(var(--week-days, 5), minmax(0, 1fr));
 }
 
 .week-board-head {

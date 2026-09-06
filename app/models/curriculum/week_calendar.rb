@@ -279,10 +279,6 @@ module Curriculum
       @child.current_year_group_key
     end
 
-    def month_start
-      @month_start ||= AcademicYear.month_start(@month, @academic_year)
-    end
-
     def month_units
       return @month_units if defined?(@month_units)
 
@@ -339,9 +335,15 @@ module Curriculum
     def allocation_order(mondays)
       return mondays unless current_plan_month?
 
-      current = AcademicYear.monday_of(@today)
-      upcoming = mondays.select { |monday| monday >= current }
+      upcoming = mondays.select { |monday| monday >= current_school_monday }
       upcoming.presence || mondays
+    end
+
+    # Before term starts (e.g. Sunday 6 September), pack from Monday the 7th,
+    # not the August Monday that still contains 1–4 September.
+    def current_school_monday
+      first = AcademicYear.first_school_monday(@month, @academic_year)
+      [ AcademicYear.monday_of(@today), first ].max
     end
 
     def empty_week(monday)
@@ -375,10 +377,7 @@ module Curriculum
     end
 
     def school_dates_for(monday)
-      WEEKDAYS.filter_map do |offset|
-        date = monday + offset
-        date if AcademicYear.date_in_month?(date, month_start)
-      end
+      AcademicYear.school_dates_for_monday(monday, @month, @academic_year)
     end
 
     def fill_week(dates, queues, weeks_left, last_week:)
@@ -576,7 +575,10 @@ module Curriculum
       requested = parse_monday(@requested_monday)
       return weeks.find { |week| week.monday == requested } || weeks.first if requested
 
-      weeks.find { |week| week.monday == AcademicYear.monday_of(@today) } || weeks.first
+      target = current_school_monday
+      weeks.find { |week| week.monday == target } ||
+        weeks.find { |week| week.monday >= target } ||
+        weeks.first
     end
 
     def parse_monday(value)

@@ -26,7 +26,7 @@ class WeekSlotsController < ApplicationController
 
   def reset
     monday = Date.iso8601(params[:week].to_s) rescue Curriculum::AcademicYear.monday_of(Date.current)
-    dates = (monday..(monday + 4)).to_a
+    dates = Curriculum::AcademicYear.school_dates_for_monday(monday, selected_month, Curriculum::AcademicYear.start_year)
     Curriculum::WeekCalendar.reset_week!(child: @child, dates: dates)
     redirect_to week_return_path, notice: "Put this week back to the automatic timetable."
   end

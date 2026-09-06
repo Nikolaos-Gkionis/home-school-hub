@@ -38,11 +38,15 @@ class Curriculum::WeekCalendarTest < ActiveSupport::TestCase
       child: @child,
       month: 9,
       academic_year: 2026,
-      today: Date.new(2026, 9, 7)
+      today: Date.new(2026, 9, 6)
     )
 
     assert_equal Date.new(2026, 9, 7), result.weeks.first.monday
+    assert_equal Date.new(2026, 9, 7), result.selected_week.monday
+    assert_not_includes result.weeks.first.dates, Date.new(2026, 9, 1)
     assert_not_includes result.mondays, Date.new(2026, 8, 31)
+    assert_equal [ Date.new(2026, 9, 28), Date.new(2026, 9, 29), Date.new(2026, 9, 30) ],
+      result.weeks.last.dates
     first_week_lessons = result.weeks.first.slots.count { |slot| slot.lesson.present? }
     assert first_week_lessons.positive?, "expected lessons on the week beginning 7 September"
   end
