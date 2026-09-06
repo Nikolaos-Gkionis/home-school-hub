@@ -54,12 +54,15 @@ module Curriculum
       date.to_date.beginning_of_week(:monday)
     end
 
-    # Mondays of school weeks that have at least one Mon–Fri day in this plan month.
+    # Mondays of school weeks that *start* in this plan month.
+    # A week that begins in August is not a September week, even if Thu–Fri
+    # spill into September. That is why September 2026 starts on Monday the 7th.
     def self.school_week_mondays(month, academic_year)
       start_date = month_start(month, academic_year)
       finish = start_date.end_of_month
       mondays = []
       cursor = monday_of(start_date)
+      cursor += 7 unless date_in_month?(cursor, start_date)
 
       while cursor <= finish
         mondays << cursor if (0..4).any? { |offset| date_in_month?(cursor + offset, start_date) }

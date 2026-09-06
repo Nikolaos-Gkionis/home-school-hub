@@ -318,7 +318,7 @@ module Curriculum
       filled = {}
 
       # In the current month, pack remaining weeks first so "this week" is never
-      # an empty leftover after early September has used every lesson.
+      # an empty leftover after earlier weeks have used every lesson.
       order.each_with_index do |monday, index|
         dates = school_dates_for(monday)
         weeks_left = order.size - index

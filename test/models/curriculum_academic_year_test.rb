@@ -31,11 +31,18 @@ class CurriculumAcademicYearTest < ActiveSupport::TestCase
     assert_equal 2027, Curriculum::AcademicYear.calendar_year_for(1, 2026)
   end
 
-  test "September 2026 school weeks start on the Monday before the 1st" do
+  test "September 2026 school weeks start on Monday the 7th" do
     mondays = Curriculum::AcademicYear.school_week_mondays(9, 2026)
 
-    assert_equal Date.new(2026, 8, 31), mondays.first
+    assert_equal Date.new(2026, 9, 7), mondays.first
     assert_equal Date.new(2026, 9, 28), mondays.last
-    assert_equal 5, mondays.size
+    assert_equal 4, mondays.size
+  end
+
+  test "October 2026 school weeks start on the first Monday in October" do
+    mondays = Curriculum::AcademicYear.school_week_mondays(10, 2026)
+
+    assert_equal Date.new(2026, 10, 5), mondays.first
+    assert_not_includes mondays, Date.new(2026, 9, 28)
   end
 end

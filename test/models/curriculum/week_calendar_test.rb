@@ -32,6 +32,21 @@ class Curriculum::WeekCalendarTest < ActiveSupport::TestCase
     assert result.weeks.any?
   end
 
+  test "September weeks start on the 7th and lessons pack from that Monday" do
+    seed_month_units
+    result = Curriculum::WeekCalendar.call(
+      child: @child,
+      month: 9,
+      academic_year: 2026,
+      today: Date.new(2026, 9, 7)
+    )
+
+    assert_equal Date.new(2026, 9, 7), result.weeks.first.monday
+    assert_not_includes result.mondays, Date.new(2026, 8, 31)
+    first_week_lessons = result.weeks.first.slots.count { |slot| slot.lesson.present? }
+    assert first_week_lessons.positive?, "expected lessons on the week beginning 7 September"
+  end
+
   test "school day is 9:00 to 15:15 with lunch in the middle" do
     seed_month_units
     result = Curriculum::WeekCalendar.call(child: @child, month: 9, academic_year: 2026, week_monday: Date.new(2026, 9, 14))
