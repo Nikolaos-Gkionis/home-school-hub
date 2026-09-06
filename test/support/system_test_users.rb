@@ -33,6 +33,15 @@ module SystemTestUsers
     visit new_user_session_path
     fill_in "user_email", with: user.email
     fill_in "user_password", with: "Password123!"
-    click_button "Sign in"
+
+    # Chrome can throw during Turbo's in-page navigation after submit.
+    # If the click already started the visit, just wait for the new page.
+    begin
+      click_button "Sign in"
+    rescue Selenium::WebDriver::Error::JavascriptError, Selenium::WebDriver::Error::UnknownError
+      nil
+    end
+
+    assert_no_current_path new_user_session_path, wait: 10
   end
 end

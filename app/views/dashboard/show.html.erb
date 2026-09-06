@@ -5,10 +5,16 @@
 <% elsif @week_overview %>
   <%= render "dashboard/week_overview" %>
 <% elsif @lesson.blank? %>
-  <%= render "shared/hub_empty_state",
-      title: "No lessons in your scope yet",
-      body: "Ask a parent to pick your year, or widen subject filters in the sidebar. If you are setting the hub up, add an Oak API token and run bin/rails curriculum:oak_sync.",
-      icon: "fa-book-open" %>
+  <div class="mx-auto w-full max-w-3xl space-y-6">
+    <%= render "shared/hub_page_header",
+        kicker: "My learning",
+        title: "Your lessons",
+        description: "Lessons appear here once your year and subjects are set." %>
+    <%= render "shared/hub_empty_state",
+        title: "No lessons in your scope yet",
+        body: "Ask a parent to pick your year, or widen subject filters in the sidebar. If you are setting the hub up, add an Oak API token and run bin/rails curriculum:oak_sync.",
+        icon: "fa-book-open" %>
+  </div>
 <% else %>
   <div
     class="flex h-full min-h-0 w-full max-w-none flex-col gap-3"

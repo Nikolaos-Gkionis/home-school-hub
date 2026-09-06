@@ -2,6 +2,7 @@
 import "@hotwired/turbo-rails"
 import { installTurboConfirm } from "turbo_confirm"
 import "controllers"
+import "pwa"
 
 installTurboConfirm()
 document.addEventListener("turbo:load", installTurboConfirm)

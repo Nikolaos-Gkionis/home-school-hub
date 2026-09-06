@@ -1,0 +1,10 @@
+<%# Shared install/favicon tags for every HTML layout. %>
+<meta name="theme-color" content="#0f766e">
+<meta name="application-name" content="HomeSchool Hub">
+<meta name="apple-mobile-web-app-title" content="HomeSchool Hub">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/icon.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/icon.png">
+<%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json), type: "application/manifest+json" %>
