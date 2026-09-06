@@ -48,7 +48,7 @@ class OakAssetsController < ApplicationController
   private
 
   def find_lesson
-    current_user.visible_lessons_relation.find(params[:lesson_id])
+    current_user.find_open_lesson!(params[:lesson_id])
   end
 
   # One hop only: let the browser stream large video directly from the CDN.

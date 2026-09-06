@@ -62,13 +62,14 @@ module ApplicationHelper
     end
   end
 
-  # Child stays in the hub on that exact lesson. A parent opens the Oak page
-  # for the same lesson, because the parent dashboard is not a lesson player.
+  # Calendar blocks always open the hub's wrapped Oak lesson (API-backed
+  # video, quizzes, and downloads). child: is the learner when a parent is
+  # looking at that child's week; nil means the child is on their own calendar.
   def week_lesson_href(lesson, child: nil)
     return nil unless lesson
 
     if child
-      lesson.oak_pupil_lesson_url
+      parent_dashboard_path(lesson_id: lesson.id)
     else
       child_dashboard_path(lesson_id: lesson.id)
     end

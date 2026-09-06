@@ -6,8 +6,6 @@
 <%= link_to href,
     class: "week-lesson-block",
     style: subject_block_style(lesson.subject),
-    target: (child ? "_blank" : nil),
-    rel: (child ? "noopener noreferrer" : nil),
     data: {
       date: (draggable && date && period_key) ? date.iso8601 : nil,
       period: (draggable && date && period_key) ? period_key : nil,

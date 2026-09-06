@@ -87,6 +87,24 @@ class User < ApplicationRecord
     rel
   end
 
+  # Sidebar subject ticks only hide the lesson tree. A calendar lesson can
+  # still be opened, and its API-wrapped video / quizzes must keep working.
+  def lesson_open?(lesson)
+    return false if lesson.blank?
+
+    yk = current_year_group_key
+    return false if yk.present? && lesson.year_group_key != yk
+
+    unit_unlocked?(lesson.subject, lesson.unit, year_group_key: lesson.year_group_key)
+  end
+
+  def find_open_lesson!(id)
+    lesson = Lesson.find_by(id: id)
+    raise ActiveRecord::RecordNotFound unless lesson_open?(lesson)
+
+    lesson
+  end
+
   def pacing_active?(year_group_key: current_year_group_key, academic_year: Curriculum::AcademicYear.start_year)
     return false if year_group_key.blank?
 

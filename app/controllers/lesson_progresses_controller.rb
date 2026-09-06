@@ -59,6 +59,6 @@ class LessonProgressesController < ApplicationController
   private
 
   def find_lesson
-    current_user.visible_lessons_relation.find(params[:lesson_id])
+    current_user.find_open_lesson!(params[:lesson_id])
   end
 end

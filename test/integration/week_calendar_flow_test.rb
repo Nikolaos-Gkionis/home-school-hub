@@ -72,7 +72,42 @@ class WeekCalendarFlowTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Lesson A"
     assert_includes response.body, "Year plan"
     assert_includes response.body, "Print week"
-    assert_includes response.body, @lesson.oak_pupil_lesson_url
+    assert_includes response.body, parent_dashboard_path(lesson_id: @lesson.id)
+    assert_not_includes response.body, @lesson.oak_pupil_lesson_url
+  end
+
+  test "parent calendar lesson opens the wrapped hub player with API video" do
+    @lesson.update!(
+      oak_synced_at: Time.current,
+      summary_json: {
+        "lessonTitle" => "Lesson A",
+        "pupilLessonOutcome" => "Retell the story in your own words."
+      },
+      assets_json: {
+        "assets" => [
+          { "type" => "video", "label" => "Video", "url" => "https://open-api.thenational.academy/api/v0/lessons/autumn-stories/assets/video" }
+        ]
+      }
+    )
+
+    post user_session_path, params: {
+      user: { email: @parent.email, password: "Password123!" }
+    }
+
+    previous_token = ENV["OAK_API_TOKEN"]
+    ENV["OAK_API_TOKEN"] = "test-token-for-wrapped-player"
+    begin
+      get parent_dashboard_path(lesson_id: @lesson.id)
+    ensure
+      ENV["OAK_API_TOKEN"] = previous_token
+    end
+
+    assert_response :success
+    assert_includes response.body, "Lesson A"
+    assert_includes response.body, "Retell the story in your own words."
+    assert_includes response.body, "Lesson video"
+    assert_includes response.body, lesson_oak_asset_path(lesson_id: @lesson.id, type: "video")
+    assert_not_includes response.body, "src=\"#{@lesson.oak_pupil_lesson_url}\""
   end
 
   test "parent can swap two lesson blocks" do
@@ -118,6 +153,21 @@ class WeekCalendarFlowTest < ActionDispatch::IntegrationTest
     assert_equal second.lesson.id, moved.slot_at(first.date, first.period).lesson.id
     assert_equal first.lesson.id, moved.slot_at(second.date, second.period).lesson.id
     assert_includes [ @lesson.id, extra.id ], first.lesson.id
+  end
+
+  test "child can use wrapped video progress on a calendar lesson outside preferred subjects" do
+    @child.active_learner.update!(preferred_subjects: [ "Art and design" ])
+
+    post user_session_path, params: {
+      user: { email: @child.email, password: "Password123!" }
+    }
+    get child_dashboard_path(lesson_id: @lesson.id)
+    assert_response :success
+    assert_includes response.body, "Lesson A"
+
+    post lesson_section_view_path(lesson_id: @lesson.id, section_key: "video")
+    assert_response :ok
+    assert LessonSectionView.exists?(user: @child, lesson: @lesson, section_key: "video")
   end
 
   test "child cannot browse a locked future month" do
