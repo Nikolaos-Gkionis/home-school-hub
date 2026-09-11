@@ -29,9 +29,11 @@ namespace :curriculum do
     puts "Lessons remaining (practice rows): #{result[:lessons]}"
   end
 
-  desc "Wipe lessons then seed YAML practice rows (no Oak import)"
-  task resync: :environment do
-    Curriculum::CatalogueReset.call
-    OakCurriculumSeed.call
+  desc "Place remaining Oak units (including Music theory) onto consecutive months for every child"
+  task spread_all: :environment do
+    User.where(role: User::ROLE_LEARNER).find_each do |child|
+      count = Curriculum::SpreadUnits.call(child: child)
+      puts "#{child.email}: #{count} units"
+    end
   end
 end

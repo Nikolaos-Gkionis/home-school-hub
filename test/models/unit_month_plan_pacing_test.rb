@@ -73,12 +73,11 @@ class UnitMonthPlanPacingTest < ActiveSupport::TestCase
   test "spread remaining units fills empty months" do
     count = Curriculum::SpreadUnits.call(child: @child, academic_year: 2026)
     assert_equal 2, count
-    months = @child.unit_month_plans.order(:month).pluck(:month, :unit)
-    assert_equal 2, months.size
-    assert_equal months.map(&:first).uniq.size, months.size
+    months = @child.unit_month_plans.order(:id).pluck(:month, :unit)
+    assert_equal [ [ 9, "September unit" ], [ 10, "October unit" ] ], months
   end
 
-  test "spread remaining units skips Music and practice" do
+  test "spread remaining units includes Music theory and skips practice" do
     Lesson.create!(
       year_group_key: "year_7",
       subject: "Music",
@@ -94,9 +93,19 @@ class UnitMonthPlanPacingTest < ActiveSupport::TestCase
 
     count = Curriculum::SpreadUnits.call(child: @child, academic_year: 2026)
     units = @child.unit_month_plans.pluck(:subject, :unit)
-    assert_equal 2, count
-    assert_not(units.any? { |subject, _unit| Lesson.music_subject?(subject) })
+    assert_equal 3, count
+    assert_includes units, [ "Music", "Notation" ]
     assert_not(units.any? { |_subject, unit| Lesson.practice_unit?(unit) })
+  end
+
+  test "spread places each subject's units on consecutive months" do
+    create_lesson(unit: "November unit", slug: "nov-unit", position: 3)
+
+    Curriculum::SpreadUnits.call(child: @child, academic_year: 2026)
+    by_unit = @child.unit_month_plans.where(subject: "English").index_by(&:unit)
+    assert_equal 9, by_unit["September unit"].month
+    assert_equal 10, by_unit["October unit"].month
+    assert_equal 11, by_unit["November unit"].month
   end
 
   test "practice lessons stay playable when pacing is on" do
@@ -116,12 +125,12 @@ class UnitMonthPlanPacingTest < ActiveSupport::TestCase
 
   private
 
-  def create_lesson(unit:, slug:)
+  def create_lesson(unit:, slug:, position: nil)
     Lesson.create!(
       year_group_key: "year_7",
       subject: "English",
       unit: unit,
-      unit_position: slug == "sept-unit" ? 1 : 2,
+      unit_position: position || (slug == "sept-unit" ? 1 : 2),
       title: unit,
       external_url: "https://www.thenational.academy/pupils/lessons/#{slug}",
       oak_lesson_slug: slug,

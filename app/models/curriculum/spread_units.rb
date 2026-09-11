@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 module Curriculum
-  # Drops leftover Oak units evenly into empty months (or every month if none are empty).
+  # Puts each subject's Oak units onto consecutive school months.
+  # Unit 1 → September, unit 2 → October, and so on. Extra units wrap
+  # around (unit 12 shares September with unit 1). Music theory is included
+  # so hour 4 has a unit every month; instrument practice stays off the plan.
   class SpreadUnits
     def self.call(child:, academic_year: AcademicYear.start_year)
       new(child: child, academic_year: academic_year).call
@@ -16,54 +19,52 @@ module Curriculum
     def call
       return 0 if @year_key.blank?
 
-      remaining = remaining_units
-      return 0 if remaining.empty?
+      created = 0
+      units_by_subject.each_value do |units|
+        units.each_with_index do |row, index|
+          next if assigned?([ row[:subject], row[:unit] ])
 
-      targets = empty_months.presence || AcademicYear::PLAN_MONTHS
-      remaining.each_with_index do |row, index|
-        @child.unit_month_plans.create!(
-          year_group_key: @year_key,
-          academic_year: @academic_year,
-          month: targets[index % targets.size],
-          subject: row[:subject],
-          unit: row[:unit]
-        )
+          @child.unit_month_plans.create!(
+            year_group_key: @year_key,
+            academic_year: @academic_year,
+            month: AcademicYear::PLAN_MONTHS[index % AcademicYear::PLAN_MONTHS.size],
+            subject: row[:subject],
+            unit: row[:unit]
+          )
+          created += 1
+        end
       end
-      remaining.size
+      created
     end
 
     private
 
-    def remaining_units
+    def assigned
+      @assigned ||= @child.unit_month_plans
+        .where(year_group_key: @year_key, academic_year: @academic_year)
+        .pluck(:subject, :unit)
+        .to_set
+    end
+
+    def assigned?(pair)
+      assigned.include?(pair)
+    end
+
+    def units_by_subject
       positions = Lesson.where(year_group_key: @year_key)
         .where.not(subject: Lesson::OAK_SUBJECT_NAME)
         .not_practice
         .group(:subject, :unit)
         .minimum(:unit_position)
 
-      assigned = @child.unit_month_plans
-        .where(year_group_key: @year_key, academic_year: @academic_year)
-        .pluck(:subject, :unit)
-        .to_set
-
-      positions.keys.filter_map do |subject, unit|
-        next if assigned.include?([ subject, unit ])
-        # Music theory is hour 4, not leftover core filler across empty months.
-        next if Lesson.music_subject?(subject)
+      rows = positions.keys.filter_map do |subject, unit|
         next if Lesson.practice_unit?(unit)
 
         { subject: subject, unit: unit, position: positions[[ subject, unit ]] || 9999 }
-      end.sort_by { |row| [ row[:subject], row[:position], row[:unit] ] }
-    end
-
-    def empty_months
-      AcademicYear::PLAN_MONTHS.select do |month|
-        @child.unit_month_plans.where(
-          year_group_key: @year_key,
-          academic_year: @academic_year,
-          month: month
-        ).none?
       end
+
+      rows.sort_by { |row| [ row[:subject], row[:position], row[:unit] ] }
+        .group_by { |row| row[:subject] }
     end
   end
 end
