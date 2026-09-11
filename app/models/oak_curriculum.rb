@@ -18,14 +18,13 @@ class OakCurriculum
       subject_rows.filter_map { |r| r["display_name"].presence || r["slug"]&.titleize }
     end
 
-    # Subjects shown in sidebar + setup checkboxes: full YAML list plus any extra names
-    # present on synced lessons (so nothing in the hub is hidden from the filter).
+    # Sidebar + setup checkboxes. YAML is the allowlist so dropped subjects
+    # (French, Art, …) cannot sneak back in from leftover lesson rows.
     def hub_subject_filter_options
-      yaml_names = display_names
-      db_names = Lesson.distinct.order(:subject).pluck(:subject)
-      return db_names if yaml_names.blank?
+      names = display_names
+      return Lesson.distinct.order(:subject).pluck(:subject) if names.blank?
 
-      (yaml_names + db_names).uniq.sort_by { |s| s.to_s.downcase }
+      names.sort_by { |s| s.to_s.downcase }
     end
   end
 end

@@ -101,7 +101,7 @@ class Curriculum::WeekCalendarTest < ActiveSupport::TestCase
     assert counts["Mathematics"] > counts["History"], "Maths should beat History: #{counts.inspect}"
     assert counts["Science"] > counts["History"], "Science should beat History: #{counts.inspect}"
     assert counts["History"].positive?
-    assert counts["Art and design"].positive?
+    assert counts["Music"].positive?
   end
 
   test "lessons come from the monthly unit plan" do
@@ -186,7 +186,7 @@ class Curriculum::WeekCalendarTest < ActiveSupport::TestCase
       "Mathematics" => "Place value",
       "Science" => "Cells",
       "History" => "Romans",
-      "Art and design" => "Colour"
+      "Music" => "Notation"
     }.each do |subject, unit|
       8.times { |index| create_lesson(subject: subject, unit: unit, position: index + 1) }
       @child.unit_month_plans.create!(

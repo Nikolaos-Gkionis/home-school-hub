@@ -1,51 +1,22 @@
-# Oak Curriculum API sync — subjects aligned with the hub plan (secondary-focused).
+# Oak Curriculum API sync — only the subjects we teach in the hub.
 # Request an API key: https://open-api.thenational.academy/docs
 # Run: OAK_API_TOKEN=... bin/rails curriculum:oak_sync
 #
 # Subject slugs must match GET /subjects (Oak). If a slug 404s, adjust it here.
+# Oak's maths slug still uses the display name "Mathematics".
 
 year_groups:
   - year_7
   - year_8
 
 subjects:
-  - slug: art
-    display_name: "Art and design"
-  - slug: biology
-    display_name: "Biology"
-  - slug: chemistry
-    display_name: "Chemistry"
-  - slug: physics
-    display_name: "Physics"
-  - slug: science
-    display_name: "Science"
-  - slug: geography
-    display_name: "Geography"
-  - slug: history
-    display_name: "History"
   - slug: maths
     display_name: "Mathematics"
   - slug: english
     display_name: "English"
-  - slug: citizenship
-    display_name: "Citizenship"
-  - slug: computing
-    display_name: "Computing"
-  - slug: design-technology
-    display_name: "Design and technology"
-  - slug: drama
-    display_name: "Drama"
+  - slug: science
+    display_name: "Science"
+  - slug: history
+    display_name: "History"
   - slug: music
     display_name: "Music"
-  - slug: physical-education
-    display_name: "Physical education"
-  - slug: german
-    display_name: "German"
-  - slug: french
-    display_name: "French"
-  - slug: spanish
-    display_name: "Spanish"
-  - slug: religious-education
-    display_name: "Religious education"
-  - slug: rshe-pshe
-    display_name: "RSHE (PSHE)"

@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 namespace :curriculum do
-  desc "Idempotent seed of curriculum lessons"
+  desc "Idempotent seed of curriculum lessons (no Oak import)"
   task seed: :environment do
     OakCurriculumSeed.call
     Curriculum::YearBrowseSeeder.ensure_all!
-    Oak::Importer.call if Oak::ApiClient.configured?
+    Curriculum::MusicPracticeSeeder.ensure_all!
   end
 
   desc "Sync published Oak lessons from the Open API (requires OAK_API_TOKEN).
@@ -22,11 +22,16 @@ namespace :curriculum do
     end
   end
 
-  desc "Clear lessons and re-seed from YAML"
+  desc "Wipe lessons, year plans, and progress so you can set subjects up again.
+        Keeps users. Puts Music practice rows back. Does not call Oak."
+  task reset_lessons: :environment do
+    result = Curriculum::CatalogueReset.call
+    puts "Lessons remaining (practice rows): #{result[:lessons]}"
+  end
+
+  desc "Wipe lessons then seed YAML practice rows (no Oak import)"
   task resync: :environment do
-    Lesson.destroy_all
+    Curriculum::CatalogueReset.call
     OakCurriculumSeed.call
-    Curriculum::YearBrowseSeeder.ensure_all!
-    Oak::Importer.call if Oak::ApiClient.configured?
   end
 end

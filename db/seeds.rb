@@ -13,4 +13,6 @@ end
 OakCurriculumSeed.call
 Curriculum::YearBrowseSeeder.ensure_all!
 Curriculum::MusicPracticeSeeder.ensure_all!
-Oak::Importer.call if Oak::ApiClient.configured?
+# Do not auto-import Oak here. After a reset, run:
+#   bin/rails curriculum:oak_sync
+# when you want the five hub subjects filled from Oak.

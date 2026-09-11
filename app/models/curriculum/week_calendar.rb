@@ -7,8 +7,9 @@ module Curriculum
   # 1. Take the Oak units the parent put in this month.
   # 2. Line the lessons up in Oak order (unit, then lesson number).
   # 3. Pour them into 9:00–15:15 days, giving English, Maths, and Science more
-  #    hours, and still sprinkling in the other subjects so the week is mixed.
-  #    When English or Maths appears twice on a day, those two sit back to back.
+  #    hours, and still sprinkling in History (and Music theory units) so the
+  #    week is mixed. When English or Maths appears twice on a day, those two
+  #    sit back to back.
   #
   # The first draft of each week is computed from the monthly plan. After
   # someone drags a block, that week is stored in week_lesson_slots so the
@@ -114,13 +115,10 @@ module Curriculum
       "english" => 5,
       "mathematics" => 5,
       "maths" => 5,
-      "science" => 4,
-      "biology" => 3,
-      "chemistry" => 3,
-      "physics" => 3
+      "science" => 4
     }.freeze
     OTHER_WEIGHT = 2
-    # Foundation subjects still appear, but they should not take over a week.
+    # History and Music still appear, but they should not take over a week.
     MAX_OTHER_PER_WEEK = 2
     # English / Maths / Science keep a heavier weekly share when lessons remain.
     MIN_CORE_PER_WEEK = 3

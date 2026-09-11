@@ -156,7 +156,7 @@ class WeekCalendarFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "child can use wrapped video progress on a calendar lesson outside preferred subjects" do
-    @child.active_learner.update!(preferred_subjects: [ "Art and design" ])
+    @child.active_learner.update!(preferred_subjects: [ "History" ])
 
     post user_session_path, params: {
       user: { email: @child.email, password: "Password123!" }
