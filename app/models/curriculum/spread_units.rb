@@ -37,6 +37,7 @@ module Curriculum
     def remaining_units
       positions = Lesson.where(year_group_key: @year_key)
         .where.not(subject: Lesson::OAK_SUBJECT_NAME)
+        .not_practice
         .group(:subject, :unit)
         .minimum(:unit_position)
 
@@ -47,6 +48,9 @@ module Curriculum
 
       positions.keys.filter_map do |subject, unit|
         next if assigned.include?([ subject, unit ])
+        # Music theory is hour 4, not leftover core filler across empty months.
+        next if Lesson.music_subject?(subject)
+        next if Lesson.practice_unit?(unit)
 
         { subject: subject, unit: unit, position: positions[[ subject, unit ]] || 9999 }
       end.sort_by { |row| [ row[:subject], row[:position], row[:unit] ] }

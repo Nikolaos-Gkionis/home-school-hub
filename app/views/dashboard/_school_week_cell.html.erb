@@ -1,0 +1,31 @@
+<%# locals: slot:, user:, compact: false %>
+<% compact = local_assigns.fetch(:compact, false) %>
+<% lesson = slot.lesson %>
+
+<% if slot.lunch? %>
+  <p class="<%= compact ? "text-sm font-semibold text-[var(--color-text-muted)]" : "week-board-fixed-label" %>">
+    <i class="fa-solid fa-utensils" aria-hidden="true"></i> Lunch · 30 min
+  </p>
+<% elsif slot.break? %>
+  <p class="<%= compact ? "text-sm font-semibold text-[var(--color-text-muted)]" : "week-board-fixed-label" %>">
+    <i class="fa-solid fa-mug-hot" aria-hidden="true"></i> Break
+  </p>
+<% elsif lesson %>
+  <%= link_to hub_dashboard_path(lesson_id: lesson.id),
+        class: compact ? "block rounded-xl border px-2 py-1.5" : "week-lesson-block",
+        style: compact ? subject_tint_style(lesson.subject) : subject_block_style(lesson.subject) do %>
+    <p class="week-lesson-subject">
+      <span class="h-2 w-2 rounded-full" style="<%= subject_swatch_style(lesson.subject) %>" aria-hidden="true"></span>
+      <span class="truncate"><%= lesson.subject %></span>
+      <% if user.completed?(lesson) %>
+        <i class="fa-solid fa-circle-check text-[var(--color-success)]" aria-label="Completed"></i>
+      <% end %>
+    </p>
+    <% if lesson.unit.present? %>
+      <p class="week-lesson-unit"><%= lesson.unit %></p>
+    <% end %>
+    <p class="week-lesson-title"><%= lesson.title %></p>
+  <% end %>
+<% else %>
+  <p class="<%= compact ? "text-sm text-[var(--color-text-muted)]" : "week-board-muted" %>">Free</p>
+<% end %>

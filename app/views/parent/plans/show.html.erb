@@ -4,7 +4,15 @@
   <%= render "shared/hub_page_header",
       kicker: @child.family_display_name,
       title: "Year plan · #{Curriculum::YearGroups.label_for_year(@year_key)}",
-      description: "Tick the Oak units for each month (September to July). Later months stay locked for your child until that month arrives." %>
+      description: "Tick the Oak units for each month (September to July). The timetable stops at the end of the third week in July. Later months stay locked for your child until that month arrives." %>
+
+  <p class="hub-card text-sm leading-relaxed text-[var(--color-text-muted)]">
+    The child's school day is <strong class="font-semibold text-[var(--color-text)]">3 hours of core Oak work</strong>,
+    then <strong class="font-semibold text-[var(--color-text)]">1 hour of music theory</strong> and
+    <strong class="font-semibold text-[var(--color-text)]">1 hour of instrument practice</strong>.
+    Afternoon hours stay reserved for music — they are never filled with other subjects.
+    If September looks too full, tick fewer units for that month.
+  </p>
 
   <% if @year_key.blank? %>
     <p class="hub-card text-sm text-[var(--color-text-muted)]">Set a school year for this child first.</p>

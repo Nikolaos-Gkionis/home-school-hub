@@ -1,4 +1,6 @@
-<% dash = request.path == parent_dashboard_path %>
+<% dash = request.path == parent_dashboard_path && params[:view].blank? && params[:lesson_id].blank? && params[:overview].blank? %>
+<% day = request.path == parent_dashboard_path && params[:view] == "day" %>
+<% timetable_week = request.path == parent_dashboard_path && params[:view] == "week" %>
 <% week = request.path.match?(%r{/parent/children/\d+/week\z}) %>
 <% fam = request.path.start_with?("/parent/family") || (request.path.start_with?("/parent/children") && !week) %>
 <% ins = request.path == insights_path %>
@@ -6,6 +8,14 @@
 <%= link_to parent_dashboard_path, class: "sidebar-nav-link #{dash ? "is-active" : ""}" do %>
   <i class="fa-solid fa-house fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>
   <span class="sidebar-nav-label truncate">Dashboard</span>
+<% end %>
+<%= link_to hub_dashboard_path(view: "day"), class: "sidebar-nav-link #{day ? "is-active" : ""}" do %>
+  <i class="fa-solid fa-sun fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>
+  <span class="sidebar-nav-label truncate">Day</span>
+<% end %>
+<%= link_to hub_dashboard_path(view: "week"), class: "sidebar-nav-link #{timetable_week ? "is-active" : ""}" do %>
+  <i class="fa-solid fa-calendar-week fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>
+  <span class="sidebar-nav-label truncate">Week</span>
 <% end %>
 <%= link_to insights_path, class: "sidebar-nav-link #{ins ? "is-active" : ""}" do %>
   <i class="fa-solid fa-chart-column fa-fw shrink-0 text-[var(--color-accent)]" aria-hidden="true"></i>

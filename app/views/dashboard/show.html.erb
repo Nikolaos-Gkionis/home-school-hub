@@ -4,6 +4,18 @@
   <%= render "dashboard/month_overview" %>
 <% elsif @week_overview %>
   <%= render "dashboard/week_overview" %>
+<% elsif @timetable_missing_child %>
+  <%= render "shared/hub_empty_state",
+      title: "No child to preview yet",
+      body: "Invite a child, set their school year, then open Day or Week to see the same timetable they do.",
+      icon: "fa-people-roof" %>
+  <div class="mt-4">
+    <%= link_to "Invite a child", new_invitation_path, class: "hub-btn hub-btn-primary" %>
+  </div>
+<% elsif @school_week %>
+  <%= render "dashboard/school_week", school_week: @school_week, user: @timetable_user %>
+<% elsif @school_day %>
+  <%= render "dashboard/school_day", school_day: @school_day, user: @timetable_user %>
 <% elsif @lesson.blank? %>
   <div class="mx-auto w-full max-w-3xl space-y-6">
     <%= render "shared/hub_page_header",
@@ -35,11 +47,20 @@
       </div>
 
       <div class="flex flex-none flex-wrap items-center gap-2">
-        <%= link_to "Open on Oak (new tab)",
-              @lesson.oak_pupil_lesson_url,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+        <%= link_to hub_dashboard_path(view: "day"), class: "hub-btn hub-btn-ghost hub-btn-sm" do %>
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+          Day
+        <% end %>
+        <%= link_to hub_dashboard_path(view: "week"), class: "hub-btn hub-btn-ghost hub-btn-sm" do %>
+          Week
+        <% end %>
+        <% unless @lesson.practice? %>
+          <%= link_to "Open on Oak (new tab)",
+                @lesson.oak_pupil_lesson_url,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+        <% end %>
         <%= render "lessons/status", lesson: @lesson, user: current_user %>
       </div>
     </header>

@@ -9,6 +9,13 @@ class Lesson < ApplicationRecord
 
   CONTENT_MODE_LEGACY = "legacy_iframe"
   CONTENT_MODE_OAK_HUB = "oak_hub"
+  CONTENT_MODE_PRACTICE = "practice"
+  CONTENT_MODES = [ CONTENT_MODE_LEGACY, CONTENT_MODE_OAK_HUB, CONTENT_MODE_PRACTICE ].freeze
+
+  MUSIC_SUBJECT_NAME = "Music"
+  PRACTICE_UNIT = "Instrument practice"
+  PRACTICE_TITLE = "Music practice"
+  PRACTICE_PLACEHOLDER_URL = "internal://music-practice"
 
   # Tracked in LessonSectionView for Oak hub lessons (render order in dashboard).
   HUB_SECTION_KEYS = %w[
@@ -28,7 +35,15 @@ class Lesson < ApplicationRecord
   has_many :lesson_time_logs, dependent: :destroy
 
   validates :title, :external_url, :subject, :unit, :year_group_key, presence: true
-  validates :content_mode, inclusion: { in: [ CONTENT_MODE_LEGACY, CONTENT_MODE_OAK_HUB ] }
+  validates :content_mode, inclusion: { in: CONTENT_MODES }
+
+  scope :practice, -> { where(content_mode: CONTENT_MODE_PRACTICE) }
+  scope :not_practice, -> { where.not(content_mode: CONTENT_MODE_PRACTICE) }
+  scope :music_subject, -> { where("LOWER(subject) = ?", MUSIC_SUBJECT_NAME.downcase) }
+  # Morning hours: Oak curriculum that is not Music (theory lives in hour 4).
+  scope :core_curriculum, -> {
+    not_practice.where.not(subject: OAK_SUBJECT_NAME).where.not("LOWER(subject) = ?", MUSIC_SUBJECT_NAME.downcase)
+  }
 
   scope :ordered, -> {
     t = arel_table
@@ -62,12 +77,24 @@ class Lesson < ApplicationRecord
     distinct.order(:subject).pluck(:subject)
   end
 
+  def self.music_subject?(name)
+    name.to_s.casecmp(MUSIC_SUBJECT_NAME).zero?
+  end
+
+  def self.practice_unit?(unit)
+    unit.to_s == PRACTICE_UNIT
+  end
+
   def oak_hub?
     content_mode == CONTENT_MODE_OAK_HUB && oak_lesson_slug.present?
   end
 
+  def practice?
+    content_mode == CONTENT_MODE_PRACTICE
+  end
+
   def legacy_iframe?
-    !oak_hub?
+    content_mode == CONTENT_MODE_LEGACY
   end
 
   def oak_pupil_lesson_url

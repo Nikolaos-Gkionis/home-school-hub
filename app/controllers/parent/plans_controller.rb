@@ -68,6 +68,7 @@ module Parent
 
       Lesson.where(year_group_key: @year_key)
         .where.not(subject: Lesson::OAK_SUBJECT_NAME)
+        .not_practice
         .ordered
         .select(:subject, :unit, :unit_position)
         .group_by(&:subject)

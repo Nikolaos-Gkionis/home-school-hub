@@ -1,0 +1,31 @@
+<%# locals: date: Date.current %>
+<% date = local_assigns[:date] || Date.current %>
+<% day_active = @timetable_view != "week" %>
+<% children = @timetable_children || [] %>
+<div class="flex flex-col items-stretch gap-2 sm:items-end">
+  <% if current_user.parent? && children.size > 1 %>
+    <nav class="flex flex-wrap justify-end gap-1" aria-label="Whose timetable">
+      <% children.each do |child| %>
+        <% active = @timetable_user&.id == child.id %>
+        <%= link_to child.family_display_name,
+              hub_dashboard_path(view: day_active ? "day" : "week", date: date.iso8601, child_id: child.id),
+              class: "hub-btn hub-btn-sm #{active ? "hub-btn-primary" : "hub-btn-ghost"}",
+              aria: { current: active ? "page" : nil } %>
+      <% end %>
+    </nav>
+  <% end %>
+  <nav class="inline-flex rounded-2xl border-2 border-[var(--color-border)] bg-[var(--color-surface)] p-1" aria-label="Timetable view">
+    <%= link_to hub_dashboard_path(view: "day", date: date.iso8601, child_id: @timetable_user&.id),
+          class: "hub-btn hub-btn-sm #{day_active ? "hub-btn-primary" : "hub-btn-ghost"}",
+          aria: { current: day_active ? "page" : nil } do %>
+      <i class="fa-solid fa-sun fa-fw" aria-hidden="true"></i>
+      Day
+    <% end %>
+    <%= link_to hub_dashboard_path(view: "week", date: date.iso8601, child_id: @timetable_user&.id),
+          class: "hub-btn hub-btn-sm #{day_active ? "hub-btn-ghost" : "hub-btn-primary"}",
+          aria: { current: day_active ? nil : "page" } do %>
+      <i class="fa-solid fa-calendar-week fa-fw" aria-hidden="true"></i>
+      Week
+    <% end %>
+  </nav>
+</div>

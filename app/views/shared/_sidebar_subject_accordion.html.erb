@@ -59,7 +59,7 @@
           <% else %>
             <% lessons.sort_by(&:position).each do |lesson| %>
               <% active = highlight.present? && highlight.to_i == lesson.id %>
-              <%= link_to current_user.parent? ? parent_dashboard_path(lesson_id: lesson.id) : child_dashboard_path(lesson_id: lesson.id),
+              <%= link_to hub_dashboard_path(lesson_id: lesson.id),
                   class: "flex min-w-0 items-start gap-1.5 rounded-xl px-1.5 py-1.5 text-xs hover:bg-[var(--color-hover)] #{active ? "bg-[var(--color-nav-active)] font-semibold text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"}",
                   **(active ? { aria: { current: "page" } } : {}) do %>
                 <i class="fa-solid fa-book fa-fw mt-0.5 shrink-0 text-[9px] opacity-70" aria-hidden="true"></i>

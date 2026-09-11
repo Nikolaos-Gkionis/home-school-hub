@@ -78,6 +78,42 @@ class UnitMonthPlanPacingTest < ActiveSupport::TestCase
     assert_equal months.map(&:first).uniq.size, months.size
   end
 
+  test "spread remaining units skips Music and practice" do
+    Lesson.create!(
+      year_group_key: "year_7",
+      subject: "Music",
+      unit: "Notation",
+      unit_position: 1,
+      title: "Music 1",
+      external_url: "https://www.thenational.academy/pupils/lessons/spread-music-1",
+      oak_lesson_slug: "spread-music-1",
+      content_mode: Lesson::CONTENT_MODE_OAK_HUB,
+      position: 1
+    )
+    Curriculum::MusicPracticeSeeder.ensure_for_year!("year_7")
+
+    count = Curriculum::SpreadUnits.call(child: @child, academic_year: 2026)
+    units = @child.unit_month_plans.pluck(:subject, :unit)
+    assert_equal 2, count
+    assert_not(units.any? { |subject, _unit| Lesson.music_subject?(subject) })
+    assert_not(units.any? { |_subject, unit| Lesson.practice_unit?(unit) })
+  end
+
+  test "practice lessons stay playable when pacing is on" do
+    @child.unit_month_plans.create!(
+      year_group_key: "year_7",
+      academic_year: 2026,
+      month: 9,
+      subject: "English",
+      unit: "September unit"
+    )
+    practice = Curriculum::MusicPracticeSeeder.ensure_for_year!("year_7")
+
+    assert @child.pacing_active?
+    assert @child.unit_unlocked?(practice.subject, practice.unit)
+    assert_includes @child.playable_lessons_relation.pluck(:id), practice.id
+  end
+
   private
 
   def create_lesson(unit:, slug:)

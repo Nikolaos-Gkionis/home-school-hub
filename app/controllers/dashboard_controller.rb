@@ -19,6 +19,14 @@ class DashboardController < ApplicationController
       return
     end
 
+    remember_timetable_child_from_params
+
+    # Day and Week share one timetable. A leftover lesson_id must not hide them.
+    if params[:lesson_id].blank?
+      load_timetable
+      return
+    end
+
     @lesson = find_lesson
     hydrate_oak_lesson! if @lesson
     persist_lesson_context! if @lesson
@@ -44,8 +52,8 @@ class DashboardController < ApplicationController
   end
 
   def find_lesson
-    rel = current_user.playable_lessons_relation
-    yk = current_user.active_learner&.year_group_key
+    rel = lesson_scope_relation
+    yk = timetable_user&.current_year_group_key || current_user.active_learner&.year_group_key
 
     # Honour the clicked lesson id first. Subject filters must not send the
     # child to a different lesson than the one on the calendar block.
@@ -72,6 +80,58 @@ class DashboardController < ApplicationController
     current_user.first_visible_hub_lesson_in(rel)
   end
 
+  def load_timetable
+    @timetable_date = parse_timetable_date
+    @timetable_view = params[:view].to_s == "week" ? "week" : "day"
+    @lesson = nil
+    @timetable_user = timetable_user
+    @timetable_children = current_user.parent? ? current_user.children.includes(:learners, :active_learner).order(:email) : []
+
+    if current_user.parent? && @timetable_user.nil?
+      @timetable_missing_child = true
+      return
+    end
+
+    if @timetable_view == "week"
+      @school_week = Curriculum::SchoolWeek.call(@timetable_user, @timetable_date)
+    else
+      @school_day = Curriculum::SchoolDay.call(@timetable_user, @timetable_date)
+    end
+  end
+
+  # Parents look at a child's plan (the year plan they ticked), not their own
+  # setup year. Children look at themselves. That is how Day/Week stay a mirror.
+  def timetable_user
+    return current_user unless current_user.parent?
+
+    child_id = params[:child_id].presence || session[TIMETABLE_CHILD_SESSION_KEY]
+    child = current_user.children.find_by(id: child_id) if child_id.present?
+    child || current_user.children.order(:email).first
+  end
+
+  def remember_timetable_child_from_params
+    return unless current_user.parent?
+    return unless params[:child_id].present?
+
+    child = current_user.children.find_by(id: params[:child_id])
+    session[TIMETABLE_CHILD_SESSION_KEY] = child.id.to_s if child
+  end
+
+  # Parent preview can open the child's playable lessons as well as their own.
+  def lesson_scope_relation
+    rel = current_user.playable_lessons_relation
+    preview = timetable_user
+    return rel unless current_user.parent? && preview&.learner? && preview.id != current_user.id
+
+    Lesson.where(id: (rel.pluck(:id) + preview.playable_lessons_relation.pluck(:id)).uniq).ordered
+  end
+
+  def parse_timetable_date
+    Date.iso8601(params[:date].to_s)
+  rescue Date::Error, ArgumentError
+    Date.current
+  end
+
   def load_month_overview
     @plan_month = Curriculum::AcademicYear.current_month
     @plan_month_label = Curriculum::AcademicYear.label_for(@plan_month)
@@ -95,6 +155,7 @@ class DashboardController < ApplicationController
     else
       Lesson.where(year_group_key: yk)
         .where.not(subject: Lesson::OAK_SUBJECT_NAME)
+        .not_practice
         .select(:subject, :unit, :unit_position)
         .group_by { |l| [ l.subject, l.unit ] }
         .keys

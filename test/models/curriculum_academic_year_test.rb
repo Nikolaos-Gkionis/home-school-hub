@@ -55,4 +55,19 @@ class CurriculumAcademicYearTest < ActiveSupport::TestCase
     assert_equal Date.new(2026, 10, 5), mondays.first
     assert_not_includes mondays, Date.new(2026, 9, 28)
   end
+
+  test "last school day is the Friday of the third week in July" do
+    # July 2027 Mondays: 5, 12, 19 → third week ends Friday 23 July.
+    assert_equal Date.new(2027, 7, 23), Curriculum::AcademicYear.last_school_date(2026)
+    # July 2026 Mondays: 6, 13, 20 → third week ends Friday 24 July.
+    assert_equal Date.new(2026, 7, 24), Curriculum::AcademicYear.last_school_date(2025)
+  end
+
+  test "term runs from 1 September through that last July Friday" do
+    assert Curriculum::AcademicYear.school_date?(Date.new(2026, 9, 1))
+    assert Curriculum::AcademicYear.school_date?(Date.new(2027, 7, 23))
+    assert_not Curriculum::AcademicYear.school_date?(Date.new(2027, 7, 26))
+    assert_not Curriculum::AcademicYear.school_date?(Date.new(2027, 8, 10))
+    assert_not Curriculum::AcademicYear.school_date?(Date.new(2026, 8, 31))
+  end
 end

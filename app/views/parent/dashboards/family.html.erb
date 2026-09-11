@@ -4,11 +4,12 @@
   <%= render "shared/hub_page_header",
       kicker: "Parent",
       title: "Family dashboard",
-      description: "A snapshot of how everyone is getting on — then jump into a child’s year plan." %>
+      description: "A snapshot of how everyone is getting on — then jump into a child’s year plan, or open Day and Week from the sidebar." %>
 
   <div class="hub-card text-sm text-[var(--color-text-muted)]">
     Charts and detailed trend data are available in
     <%= link_to "Insights", insights_path, class: "font-semibold text-[var(--color-accent)] underline hover:opacity-90" %>.
+    The school timetable is a mirror of each child’s Day and Week. Open them from a child below, or from the sidebar.
   </div>
 
   <% m = @metrics %>
@@ -41,6 +42,8 @@
               <% end %>
             </span>
             <span class="flex flex-wrap items-center gap-2">
+              <%= link_to "Day", parent_dashboard_path(view: "day", child_id: child.id), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
+              <%= link_to "Week", parent_dashboard_path(view: "week", child_id: child.id), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
               <%= link_to "Year plan", parent_child_plan_path(child), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
               <%= link_to "Weekly calendar", parent_child_week_path(child), class: "hub-btn hub-btn-secondary hub-btn-sm" %>
               <%= link_to "Change year", parent_edit_child_path(child), class: "hub-btn hub-btn-primary hub-btn-sm" %>

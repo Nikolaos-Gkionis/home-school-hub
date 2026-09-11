@@ -9,6 +9,10 @@ class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   helper SidebarNavHelper
+  helper_method :hub_dashboard_path, :role_dashboard_path
+
+  # Remember which child a parent is previewing on Day/Week.
+  TIMETABLE_CHILD_SESSION_KEY = :timetable_child_id
 
   def after_sign_in_path_for(_resource)
     role_home_path
@@ -44,11 +48,24 @@ class ApplicationController < ActionController::Base
     user.parent? ? parent_dashboard_path : child_dashboard_path
   end
 
-  def role_dashboard_path(user = current_user, lesson_id: nil)
+  def role_dashboard_path(user = current_user, lesson_id: nil, **query)
+    query[:lesson_id] = lesson_id if lesson_id.present?
+    hub_dashboard_path_for(user, **query)
+  end
+
+  def hub_dashboard_path(**query)
+    if current_user&.parent? && query[:child_id].blank?
+      child_id = session[TIMETABLE_CHILD_SESSION_KEY]
+      query = query.merge(child_id: child_id) if child_id.present?
+    end
+    hub_dashboard_path_for(current_user, **query)
+  end
+
+  def hub_dashboard_path_for(user, **query)
     if user.parent?
-      parent_dashboard_path(lesson_id: lesson_id)
+      parent_dashboard_path(query)
     else
-      child_dashboard_path(lesson_id: lesson_id)
+      child_dashboard_path(query)
     end
   end
 

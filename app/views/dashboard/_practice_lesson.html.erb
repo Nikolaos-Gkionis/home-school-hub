@@ -1,0 +1,21 @@
+<%# locals: lesson: %>
+<%# Instrument practice: stay in the hub, no Oak iframe. %>
+<div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/30 p-4 sm:p-6">
+  <%= link_to hub_dashboard_path(view: "day"),
+        class: "inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-accent)] hover:underline" do %>
+    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+    Today
+  <% end %>
+
+  <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-hover)] text-2xl text-[var(--color-accent)]" aria-hidden="true">
+    <i class="fa-solid fa-music"></i>
+  </div>
+
+  <h2 class="font-display text-xl font-semibold text-[var(--color-text)]">Practise your instrument</h2>
+  <p class="max-w-xl text-sm leading-relaxed text-[var(--color-text)]">
+    This hour is for playing, not an Oak screen. Warm up slowly, then practise a piece you already know and one you are learning.
+  </p>
+  <p class="max-w-xl text-sm leading-relaxed text-[var(--color-text-muted)]">
+    Keep going for the full hour. When you are finished, tap Complete at the top of this page.
+  </p>
+</div>

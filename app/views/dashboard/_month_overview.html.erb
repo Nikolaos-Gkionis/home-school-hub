@@ -26,7 +26,7 @@
             <div class="h-full rounded-full bg-[var(--color-accent)]" style="width: <%= pct %>%"></div>
           </div>
           <% if row[:first_lesson] %>
-            <%= link_to "Open first lesson", child_dashboard_path(lesson_id: row[:first_lesson].id), class: "hub-btn hub-btn-primary hub-btn-sm mt-4" %>
+            <%= link_to "Open first lesson", hub_dashboard_path(lesson_id: row[:first_lesson].id), class: "hub-btn hub-btn-primary hub-btn-sm mt-4" %>
           <% end %>
         </div>
       <% end %>

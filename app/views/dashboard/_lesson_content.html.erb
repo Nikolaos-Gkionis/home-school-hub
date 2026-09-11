@@ -1,5 +1,7 @@
 <%# locals: lesson:, user: %>
-<% if lesson.oak_hub? %>
+<% if lesson.practice? %>
+  <%= render "dashboard/practice_lesson", lesson: lesson %>
+<% elsif lesson.oak_hub? %>
   <%# Never block learners from opening Oak lessons; API-only parts already fail gracefully inside the lesson partial. %>
   <%= render "dashboard/oak_lesson", lesson: lesson, user: user %>
 <% else %>

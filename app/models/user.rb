@@ -124,6 +124,8 @@ class User < ApplicationRecord
   # everything stays open so existing families are not locked out.
   def unit_unlocked?(subject, unit, year_group_key: current_year_group_key)
     return true if subject.to_s == Lesson::OAK_SUBJECT_NAME
+    # Hour 5 is a daily practice slot, not a month-planned Oak unit.
+    return true if Lesson.music_subject?(subject) && Lesson.practice_unit?(unit)
     return true unless pacing_active?(year_group_key: year_group_key)
 
     plan = plan_for_unit(subject, unit, year_group_key: year_group_key)
@@ -134,9 +136,13 @@ class User < ApplicationRecord
 
   def playable_lessons_relation
     rel = visible_lessons_relation
-    return rel unless pacing_active?
-
     yk = current_year_group_key
+    extra_ids = always_playable_ids_for(yk)
+
+    unless pacing_active?
+      return Lesson.where(id: (rel.pluck(:id) + extra_ids).uniq).ordered
+    end
+
     oak_ids = rel.where(subject: Lesson::OAK_SUBJECT_NAME).pluck(:id)
     pairs = unit_month_plans.where(
       year_group_key: yk,
@@ -148,7 +154,7 @@ class User < ApplicationRecord
       rel.where(year_group_key: yk, subject: subject, unit: unit).pluck(:id)
     end
 
-    rel.where(id: (oak_ids + assigned_ids).uniq)
+    Lesson.where(id: (oak_ids + assigned_ids + extra_ids).uniq).ordered
   end
 
   def effective_preferred_subjects
@@ -209,7 +215,8 @@ class User < ApplicationRecord
 
     yk = active_learner&.year_group_key
     scoped = yk.present? ? relation.where(year_group_key: yk) : relation
-    scoped.where.not(subject: Lesson::OAK_SUBJECT_NAME).first ||
+    scoped.core_curriculum.first ||
+      scoped.where.not(subject: Lesson::OAK_SUBJECT_NAME).first ||
       scoped.first ||
       relation.first
   end
@@ -287,6 +294,35 @@ class User < ApplicationRecord
     return if learners.exists?(id: id)
 
     errors.add(:active_learner_id, "must be one of your learners")
+  end
+
+  # Music theory + practice stay open from the timetable even if Music is filtered out.
+  def always_playable_ids_for(year_group_key)
+    return [] if year_group_key.blank?
+
+    practice_ids = Lesson.where(
+      year_group_key: year_group_key,
+      content_mode: Lesson::CONTENT_MODE_PRACTICE
+    ).pluck(:id)
+
+    practice_ids + music_theory_playable_ids_for(year_group_key)
+  end
+
+  def music_theory_playable_ids_for(year_group_key)
+    music = Lesson.where(year_group_key: year_group_key).music_subject.not_practice
+    return music.pluck(:id) unless pacing_active?(year_group_key: year_group_key)
+
+    planned = unit_month_plans.where(
+      year_group_key: year_group_key,
+      academic_year: Curriculum::AcademicYear.start_year
+    ).where("LOWER(subject) = ?", Lesson::MUSIC_SUBJECT_NAME.downcase)
+
+    # No Music unit on the year plan: still offer theory so hour 4 is not blank.
+    return music.pluck(:id) if planned.none?
+
+    planned.where(month: Curriculum::AcademicYear.unlocked_months).flat_map do |plan|
+      music.where(subject: plan.subject, unit: plan.unit).pluck(:id)
+    end
   end
 
   def pruned_sidebar_expanded_hash_for_scope

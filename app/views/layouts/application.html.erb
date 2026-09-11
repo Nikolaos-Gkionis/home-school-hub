@@ -72,7 +72,7 @@
           </div>
 
           <div class="sidebar-expandable mt-3 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
-            <% if current_user.learner? && current_user.learners.any? %>
+            <% if current_user.learners.any? %>
               <div class="sidebar-active-learner-block shrink-0 space-y-1 border-b border-[var(--color-border)] pb-2">
                 <div class="sidebar-section-heading flex items-center gap-1.5 px-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                   <i class="fa-solid fa-user-graduate text-[10px]" aria-hidden="true"></i>
@@ -97,7 +97,7 @@
             <% end %>
 
             <% nav_highlight = @lesson&.id %>
-            <% if current_user.learner? %>
+            <% if current_user.learners.any? %>
               <div
                 class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden"
                 data-controller="sidebar-nav"

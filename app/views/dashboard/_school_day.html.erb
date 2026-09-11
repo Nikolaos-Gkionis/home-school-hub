@@ -1,0 +1,63 @@
+<%# locals: school_day:, user: %>
+<% content_for :title, "Today — HomeSchool Hub" %>
+<% current_period = Curriculum::TimetableClock.current_period_key %>
+<% preview_name = current_user.parent? && user&.learner? ? user.family_display_name : nil %>
+<% header_title = if school_day.weekend?
+     "Weekend"
+   elsif school_day.holiday?
+     "Summer holiday"
+   elsif preview_name
+     "#{preview_name}’s school day"
+   else
+     "Your school day"
+   end %>
+<% header_description = if school_day.weekend?
+     "School days run Monday to Friday. Open the week view to see the plan."
+   elsif school_day.holiday?
+     "The school year runs from September until the end of the third week in July."
+   else
+     "This is the same 09:00–15:15 timetable the learner sees: three morning Oak hours, then music theory and instrument practice. Comfort breaks are 15 minutes. Lunch is 30 minutes."
+   end %>
+
+<div class="mx-auto w-full max-w-5xl space-y-6 pb-8">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0 flex-1">
+      <%= render "shared/hub_page_header",
+          kicker: [ preview_name, (school_day.today? ? "Today" : school_day.date.strftime("%A")) ].compact.join(" · "),
+          title: header_title,
+          description: header_description %>
+    </div>
+    <%= render "dashboard/timetable_switch", date: school_day.date %>
+  </div>
+
+  <% if school_day.weekend? %>
+    <%= render "shared/hub_empty_state",
+        title: "No school day at the weekend",
+        body: "Use Week to see Monday to Friday, or come back on a school day.",
+        icon: "fa-mug-hot" %>
+    <div>
+      <%= link_to "Open this week", hub_dashboard_path(view: "week", date: school_day.date.iso8601), class: "hub-btn hub-btn-primary" %>
+    </div>
+  <% elsif school_day.holiday? %>
+    <%= render "shared/hub_empty_state",
+        title: "Summer holiday",
+        body: "The school year runs from September until the end of the third week in July. Open Week to jump back to the last teaching week.",
+        icon: "fa-umbrella-beach" %>
+    <div>
+      <%= link_to "Open this week", hub_dashboard_path(view: "week", date: school_day.date.iso8601), class: "hub-btn hub-btn-primary" %>
+    </div>
+  <% else %>
+    <ol id="school-day-timeline" class="space-y-3">
+      <% school_day.timeline.each do |slot| %>
+        <% now = school_day.today? && slot.key == current_period %>
+        <li>
+          <%= render "dashboard/school_day_slot",
+              slot: slot,
+              user: user,
+              now: now,
+              empty_copy: (slot.kind == :music_theory ? "Ask a parent to add a Music unit on the year plan, or sync Oak Music." : (slot.kind == :music_practice ? "Ask a parent to set your year so practice can appear." : "No more lessons in this hour yet")) %>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+</div>
