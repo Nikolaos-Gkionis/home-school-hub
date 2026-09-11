@@ -51,6 +51,9 @@ env:
     # Public host (same as proxy.host) — used in mailer links and config.hosts.
     MAILER_HOST: homeschool.peponi.to
 
+    # Container clock follows UK civil time (BST until late October, then GMT).
+    TZ: Europe/London
+
     # Optional: HTTP timeout for Brevo API (seconds).
     BREVO_HTTP_TIMEOUT: "30"
 
@@ -105,9 +108,8 @@ builder:
 ssh:
   user: root
   # log_level: debug   # uncomment temporarily while fixing "Authentication failed"
-  # keys:
-  #   - ~/.ssh/id_ed25519
-  #   - ~/.ssh/id_rsa
+  keys:
+    - ~/.ssh/id_ed25519
 
 # Use accessory services (secrets come from .kamal/secrets).
 # accessories:

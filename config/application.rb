@@ -42,7 +42,9 @@ module HomeSchoolHub
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # UK civil time: BST (UTC+1) in summer, GMT (UTC+0) after the last Sunday
+    # in October. "London" follows that change automatically.
+    config.time_zone = "London"
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Don't generate system test files.

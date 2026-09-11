@@ -25,4 +25,22 @@ class CurriculumTimetableClockTest < ActiveSupport::TestCase
     assert_nil Curriculum::TimetableClock.now_line_style
     assert_nil Curriculum::TimetableClock.current_period_key
   end
+
+  test "September school hours follow BST, not UTC" do
+    # 09:05 UTC is 10:05 BST on 14 September 2026 — comfort break, not Hour 1.
+    travel_to Time.utc(2026, 9, 14, 9, 5, 0)
+
+    assert_equal "London", Time.zone.name
+    assert_equal 10, Time.current.hour
+    assert_equal "b1", Curriculum::TimetableClock.current_period_key
+  end
+
+  test "after the late-October clock change, school hours follow GMT" do
+    # Last Sunday in October 2026 is the 25th. Monday 26th is GMT.
+    # 10:05 UTC is 10:05 UK time — comfort break again.
+    travel_to Time.utc(2026, 10, 26, 10, 5, 0)
+
+    assert_equal 10, Time.current.hour
+    assert_equal "b1", Curriculum::TimetableClock.current_period_key
+  end
 end
