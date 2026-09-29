@@ -149,16 +149,18 @@
       <%= render "insights/daily_breakdown_table",
           title: "Daily lessons by learner",
           description: "Recent days of lesson completions for each child account, plus totals. Showing #{@daily_dates_per_page} days per page.",
+          dates: @daily_dates,
           rows: m[:daily_lesson_rows],
           totals: m[:daily_lesson_totals],
           total_cell: m[:daily_lesson_rows].sum { |row| row[:total].to_i },
           show_pagination: true %>
     <% end %>
 
-    <% if @daily_dates.any? && m[:daily_time_rows].present? %>
+    <% if @daily_time_dates.any? && m[:daily_time_rows].present? %>
       <%= render "insights/daily_breakdown_table",
           title: "Daily time by learner (minutes)",
           description: "Recent days of lesson time for each child account, plus totals.",
+          dates: @daily_time_dates,
           rows: m[:daily_time_rows],
           totals: m[:daily_time_totals],
           total_cell: m[:daily_time_rows].sum { |row| row[:total].to_f }.round(1) %>

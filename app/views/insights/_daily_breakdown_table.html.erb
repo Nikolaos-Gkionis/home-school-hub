@@ -1,3 +1,6 @@
+<%# dates is passed in so the lessons table and the time table can show different day columns. %>
+<% dates = local_assigns.fetch(:dates) %>
+
 <div class="hub-card">
   <h2 class="font-display text-sm font-semibold text-[var(--color-text)]"><%= title %></h2>
   <p class="mt-1 text-xs text-[var(--color-text-muted)]"><%= description %></p>
@@ -11,7 +14,7 @@
       <thead>
         <tr class="border-b border-[var(--color-border)] text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
           <th class="py-2 pr-3 whitespace-nowrap">Learner</th>
-          <% @daily_dates.each do |date| %>
+          <% dates.each do |date| %>
             <th class="py-2 px-2 text-right whitespace-nowrap tabular-nums" title="<%= date %>">
               <%= insights_day_label(date) %>
             </th>
@@ -23,16 +26,16 @@
         <% rows.each do |row| %>
           <tr class="border-b border-[var(--color-border)]/40">
             <td class="py-2 pr-3 whitespace-nowrap text-[var(--color-text)]"><%= row[:label] %></td>
-            <% @daily_dates.each do |date| %>
-              <td class="py-2 px-2 text-right whitespace-nowrap tabular-nums text-[var(--color-text)]"><%= row[:by_date][date] %></td>
+            <% dates.each do |date| %>
+              <td class="py-2 px-2 text-right whitespace-nowrap tabular-nums text-[var(--color-text)]"><%= row[:by_date][date] || 0 %></td>
             <% end %>
             <td class="py-2 pl-2 text-right whitespace-nowrap tabular-nums font-semibold text-[var(--color-accent)]"><%= row[:total] %></td>
           </tr>
         <% end %>
         <tr class="border-b-0">
           <td class="py-2 pr-3 whitespace-nowrap font-semibold text-[var(--color-text)]">Totals</td>
-          <% @daily_dates.each do |date| %>
-            <td class="py-2 px-2 text-right whitespace-nowrap tabular-nums font-semibold text-[var(--color-text)]"><%= totals[date] %></td>
+          <% dates.each do |date| %>
+            <td class="py-2 px-2 text-right whitespace-nowrap tabular-nums font-semibold text-[var(--color-text)]"><%= totals[date] || 0 %></td>
           <% end %>
           <td class="py-2 pl-2 text-right whitespace-nowrap tabular-nums font-semibold text-[var(--color-accent)]"><%= total_cell %></td>
         </tr>

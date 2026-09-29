@@ -64,21 +64,30 @@ class InsightsController < ApplicationController
   end
 
   def assign_daily_date_page!
-    all_dates = (@metrics[:daily_lesson_dates] + @metrics[:daily_time_dates]).uniq.sort
-    @daily_dates_total_count = all_dates.size
-    @daily_dates = []
-    @daily_dates_page = 1
-    @daily_dates_total_pages = 0
-    return if all_dates.empty?
+    lesson_dates = Array(@metrics[:daily_lesson_dates]).uniq.sort
+    time_dates = Array(@metrics[:daily_time_dates]).uniq.sort
+
+    lesson_slice = slice_recent_daily_dates(lesson_dates, params.fetch(:daily_page, 1))
+    @daily_dates = lesson_slice[:dates]
+    @daily_dates_page = lesson_slice[:page]
+    @daily_dates_total_pages = lesson_slice[:total_pages]
+    @daily_dates_total_count = lesson_dates.size
+
+    # Time table uses its own recent dates so minutes-only days do not hide completions.
+    @daily_time_dates = slice_recent_daily_dates(time_dates, 1)[:dates]
+  end
+
+  def slice_recent_daily_dates(all_dates, page)
+    return { dates: [], page: 1, total_pages: 0 } if all_dates.empty?
 
     per_page = DAILY_DATES_PER_PAGE
-    @daily_dates_total_pages = (all_dates.size.to_f / per_page).ceil
-    @daily_dates_page = params.fetch(:daily_page, 1).to_i
-    @daily_dates_page = 1 if @daily_dates_page < 1
-    @daily_dates_page = @daily_dates_total_pages if @daily_dates_page > @daily_dates_total_pages
+    total_pages = (all_dates.size.to_f / per_page).ceil
+    page = page.to_i
+    page = 1 if page < 1
+    page = total_pages if page > total_pages
 
-    end_index = all_dates.size - ((@daily_dates_page - 1) * per_page)
+    end_index = all_dates.size - ((page - 1) * per_page)
     start_index = [ end_index - per_page, 0 ].max
-    @daily_dates = all_dates[start_index...end_index] || []
+    { dates: all_dates[start_index...end_index] || [], page: page, total_pages: total_pages }
   end
 end
